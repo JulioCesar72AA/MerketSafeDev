@@ -1,15 +1,15 @@
-package mx.softel.scanblelib
+package mx.softel.scanblelib.ble
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanRecord
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.util.Log
+import mx.softel.scanblelib.BLE_DEVICE_DEBUG_MODE
 import mx.softel.scanblelib.extensions.toHexValue
 
-class BleDevice(var ctx: Context,
-                scanResult: ScanResult,
-                var availableBeacons: HashMap<String, String>) {
+class BleDevice(scanResult: ScanResult,
+                private var availableBeacons: HashMap<String, String>) {
 
     // FORMATO DEL BEACON
     private val BLE_DEVICE_NOT_ENCRYPTED    = 0     // El dispositivo contiene información sin encriptar
@@ -17,36 +17,29 @@ class BleDevice(var ctx: Context,
 
     // AUXILIARES
     private var beaconDeviceString          = ""    // Beacon transformado en cadena
-    private var deviceBeaconType            = ""    // Es la versión de beacon perteneciente al firmware
+    internal var deviceBeaconType            = ""    // Es la versión de beacon perteneciente al firmware
     private var deviceBeaconIsEncrypted     = ""    // Nos indica si el beacon está o no encriptado
 
     // FLAGS
     private var isEncrypted                 = 0
 
     // BLE ESCANEADOS
-    private val bleDevice       : BluetoothDevice   = scanResult.device
-    private val beaconDevice    : ScanRecord?       = scanResult.scanRecord
-    private val bleMacAddress   : String            = scanResult.device.address
-
+    internal val bleDevice       : BluetoothDevice   = scanResult.device
+    internal val beaconDevice    : ScanRecord?       = scanResult.scanRecord
+    internal val bleMacAddress   : String            = scanResult.device.address
 
 
     /************************************************************************************************/
     /**     CONSTRUCTORES                                                                           */
     /************************************************************************************************/
-    init {
-        analizeBeacon()
-    }
+    init { analizeBeacon() }
 
     /************************************************************************************************/
     /**     GETTERS                                                                                 */
     /************************************************************************************************/
-    fun getBleDevice(): BluetoothDevice         = bleDevice
-    fun getMacDevice(): String                  = bleMacAddress
-    fun getBeaconDevice(): ScanRecord?          = beaconDevice
-    fun getBeaconDeviceString(): String         = beaconDeviceString
-    fun isEncrypted(): Int                      = isEncrypted
-    fun getBeaconDeviceType(): String           = deviceBeaconType
-    fun getDeviceBeaconIsEncrypted(): String    = deviceBeaconIsEncrypted
+    fun getBeaconDeviceString()     : String            = beaconDeviceString
+    fun isEncrypted()               : Int               = isEncrypted
+    fun getDeviceBeaconIsEncrypted(): String            = deviceBeaconIsEncrypted
 
 
 
@@ -54,7 +47,6 @@ class BleDevice(var ctx: Context,
     /**     METODOS                                                                                 */
     /************************************************************************************************/
     private fun analizeBeacon() {
-        Log.d(TAG, "analizeBeacon")
         try {
             isEncrypted = BLE_DEVICE_NOT_ENCRYPTED
 
@@ -66,10 +58,14 @@ class BleDevice(var ctx: Context,
             beaconDeviceString = beaconDeviceBytes!!.toHexValue()
 
             // Obtenemos el identificador del beacon, para identificar si es nuevo o viejo
-            val subOld = beaconDeviceString.substring(BEGIN_OFFSET_FOR_OLD_BEACON,
-                                                             END_OFFSET_FOR_OLD_BEACON)
-            val subNew = beaconDeviceString.substring(BEGIN_OFFSET_FOR_NEW_BEACON,
-                                                             END_OFFSET_FOR_NEW_BEACON)
+            val subOld = beaconDeviceString.substring(
+                BEGIN_OFFSET_FOR_OLD_BEACON,
+                END_OFFSET_FOR_OLD_BEACON
+            )
+            val subNew = beaconDeviceString.substring(
+                BEGIN_OFFSET_FOR_NEW_BEACON,
+                END_OFFSET_FOR_NEW_BEACON
+            )
             val oldBeaconType = PREFIX_FOR_BLE_BEACONS + subOld
             val newBeaconType = PREFIX_FOR_BLE_BEACONS + subNew
 
