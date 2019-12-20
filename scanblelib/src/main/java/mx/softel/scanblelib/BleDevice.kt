@@ -37,6 +37,18 @@ class BleDevice(var ctx: Context,
         analizeBeacon()
     }
 
+    /************************************************************************************************/
+    /**     GETTERS                                                                                 */
+    /************************************************************************************************/
+    fun getBleDevice(): BluetoothDevice         = bleDevice
+    fun getMacDevice(): String                  = bleMacAddress
+    fun getBeaconDevice(): ScanRecord?          = beaconDevice
+    fun getBeaconDeviceString(): String         = beaconDeviceString
+    fun isEncrypted(): Int                      = isEncrypted
+    fun getBeaconDeviceType(): String           = deviceBeaconType
+    fun getDeviceBeaconIsEncrypted(): String    = deviceBeaconIsEncrypted
+
+
 
     /************************************************************************************************/
     /**     METODOS                                                                                 */
@@ -82,7 +94,7 @@ class BleDevice(var ctx: Context,
 
 
             // --------------------------------------------------
-            if (DEBUG_MODE) {
+            if (BLE_DEVICE_DEBUG_MODE) {
                 Log.d(TAG, "OLD BEACON: $oldBeaconType")
                 Log.d(TAG, "NEW BEACON: $newBeaconType")
                 for (data in beaconValues) { Log.d(TAG, "BEACON VALUES: $data") }

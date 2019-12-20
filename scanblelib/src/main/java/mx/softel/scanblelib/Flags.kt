@@ -1,3 +1,3 @@
 package mx.softel.scanblelib
 
-internal var DEBUG_MODE = true
+internal var BLE_DEVICE_DEBUG_MODE = true
