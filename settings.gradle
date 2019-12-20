@@ -1,2 +1,2 @@
-include ':app', ':cirwirelesslib'
+include ':app', ':cirwirelesslib', ':scanblelib'
 rootProject.name='CIR Wireless'

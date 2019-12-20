@@ -11,12 +11,22 @@ import mx.softel.cirwirelesslib.BleUtils
 
 class MainActivity : AppCompatActivity() {
 
+    /************************************************************************************************/
+    /**     CICLO DE VIDA                                                                           */
+    /************************************************************************************************/
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+    }
 
-        BleUtils.helloWorldLib()
+
+
+    /************************************************************************************************/
+    /**     COMPANION OBJECT                                                                        */
+    /************************************************************************************************/
+    companion object {
+        private val TAG = MainActivity::class.java.simpleName
     }
 
 
