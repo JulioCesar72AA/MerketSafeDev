@@ -17,7 +17,7 @@ class BleDevice(scanResult: ScanResult,
 
     // AUXILIARES
     private var beaconDeviceString          = ""    // Beacon transformado en cadena
-    internal var deviceBeaconType            = ""    // Es la versión de beacon perteneciente al firmware
+    internal var deviceBeaconType           = ""    // Es la versión de beacon perteneciente al firmware
     private var deviceBeaconIsEncrypted     = ""    // Nos indica si el beacon está o no encriptado
 
     // FLAGS
