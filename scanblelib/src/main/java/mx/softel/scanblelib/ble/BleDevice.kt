@@ -12,6 +12,8 @@ class BleDevice(scanResult: ScanResult,
                 private var availableBeacons: HashMap<String, String>) {
 
     // BLE ESCANEADOS (PROPIEDADES PUBLICAS AL FRONT END)
+    val rssi            : Int               = scanResult.rssi
+    val name            : String?           = scanResult.device.name
     val bleDevice       : BluetoothDevice   = scanResult.device
     val beaconDevice    : ScanRecord?       = scanResult.scanRecord
     val bleMacAddress   : String            = scanResult.device.address
@@ -106,6 +108,15 @@ class BleDevice(scanResult: ScanResult,
         }
     }
 
+
+    fun setRecyclerData(devices: ArrayList<BleDevice>) {
+        val data = ArrayList<BleDeviceModel>()
+        /*for (device in devices) {
+            val model = BleDeviceModel(device.name,
+                                       device.bleMacAddress)
+            data.add(model)
+        }*/
+    }
 
 
 
