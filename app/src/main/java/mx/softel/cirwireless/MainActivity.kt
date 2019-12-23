@@ -13,7 +13,9 @@ import mx.softel.scanblelib.adapters.BleDeviceRecyclerAdapter
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
 
-class MainActivity : AppCompatActivity(), View.OnClickListener {
+class MainActivity : AppCompatActivity(),
+    View.OnClickListener,
+    BleDeviceRecyclerAdapter.OnScanClickListener {
 
     private var bleDevices = ArrayList<BleDevice>()
 
@@ -51,6 +53,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
 
     /************************************************************************************************/
+    /**     INTERFACES                                                                              */
+    /************************************************************************************************/
+    override fun onScanClickListener(position: Int) {
+        Log.d(TAG, "onScanClickListener")
+        Log.d(TAG, "NAME: ${bleDevices[position].name}")
+        Log.d(TAG, "BLE DEVICE: ${bleDevices[position].bleMacAddress}")
+        Log.d(TAG, "RSSI: ${bleDevices[position].rssi}")
+    }
+
+
+    /************************************************************************************************/
     /**     VISTA                                                                                   */
     /************************************************************************************************/
     private fun initUI() {
@@ -73,7 +86,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         rvBleList.apply {
             val manager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
             layoutManager = manager
-            adapter = BleDeviceRecyclerAdapter(bleDevices)
+            adapter = BleDeviceRecyclerAdapter(bleDevices, this@MainActivity)
         }
 
         initUI()
