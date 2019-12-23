@@ -91,10 +91,8 @@ class BleDevice(scanResult: ScanResult,
 
             // --------------------------------------------------
             if (BLE_DEVICE_DEBUG_MODE) {
-                Log.d(TAG, "OLD BEACON: $oldBeaconType")
-                Log.d(TAG, "NEW BEACON: $newBeaconType")
+                Log.d(TAG, "OLD BEACON: $oldBeaconType | NEW BEACON: $newBeaconType | BEACON ENCRYPTED: $deviceBeaconIsEncrypted")
                 for (data in beaconValues) { Log.d(TAG, "BEACON VALUES: $data") }
-                Log.d(TAG, "BEACON ENCRYPTED: $deviceBeaconIsEncrypted")
             }
             // --------------------------------------------------
 

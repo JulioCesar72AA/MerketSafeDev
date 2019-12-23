@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+        Log.d(TAG, "onCreate")
 
         // SCAN
         val bleManager = BleManager(this, 10_000L)

@@ -4,6 +4,10 @@ object Catalog {
 
     private val TAG = Catalog::class.java.simpleName
 
+    // BASE DE DATOS
+    const val DATABASE_NAME                 = "beacons_db"
+    const val DATABASE_VERSION              = 1
+
     // TABLAS
     const val TABLE_BEACONS_NAME            = "beacon"
 

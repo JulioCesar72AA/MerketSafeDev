@@ -11,27 +11,30 @@ import android.util.Log
 import mx.softel.scanblelib.BLE_MANAGER_DEBUG_MODE
 import mx.softel.scanblelib.extensions.isLocationPermissionGranted
 import mx.softel.scanblelib.extensions.requestLocationPermission
+import mx.softel.scanblelib.sqlite.BeaconsDatabaseHelper
 
 class BleManager(var appContext: Context,
                  var scanningTime: Long) {
 
-    val bleAdapter  : BluetoothAdapter
-    val bleScanner  : BluetoothLeScanner
+    private val bleAdapter          : BluetoothAdapter
+    private val bleScanner          : BluetoothLeScanner
+    private val availableBeacons    : HashMap<String, String>
 
     // AUXILIARES
-    val bleDevices = ArrayList <BleDevice>()
-    val filterBeaconList = ArrayList<String>()
+    private val bleDevices          = ArrayList <BleDevice>()
+    private val beaconsDB           = BeaconsDatabaseHelper(appContext, null)
+    private val filterBeaconList    = ArrayList<String>()
+
 
     /************************************************************************************************/
     /**     CONSTRUCTORES                                                                           */
     /************************************************************************************************/
     init {
+        if (BLE_MANAGER_DEBUG_MODE) Log.d(TAG, "init")
         val manager = appContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        bleAdapter = manager.adapter
-        bleScanner = bleAdapter.bluetoothLeScanner
-
-        // TODO: Agragar BeaconsDatabase
-        // TODO: Agregar AvailableBeacons
+        bleAdapter          = manager.adapter
+        bleScanner          = bleAdapter.bluetoothLeScanner
+        availableBeacons    = beaconsDB.getBeaconTypes()
     }
 
 
@@ -84,7 +87,7 @@ class BleManager(var appContext: Context,
             // --------------------------------------------------
 
             if (isImberaDevice(mac) && newDeviceScanned(mac)) {
-                val scannedBleDevice = BleDevice(result,/* TODO: Cambiar HashMap*/ HashMap())
+                val scannedBleDevice = BleDevice(result, availableBeacons)
                 if (filterBeaconList.contains(scannedBleDevice.deviceBeaconType)) {
                     bleDevices.add(scannedBleDevice)
                 }
