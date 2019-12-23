@@ -3,13 +3,19 @@ package mx.softel.cirwireless
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_main.*
+import mx.softel.scanblelib.adapters.BleDeviceRecyclerAdapter
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
 
-class MainActivity : AppCompatActivity(), View.OnClickListener {
+class MainActivity : AppCompatActivity(),
+    View.OnClickListener,
+    BleDeviceRecyclerAdapter.OnScanClickListener {
 
     private var bleDevices = ArrayList<BleDevice>()
 
@@ -21,6 +27,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         Log.d(TAG, "onCreate")
+        initUI()
         setOnClick()
     }
 
@@ -45,12 +52,54 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
+    /************************************************************************************************/
+    /**     INTERFACES                                                                              */
+    /************************************************************************************************/
+    override fun onScanClickListener(position: Int) {
+        Log.d(TAG, "onScanClickListener")
+        Log.d(TAG, "NAME: ${bleDevices[position].name}")
+        Log.d(TAG, "BLE DEVICE: ${bleDevices[position].bleMacAddress}")
+        Log.d(TAG, "RSSI: ${bleDevices[position].rssi}")
+    }
+
+
+    /************************************************************************************************/
+    /**     VISTA                                                                                   */
+    /************************************************************************************************/
+    private fun initUI() {
+        Log.d(TAG, "initUI")
+
+        pbScanning.visibility = View.GONE
+        scanMask.visibility = View.GONE
+    }
+
+    private fun setScanningUI() {
+        Log.d(TAG, "setScanningUI")
+
+        pbScanning.visibility = View.VISIBLE
+        scanMask.visibility = View.VISIBLE
+    }
+
+    private fun setRecyclerUI() {
+        Log.d(TAG, "setRecyclerUI")
+
+        rvBleList.apply {
+            val manager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
+            layoutManager = manager
+            adapter = BleDeviceRecyclerAdapter(bleDevices, this@MainActivity)
+        }
+
+        initUI()
+    }
+
 
     /************************************************************************************************/
     /**     AUXILIARES                                                                              */
     /************************************************************************************************/
     private fun scanDevices() {
         Log.d(TAG, "scanDevices")
+
+        setScanningUI()
         val bleManager = BleManager(this)
         bleManager.scanBleDevices {
             Log.d(TAG, "scanBleDevices")
@@ -58,9 +107,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             for (dev in it) {
                 Log.d(TAG, "Dispositivo: ${dev.bleDevice}")
                 // Log.d(TAG, "Beacon: ${dev.beaconDevice}")
+                setRecyclerUI()
             }
         }
     }
+
 
 
     /************************************************************************************************/
