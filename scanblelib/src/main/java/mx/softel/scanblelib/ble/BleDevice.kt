@@ -11,35 +11,39 @@ import mx.softel.scanblelib.extensions.toHexValue
 class BleDevice(scanResult: ScanResult,
                 private var availableBeacons: HashMap<String, String>) {
 
+    // BLE ESCANEADOS (PROPIEDADES PUBLICAS AL FRONT END)
+    val bleDevice       : BluetoothDevice   = scanResult.device
+    val beaconDevice    : ScanRecord?       = scanResult.scanRecord
+    val bleMacAddress   : String            = scanResult.device.address
+
     // FORMATO DEL BEACON
     private val BLE_DEVICE_NOT_ENCRYPTED    = 0     // El dispositivo contiene información sin encriptar
     private val BLE_DEVICE_ENCRYPTED        = 1     // El dispositivo contiene información encriptada
 
     // AUXILIARES
     private var beaconDeviceString          = ""    // Beacon transformado en cadena
-    internal var deviceBeaconType           = ""    // Es la versión de beacon perteneciente al firmware
+    private var deviceBeaconType            = ""    // Es la versión de beacon perteneciente al firmware
     private var deviceBeaconIsEncrypted     = ""    // Nos indica si el beacon está o no encriptado
 
     // FLAGS
     private var isEncrypted                 = 0
 
-    // BLE ESCANEADOS
-    internal val bleDevice       : BluetoothDevice   = scanResult.device
-    internal val beaconDevice    : ScanRecord?       = scanResult.scanRecord
-    internal val bleMacAddress   : String            = scanResult.device.address
-
 
     /************************************************************************************************/
     /**     CONSTRUCTORES                                                                           */
     /************************************************************************************************/
-    init { analizeBeacon() }
+    init {
+        if (BLE_DEVICE_DEBUG_MODE) Log.d(TAG, "init")
+        analizeBeacon()
+    }
 
     /************************************************************************************************/
     /**     GETTERS                                                                                 */
     /************************************************************************************************/
-    fun getBeaconDeviceString()     : String            = beaconDeviceString
-    fun isEncrypted()               : Int               = isEncrypted
-    fun getDeviceBeaconIsEncrypted(): String            = deviceBeaconIsEncrypted
+    fun getBeaconDeviceString()     : String    = beaconDeviceString
+    fun getDeviceBeaconIsEncrypted(): String    = deviceBeaconIsEncrypted
+    fun getBeaconType()             : String    = deviceBeaconType
+    fun isEncrypted()               : Int       = isEncrypted
 
 
 
@@ -47,6 +51,7 @@ class BleDevice(scanResult: ScanResult,
     /**     METODOS                                                                                 */
     /************************************************************************************************/
     private fun analizeBeacon() {
+        if (BLE_DEVICE_DEBUG_MODE) Log.d(TAG, "analizeBeacon")
         try {
             isEncrypted = BLE_DEVICE_NOT_ENCRYPTED
 

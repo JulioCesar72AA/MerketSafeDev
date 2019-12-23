@@ -13,23 +13,24 @@ import mx.softel.scanblelib.extensions.isLocationPermissionGranted
 import mx.softel.scanblelib.extensions.requestLocationPermission
 import mx.softel.scanblelib.sqlite.BeaconsDatabaseHelper
 
-class BleManager(var appContext: Context,
-                 var scanningTime: Long) {
+class BleManager(private var appContext: Context,
+                 private var scanningTime: Long = 10_000L) {
 
     private val bleAdapter          : BluetoothAdapter
     private val bleScanner          : BluetoothLeScanner
     private val availableBeacons    : HashMap<String, String>
 
     // AUXILIARES
-    private val bleDevices          = ArrayList <BleDevice>()
+    val bleDevices                  = ArrayList <BleDevice>()
     private val beaconsDB           = BeaconsDatabaseHelper(appContext, null)
-    private val filterBeaconList    = ArrayList<String>()
+    private val filterBeaconList    = ArrayList<String>()                               // TODO:  ¿?
 
 
     /************************************************************************************************/
     /**     CONSTRUCTORES                                                                           */
     /************************************************************************************************/
     init {
+        Log.d(TAG, "init")
         if (BLE_MANAGER_DEBUG_MODE) Log.d(TAG, "init")
         val manager = appContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bleAdapter          = manager.adapter
@@ -85,12 +86,17 @@ class BleManager(var appContext: Context,
                 Log.d(TAG, "onScanResult: $mac | isImberaDevice: ${isImberaDevice(mac)}")
             }
             // --------------------------------------------------
+            val check = isImberaDevice(mac) && newDeviceScanned(mac)
+            Log.d(TAG, "$mac CHECK: $check")
 
-            if (isImberaDevice(mac) && newDeviceScanned(mac)) {
+            if (check) {
                 val scannedBleDevice = BleDevice(result, availableBeacons)
-                if (filterBeaconList.contains(scannedBleDevice.deviceBeaconType)) {
+                //val type = filterBeaconList.contains(scannedBleDevice.deviceBeaconType)
+                //Log.d(TAG, "TYPE: $type")
+                //if (type) {
                     bleDevices.add(scannedBleDevice)
-                }
+                    Log.d(TAG, "Añadiendo $mac a bleDevices")
+                //}
             }
         }
     }
