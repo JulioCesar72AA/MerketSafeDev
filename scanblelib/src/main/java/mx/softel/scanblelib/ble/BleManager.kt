@@ -23,7 +23,7 @@ class BleManager(private var appContext: Context,
     // AUXILIARES
     val bleDevices                  = ArrayList <BleDevice>()
     private val beaconsDB           = BeaconsDatabaseHelper(appContext, null)
-    private val filterBeaconList    = ArrayList<String>()                               // TODO:  ¿?
+    private val filterBeaconList    = ArrayList<String>() // TODO:  ¿?
 
 
     /************************************************************************************************/
@@ -69,7 +69,6 @@ class BleManager(private var appContext: Context,
             appContext.requestLocationPermission()
         }
     }
-
 
 
 
