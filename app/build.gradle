@@ -40,4 +40,5 @@ dependencies {
 
     // Project libraries
     implementation project(':cirwirelesslib')
+    implementation project(':scanblelib')
 }
