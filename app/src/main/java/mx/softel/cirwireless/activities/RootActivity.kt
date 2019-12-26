@@ -19,8 +19,23 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_root)
         setSupportActionBar(rootToolbar)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         getAndSetIntentData()
     }
+
+    /**
+     * Interface que ejecuta la actividad cuando el usuario hace
+     * click en el ícono de "volver" <- del [getSupportActionBar]
+     */
+    override fun onSupportNavigateUp(): Boolean {
+        // Quitamos el fragmento que esté en la parte superior del backstack
+        val pop = supportFragmentManager.popBackStackImmediate()
+
+        // Si no hay nada que hacer POP, entonces termina la actividad
+        if (!pop) finish()
+        return true
+    }
+
 
     private fun getAndSetIntentData() {
         Log.d(TAG, "getIntent")

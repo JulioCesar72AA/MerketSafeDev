@@ -2,22 +2,23 @@ package mx.softel.cirwireless.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main.*
 import mx.softel.cirwireless.R
-import mx.softel.cirwireless.extensions.toast
-import mx.softel.scanblelib.adapters.BleDeviceRecyclerAdapter
+import mx.softel.cirwireless.adapters.ScanRecyclerAdapter
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
 
 class MainActivity: AppCompatActivity(),
+                    SwipeRefreshLayout.OnRefreshListener,
                     View.OnClickListener,
-                    BleDeviceRecyclerAdapter.OnScanClickListener {
+                    ScanRecyclerAdapter.OnScanClickListener {
 
     private var bleDevices = ArrayList<BleDevice>()
     private var isScanning = false
@@ -28,12 +29,29 @@ class MainActivity: AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
         Log.d(TAG, "onCreate")
-        initUI()
+        srlScan.apply {
+            setOnRefreshListener(this@MainActivity)
+            setColorSchemeColors(getColor(R.color.colorAccent),
+                                 getColor(R.color.colorIconBlue),
+                                 getColor(R.color.colorPrimary))
+        }
+        setScanningUI()
         setOnClick()
+        scanDevices()
     }
 
+    override fun onRefresh() {
+        Log.d(TAG, "onRefresh")
+
+        scanMask.visibility = View.VISIBLE
+        scanDevices()
+
+        // Detenemos el escaneo en pantalla
+        Handler().postDelayed({
+            srlScan.isRefreshing = false
+        }, TIMEOUT)
+    }
 
 
     /************************************************************************************************/
@@ -41,12 +59,12 @@ class MainActivity: AppCompatActivity(),
     /************************************************************************************************/
     override fun onClick(v: View?) {
         when (v!!.id) {
-            R.id.fab -> if (!isScanning) scanDevices() else toast(R.string.tst_scanning)
+            R.id.scanMask -> { /* Ignoramos el click para bloquear los demás elementos */ }
         }
     }
 
     private fun setOnClick() {
-        fab.setOnClickListener(this)
+        scanMask.setOnClickListener(this)
     }
 
 
@@ -94,7 +112,7 @@ class MainActivity: AppCompatActivity(),
         rvBleList.apply {
             val manager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
             layoutManager = manager
-            adapter = BleDeviceRecyclerAdapter(bleDevices, this@MainActivity)
+            adapter = ScanRecyclerAdapter(bleDevices, this@MainActivity)
         }
 
         initUI()
@@ -108,8 +126,7 @@ class MainActivity: AppCompatActivity(),
         Log.d(TAG, "scanDevices")
 
         isScanning = true
-        setScanningUI()
-        val bleManager = BleManager(this)
+        val bleManager = BleManager(this, TIMEOUT)
         bleManager.scanBleDevices {
             Log.d(TAG, "scanBleDevices")
             bleDevices = it
@@ -136,6 +153,8 @@ class MainActivity: AppCompatActivity(),
         const val EXTRA_BEACON_TYPE         = "beacon_type"
         const val EXTRA_IS_ENCRYPTED        = "is_encrypted"
         const val EXTRA_DEVICE              = "device"
+
+        private val TIMEOUT                 = 10_000L
 
     }
 
