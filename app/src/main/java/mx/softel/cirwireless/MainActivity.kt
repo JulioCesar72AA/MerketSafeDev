@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 
@@ -18,6 +19,7 @@ class MainActivity : AppCompatActivity(),
     BleDeviceRecyclerAdapter.OnScanClickListener {
 
     private var bleDevices = ArrayList<BleDevice>()
+    private var isScanning = false
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -39,9 +41,11 @@ class MainActivity : AppCompatActivity(),
     override fun onClick(v: View?) {
         when (v!!.id) {
             R.id.fab -> {
-                scanDevices()
-                for(dev in bleDevices) {
-                    Log.d(TAG, "Almacenado en MainActivity: ${dev.bleDevice}")
+                if (!isScanning) scanDevices()
+                else {
+                    Toast.makeText(this, "Espera un momento... Escaneando", Toast.LENGTH_SHORT).apply {
+                        show()
+                    }
                 }
             }
         }
@@ -99,6 +103,7 @@ class MainActivity : AppCompatActivity(),
     private fun scanDevices() {
         Log.d(TAG, "scanDevices")
 
+        isScanning = true
         setScanningUI()
         val bleManager = BleManager(this)
         bleManager.scanBleDevices {
@@ -108,6 +113,7 @@ class MainActivity : AppCompatActivity(),
                 Log.d(TAG, "Dispositivo: ${dev.bleDevice}")
                 // Log.d(TAG, "Beacon: ${dev.beaconDevice}")
                 setRecyclerUI()
+                isScanning = false
             }
         }
     }
