@@ -23,9 +23,9 @@ class BleDevice(scanResult: ScanResult,
     private val BLE_DEVICE_ENCRYPTED        = 1     // El dispositivo contiene información encriptada
 
     // AUXILIARES
-    private var beaconDeviceString          = ""    // Beacon transformado en cadena
-    private var deviceBeaconType            = ""    // Es la versión de beacon perteneciente al firmware
-    private var deviceBeaconIsEncrypted     = ""    // Nos indica si el beacon está o no encriptado
+    internal var beaconDeviceString          = ""    // Beacon transformado en cadena
+    internal var deviceBeaconType            = ""    // Es la versión de beacon perteneciente al firmware
+    internal var deviceBeaconIsEncrypted     = ""    // Nos indica si el beacon está o no encriptado
 
     // FLAGS
     private var isEncrypted                 = 0
@@ -45,7 +45,7 @@ class BleDevice(scanResult: ScanResult,
     fun getBeaconDeviceString()     : String    = beaconDeviceString
     fun getDeviceBeaconIsEncrypted(): String    = deviceBeaconIsEncrypted
     fun getBeaconType()             : String    = deviceBeaconType
-    fun isEncrypted()               : Int       = isEncrypted
+    fun isEncrypted()               : Boolean   = isEncrypted != 0
 
 
 

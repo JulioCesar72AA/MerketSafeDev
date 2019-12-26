@@ -14,7 +14,8 @@ import mx.softel.scanblelib.extensions.requestLocationPermission
 import mx.softel.scanblelib.sqlite.BeaconsDatabaseHelper
 
 class BleManager(private var appContext: Context,
-                 private var scanningTime: Long = 10_000L) {
+                 private var scanningTime: Long = 10_000L,
+                 private var filterBeaconList: ArrayList<String> = arrayListOf() ) {
 
     private val bleAdapter          : BluetoothAdapter
     private val bleScanner          : BluetoothLeScanner
@@ -23,7 +24,6 @@ class BleManager(private var appContext: Context,
     // AUXILIARES
     val bleDevices                  = ArrayList <BleDevice>()
     private val beaconsDB           = BeaconsDatabaseHelper(appContext, null)
-    private val filterBeaconList    = ArrayList<String>() // TODO:  ¿?
 
 
     /************************************************************************************************/
@@ -86,16 +86,20 @@ class BleManager(private var appContext: Context,
             }
             // --------------------------------------------------
             val check = isImberaDevice(mac) && newDeviceScanned(mac)
-            Log.d(TAG, "$mac CHECK: $check")
 
             if (check) {
                 val scannedBleDevice = BleDevice(result, availableBeacons)
-                //val type = filterBeaconList.contains(scannedBleDevice.deviceBeaconType)
-                //Log.d(TAG, "TYPE: $type")
-                //if (type) {
+                if (filterBeaconList.isEmpty()) {
                     bleDevices.add(scannedBleDevice)
                     Log.d(TAG, "Añadiendo $mac a bleDevices")
-                //}
+                } else {
+                    val type = filterBeaconList.contains(scannedBleDevice.deviceBeaconType)
+                    Log.d(TAG, "TYPE: $type")
+                    if (type) {
+                        bleDevices.add(scannedBleDevice)
+                        Log.d(TAG, "Añadiendo $mac a bleDevices")
+                    }
+                }
             }
         }
     }
