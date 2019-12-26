@@ -12,20 +12,20 @@ class BleDevice(scanResult: ScanResult,
                 private var availableBeacons: HashMap<String, String>) {
 
     // BLE ESCANEADOS (PROPIEDADES PUBLICAS AL FRONT END)
-    val rssi            : Int               = scanResult.rssi
-    val name            : String?           = scanResult.device.name
-    val bleDevice       : BluetoothDevice   = scanResult.device
-    val beaconDevice    : ScanRecord?       = scanResult.scanRecord
-    val bleMacAddress   : String            = scanResult.device.address
+    private val rssi            : Int               = scanResult.rssi
+    private val name            : String?           = scanResult.device.name
+    private val bleDevice       : BluetoothDevice   = scanResult.device
+    private val beaconDevice    : ScanRecord?       = scanResult.scanRecord
+    private val bleMacAddress   : String            = scanResult.device.address
 
     // FORMATO DEL BEACON
     private val BLE_DEVICE_NOT_ENCRYPTED    = 0     // El dispositivo contiene información sin encriptar
     private val BLE_DEVICE_ENCRYPTED        = 1     // El dispositivo contiene información encriptada
 
     // AUXILIARES
-    internal var beaconDeviceString          = ""    // Beacon transformado en cadena
-    internal var deviceBeaconType            = ""    // Es la versión de beacon perteneciente al firmware
-    internal var deviceBeaconIsEncrypted     = ""    // Nos indica si el beacon está o no encriptado
+    private  var beaconDeviceString         = ""    // Beacon transformado en cadena
+    internal var deviceBeaconType           = ""    // Es la versión de beacon perteneciente al firmware
+    private  var deviceBeaconIsEncrypted    = ""    // Nos indica si el beacon está o no encriptado
 
     // FLAGS
     private var isEncrypted                 = 0
@@ -42,10 +42,14 @@ class BleDevice(scanResult: ScanResult,
     /************************************************************************************************/
     /**     GETTERS                                                                                 */
     /************************************************************************************************/
-    fun getBeaconDeviceString()     : String    = beaconDeviceString
-    fun getDeviceBeaconIsEncrypted(): String    = deviceBeaconIsEncrypted
-    fun getBeaconType()             : String    = deviceBeaconType
-    fun isEncrypted()               : Boolean   = isEncrypted != 0
+    fun getBeaconDeviceString()     : String            = beaconDeviceString
+    fun getDeviceBeaconIsEncrypted(): String            = deviceBeaconIsEncrypted
+    fun getBeaconType()             : String            = deviceBeaconType
+    fun isEncrypted()               : Boolean           = isEncrypted != 0
+    fun getRssi()                   : Int               = rssi
+    fun getMac()                    : String            = bleMacAddress
+    fun getName()                   : String            = name ?: "NULL"
+    fun getBleDevice()              : BluetoothDevice   = bleDevice
 
 
 
@@ -107,17 +111,6 @@ class BleDevice(scanResult: ScanResult,
             ex.stackTrace
         }
     }
-
-
-    fun setRecyclerData(devices: ArrayList<BleDevice>) {
-        val data = ArrayList<BleDeviceModel>()
-        /*for (device in devices) {
-            val model = BleDeviceModel(device.name,
-                                       device.bleMacAddress)
-            data.add(model)
-        }*/
-    }
-
 
 
     /************************************************************************************************/
