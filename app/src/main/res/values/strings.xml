@@ -1,4 +1,16 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">CIR Wireless</string>
     <string name="action_settings">Settings</string>
+
+
+    <!-- TOAST's -->
+    <string name="tst_scanning" tools:ignore="Typos">Espere un momento… Escaneando</string>
+
+    <!-- BUTTON's -->
+    <string name="btn_configure">Configurar</string>
+    <string name="btn_test">Probar</string>
+
+    <!-- TEXT VIEW's -->
+    <string name="tv_selected_device">Dispositivo Seleccionado</string>
+
 </resources>

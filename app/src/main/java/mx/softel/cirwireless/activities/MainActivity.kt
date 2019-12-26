@@ -1,22 +1,23 @@
-package mx.softel.cirwireless
+package mx.softel.cirwireless.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import mx.softel.cirwireless.R
+import mx.softel.cirwireless.extensions.toast
 import mx.softel.scanblelib.adapters.BleDeviceRecyclerAdapter
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
 
-class MainActivity : AppCompatActivity(),
-    View.OnClickListener,
-    BleDeviceRecyclerAdapter.OnScanClickListener {
+class MainActivity: AppCompatActivity(),
+                    View.OnClickListener,
+                    BleDeviceRecyclerAdapter.OnScanClickListener {
 
     private var bleDevices = ArrayList<BleDevice>()
     private var isScanning = false
@@ -40,14 +41,7 @@ class MainActivity : AppCompatActivity(),
     /************************************************************************************************/
     override fun onClick(v: View?) {
         when (v!!.id) {
-            R.id.fab -> {
-                if (!isScanning) scanDevices()
-                else {
-                    Toast.makeText(this, "Espera un momento... Escaneando", Toast.LENGTH_SHORT).apply {
-                        show()
-                    }
-                }
-            }
+            R.id.fab -> if (!isScanning) scanDevices() else toast(R.string.tst_scanning)
         }
     }
 
@@ -61,9 +55,19 @@ class MainActivity : AppCompatActivity(),
     /************************************************************************************************/
     override fun onScanClickListener(position: Int) {
         Log.d(TAG, "onScanClickListener")
-        Log.d(TAG, "NAME: ${bleDevices[position].name}")
-        Log.d(TAG, "BLE DEVICE: ${bleDevices[position].bleMacAddress}")
-        Log.d(TAG, "RSSI: ${bleDevices[position].rssi}")
+
+        val intent = Intent(this, RootActivity::class.java)
+        intent.apply {
+            val dev = bleDevices[position]
+            putExtra(EXTRA_DEVICE,              dev.getBleDevice())
+            putExtra(EXTRA_NAME,                dev.getName())
+            putExtra(EXTRA_MAC,                 dev.getMac())
+            putExtra(EXTRA_BEACON,              dev.getBeaconDeviceString())
+            putExtra(EXTRA_BEACON_ENCRYPTED,    dev.getDeviceBeaconIsEncrypted())
+            putExtra(EXTRA_BEACON_TYPE,         dev.getBeaconType())
+            putExtra(EXTRA_IS_ENCRYPTED,        dev.isEncrypted())
+            startActivity(this)
+        }
     }
 
 
@@ -73,15 +77,15 @@ class MainActivity : AppCompatActivity(),
     private fun initUI() {
         Log.d(TAG, "initUI")
 
-        pbScanning.visibility = View.GONE
-        scanMask.visibility = View.GONE
+        pbScanning.visibility   = View.GONE
+        scanMask.visibility     = View.GONE
     }
 
     private fun setScanningUI() {
         Log.d(TAG, "setScanningUI")
 
-        pbScanning.visibility = View.VISIBLE
-        scanMask.visibility = View.VISIBLE
+        pbScanning.visibility   = View.VISIBLE
+        scanMask.visibility     = View.VISIBLE
     }
 
     private fun setRecyclerUI() {
@@ -110,8 +114,7 @@ class MainActivity : AppCompatActivity(),
             Log.d(TAG, "scanBleDevices")
             bleDevices = it
             for (dev in it) {
-                Log.d(TAG, "Dispositivo: ${dev.bleDevice}")
-                // Log.d(TAG, "Beacon: ${dev.beaconDevice}")
+                Log.d(TAG, "Dispositivo: ${dev.getBleDevice()}")
                 setRecyclerUI()
                 isScanning = false
             }
@@ -125,6 +128,15 @@ class MainActivity : AppCompatActivity(),
     /************************************************************************************************/
     companion object {
         private val TAG = MainActivity::class.java.simpleName
+
+        const val EXTRA_MAC                 = "mac"
+        const val EXTRA_NAME                = "name"
+        const val EXTRA_BEACON              = "beacon"
+        const val EXTRA_BEACON_ENCRYPTED    = "beacon_encrypted"
+        const val EXTRA_BEACON_TYPE         = "beacon_type"
+        const val EXTRA_IS_ENCRYPTED        = "is_encrypted"
+        const val EXTRA_DEVICE              = "device"
+
     }
 
 

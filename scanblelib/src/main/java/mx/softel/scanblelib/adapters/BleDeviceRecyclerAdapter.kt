@@ -37,9 +37,9 @@ class BleDeviceRecyclerAdapter(private val devicesList: List<BleDevice>,
         }
 
         fun bind(device: BleDevice) = with(itemView) {
-            tvScanName.text = device.name ?: "-----"
-            tvScanMac.text  = device.bleMacAddress
-            tvScanRSSI.text = device.rssi.toString()
+            tvScanName.text = device.getName()
+            tvScanMac.text  = device.getMac()
+            tvScanRSSI.text = device.getRssi().toString()
         }
 
         override fun onClick(v: View?) {

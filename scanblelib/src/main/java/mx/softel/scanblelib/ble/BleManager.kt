@@ -48,7 +48,7 @@ class BleManager(private var appContext: Context,
 
     fun newDeviceScanned(mac: String): Boolean {
         for (device in bleDevices) {
-            val scannedMac = device.bleMacAddress
+            val scannedMac = device.getMac()
             val exists = (scannedMac == mac)
             if (exists) return false    // Ya existe ese dispositivo en la lista de escaneo
         }
