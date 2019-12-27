@@ -8,15 +8,18 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
+import androidx.annotation.UiThread
+import mx.softel.cirwirelesslib.constants.Constants
 import java.lang.Exception
+import kotlin.concurrent.thread
 
 class BleService: Service() {
-
-    private lateinit var ctx: Context
 
     // BLE MANAGER
     private var bleManager              : BluetoothManager?                 = null
     private var bleAdapter              : BluetoothAdapter?                 = null
+    var bleDevice               : BluetoothDevice?                  = null
 
     // GATT
     private var bleGatt                 : BluetoothGatt?                    = null
@@ -26,7 +29,7 @@ class BleService: Service() {
     // FLAGS - STATES
     private var descriptorEnabled       : Boolean                           = false
     private var stopTimer               : Boolean                           = false
-    private var currentState            : ActualState                       = ActualState.STANDBY
+    private var currentState            : ActualState                       = ActualState.DISCONNECTED
 
     // HANDLERS
     private var connectionObserver      : Handler                           = Handler()
@@ -42,10 +45,16 @@ class BleService: Service() {
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
     /************************************************************************************************/
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(TAG, "onStartCommand")
+        bleDevice = intent?.extras?.get(Constants.EXTRA_DEVICE) as BluetoothDevice
+        if (bleDevice != null) connectBleDevice(bleDevice!!)
+        return START_STICKY
+    }
+
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "onCreate")
-        ctx = applicationContext
 
         if (initBleService()) {
             Log.d(TAG, "Se inició correctamente el servicio BLE")
@@ -58,10 +67,6 @@ class BleService: Service() {
         super.onDestroy()
         Log.d(TAG, "onDestroy")
         unregisterRunnableTimeoutTask()
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return START_STICKY
     }
 
 
@@ -78,7 +83,7 @@ class BleService: Service() {
     /************************************************************************************************/
     /**     BLUETOOTH                                                                               */
     /************************************************************************************************/
-    fun connectBleDevice(device: BluetoothDevice) {
+    private fun connectBleDevice(device: BluetoothDevice) {
         Log.d(TAG, "connectBleDevice")
 
         descriptorEnabled   = false
@@ -142,6 +147,22 @@ class BleService: Service() {
         runnableTimeoutTaskList.clear()
     }
 
+    private fun disconnectionReasonCode(status: Int): DisconnectionReason
+            = when (status) {
+        133     -> DisconnectionReason.ERROR_133
+        257     -> DisconnectionReason.ERROR_257
+        else    -> DisconnectionReason.DISCONNECTION_OCURRED
+    }
+
+    private fun actualStateCode(status: Int): ActualState
+            = when (status) {
+        0       -> ActualState.DISCONNECTED
+        1       -> ActualState.CONNECTING
+        2       -> ActualState.CONNECTED
+        3       -> ActualState.DISCONNECTING
+        else    -> ActualState.UNKNOWN
+    }
+
 
 
     /************************************************************************************************/
@@ -151,7 +172,18 @@ class BleService: Service() {
 
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
-            Log.i(TAG, "onConnectionStateChange")
+            Log.i(TAG, "onConnectionStateChange -> Status($status) -> NewState -> $newState)")
+
+            if (status == DisconnectionReason.ERROR_133.code
+                || status == DisconnectionReason.ERROR_257.code) {
+                //disconnectBleDevice(disconnectionReasonCode(status))
+            }
+
+            //bleGatt!!.connect()
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                Log.d(TAG, "Conectado!!!!!!")
+                bleGatt!!.discoverServices()
+            }
         }
 
         override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {

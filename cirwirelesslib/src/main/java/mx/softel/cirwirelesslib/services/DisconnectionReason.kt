@@ -1,6 +1,6 @@
 package mx.softel.cirwirelesslib.services
 
-enum class DisconnectionReason(code: Int) {
+enum class DisconnectionReason(val code: Int) {
     DISCONNECTION_OCURRED               (1),
     DEVICE_NOT_CONFIGURED               (2),
     NORMAL_DISCONNECTION                (3),

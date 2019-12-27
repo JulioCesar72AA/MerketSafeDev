@@ -1,12 +1,9 @@
 package mx.softel.cirwirelesslib.services
 
-enum class ActualState {
-    STANDBY,
-    CONNECTING,
-    CONNECTED,
-    GETTING_SERVICES,
-    GETTING_CHARACTERISTICS,
-    WRITING,
-    READING,
-    NOTIFYING
+enum class ActualState(val code: Int) {
+    UNKNOWN         (-1),
+    DISCONNECTED    (0),
+    CONNECTING      (1),
+    CONNECTED       (2),
+    DISCONNECTING   (3)
 }

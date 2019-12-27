@@ -12,8 +12,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.android.synthetic.main.activity_main.*
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.adapters.ScanRecyclerAdapter
-import mx.softel.cirwireless.constants.Constants
 import mx.softel.cirwireless.extensions.toast
+import mx.softel.cirwirelesslib.constants.Constants
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
 

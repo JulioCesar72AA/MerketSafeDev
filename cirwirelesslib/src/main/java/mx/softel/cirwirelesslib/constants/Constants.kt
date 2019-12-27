@@ -1,4 +1,4 @@
-package mx.softel.cirwireless.constants
+package mx.softel.cirwirelesslib.constants
 
 object Constants {
     // Paso de parámetros entre actividades

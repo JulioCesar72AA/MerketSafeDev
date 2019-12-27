@@ -3,18 +3,15 @@ package mx.softel.cirwireless.activities
 import android.bluetooth.BluetoothDevice
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.SyncStateContract
 import android.util.Log
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.activity_root.*
 import mx.softel.cirwireless.R
-import mx.softel.cirwireless.constants.Constants
 import mx.softel.cirwireless.fragments.MainFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
+import mx.softel.cirwirelesslib.constants.Constants
 
 class RootActivity : AppCompatActivity(), FragmentNavigation {
-
-    lateinit var bleDevice: BluetoothDevice
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -46,7 +43,7 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
 
         // Obtenemos la información del intent
         val data = intent.extras!!
-        bleDevice                = data[Constants.EXTRA_DEVICE] as BluetoothDevice
+        val bleDevice                = data[Constants.EXTRA_DEVICE] as BluetoothDevice
         val name           = data.getString(Constants.EXTRA_NAME)!!
         val mac            = data.getString(Constants.EXTRA_MAC)!!
         val beacon         = data.getString(Constants.EXTRA_BEACON)!!

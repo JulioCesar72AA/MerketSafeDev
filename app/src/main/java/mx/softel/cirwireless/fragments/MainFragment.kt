@@ -13,10 +13,8 @@ import android.widget.Button
 import android.widget.TextView
 
 import mx.softel.cirwireless.R
-import mx.softel.cirwireless.activities.MainActivity
-import mx.softel.cirwireless.activities.RootActivity
-import mx.softel.cirwireless.constants.Constants
 import mx.softel.cirwireless.extensions.toast
+import mx.softel.cirwirelesslib.constants.Constants
 import mx.softel.cirwirelesslib.services.BleService
 
 /**
@@ -98,8 +96,14 @@ class MainFragment : Fragment(), View.OnClickListener {
     /************************************************************************************************/
     /**     SERVICES                                                                                */
     /************************************************************************************************/
-    private fun startBleService()
-            = activity!!.startService(Intent(context, BleService::class.java))
+    private fun startBleService() {
+
+        val intent = Intent(context, BleService::class.java)
+        intent.apply {
+            putExtra(Constants.EXTRA_DEVICE, bleDevice)
+        }
+        activity!!.startService(intent)
+    }
 
     private fun stopBleService()
             = activity!!.stopService(Intent(context, BleService::class.java))
