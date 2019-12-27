@@ -2,5 +2,7 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <dimen name="button_magin">32dp</dimen>
+    <dimen name="scan_content_margin">12dp</dimen>
+    <dimen name="scan_corner_radius">12dp</dimen>
 
 </resources>

@@ -1,33 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.MainActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
+
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/srlScan"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <!-- Lista de dispositivos escaneados -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvBleList"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:layout_height="match_parent"
+            tools:listitem="@layout/ble_scan_list_prototype"/>
 
-    </com.google.android.material.appbar.AppBarLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <include layout="@layout/content_main"/>
+    <!-- Máscara de escaneo -->
+    <View
+        android:id="@+id/scanMask"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#25000000"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/pbScanning"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/ic_bluetooth"/>
+        android:layout_gravity="center"/>
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

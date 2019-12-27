@@ -13,4 +13,7 @@
     <!-- TEXT VIEW's -->
     <string name="tv_selected_device">Dispositivo Seleccionado</string>
 
+    <!-- CONTENT DESCRIPTION's -->
+    <string name="cd_bluetooth_icon">Bluetooth</string>
+
 </resources>
