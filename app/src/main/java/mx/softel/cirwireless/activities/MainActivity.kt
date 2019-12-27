@@ -12,6 +12,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.android.synthetic.main.activity_main.*
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.adapters.ScanRecyclerAdapter
+import mx.softel.cirwireless.constants.Constants
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
@@ -81,13 +82,13 @@ class MainActivity: AppCompatActivity(),
         val intent = Intent(this, RootActivity::class.java)
         intent.apply {
             val dev = bleDevices[position]
-            putExtra(EXTRA_DEVICE,              dev.getBleDevice())
-            putExtra(EXTRA_NAME,                dev.getName())
-            putExtra(EXTRA_MAC,                 dev.getMac())
-            putExtra(EXTRA_BEACON,              dev.getBeaconDeviceString())
-            putExtra(EXTRA_BEACON_ENCRYPTED,    dev.getDeviceBeaconIsEncrypted())
-            putExtra(EXTRA_BEACON_TYPE,         dev.getBeaconType())
-            putExtra(EXTRA_IS_ENCRYPTED,        dev.isEncrypted())
+            putExtra(Constants.EXTRA_DEVICE,              dev.getBleDevice())
+            putExtra(Constants.EXTRA_NAME,                dev.getName())
+            putExtra(Constants.EXTRA_MAC,                 dev.getMac())
+            putExtra(Constants.EXTRA_BEACON,              dev.getBeaconDeviceString())
+            putExtra(Constants.EXTRA_BEACON_ENCRYPTED,    dev.getDeviceBeaconIsEncrypted())
+            putExtra(Constants.EXTRA_BEACON_TYPE,         dev.getBeaconType())
+            putExtra(Constants.EXTRA_IS_ENCRYPTED,        dev.isEncrypted())
             startActivity(this)
         }
     }
@@ -150,15 +151,7 @@ class MainActivity: AppCompatActivity(),
     companion object {
         private val TAG = MainActivity::class.java.simpleName
 
-        const val EXTRA_MAC                 = "mac"
-        const val EXTRA_NAME                = "name"
-        const val EXTRA_BEACON              = "beacon"
-        const val EXTRA_BEACON_ENCRYPTED    = "beacon_encrypted"
-        const val EXTRA_BEACON_TYPE         = "beacon_type"
-        const val EXTRA_IS_ENCRYPTED        = "is_encrypted"
-        const val EXTRA_DEVICE              = "device"
-
-        private val TIMEOUT                 = 10_000L
+        private const val TIMEOUT           = 10_000L
 
     }
 
