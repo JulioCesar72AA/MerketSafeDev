@@ -13,8 +13,12 @@ import kotlinx.android.synthetic.main.activity_main.*
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.adapters.ScanRecyclerAdapter
 import mx.softel.cirwireless.extensions.toast
+import mx.softel.cirwirelesslib.constants.Constants
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
+import android.bluetooth.BluetoothAdapter
+
+
 
 class MainActivity: AppCompatActivity(),
                     SwipeRefreshLayout.OnRefreshListener,
@@ -39,6 +43,18 @@ class MainActivity: AppCompatActivity(),
         }
         setScanningUI()
         setOnClick()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume")
+
+        /**
+         * Se añade el escaneo en el [onResume] porque solicita los permisos
+         * de ubicación al usuario, si no los ha proporcionado hace el flujo
+         * [onResume] -> [onPause] -> [onResume], es en el segundo instante
+         * donde se ejecuta el escaneo al solicitar los permisos necesarios
+         */
         scanDevices()
     }
 
@@ -81,13 +97,13 @@ class MainActivity: AppCompatActivity(),
         val intent = Intent(this, RootActivity::class.java)
         intent.apply {
             val dev = bleDevices[position]
-            putExtra(EXTRA_DEVICE,              dev.getBleDevice())
-            putExtra(EXTRA_NAME,                dev.getName())
-            putExtra(EXTRA_MAC,                 dev.getMac())
-            putExtra(EXTRA_BEACON,              dev.getBeaconDeviceString())
-            putExtra(EXTRA_BEACON_ENCRYPTED,    dev.getDeviceBeaconIsEncrypted())
-            putExtra(EXTRA_BEACON_TYPE,         dev.getBeaconType())
-            putExtra(EXTRA_IS_ENCRYPTED,        dev.isEncrypted())
+            putExtra(Constants.EXTRA_DEVICE,              dev.getBleDevice())
+            putExtra(Constants.EXTRA_NAME,                dev.getName())
+            putExtra(Constants.EXTRA_MAC,                 dev.getMac())
+            putExtra(Constants.EXTRA_BEACON,              dev.getBeaconDeviceString())
+            putExtra(Constants.EXTRA_BEACON_ENCRYPTED,    dev.getDeviceBeaconIsEncrypted())
+            putExtra(Constants.EXTRA_BEACON_TYPE,         dev.getBeaconType())
+            putExtra(Constants.EXTRA_IS_ENCRYPTED,        dev.isEncrypted())
             startActivity(this)
         }
     }
@@ -101,6 +117,7 @@ class MainActivity: AppCompatActivity(),
 
         pbScanning.visibility   = View.GONE
         scanMask.visibility     = View.GONE
+        tvNoDevices.visibility  = View.GONE
     }
 
     private fun setScanningUI() {
@@ -108,6 +125,7 @@ class MainActivity: AppCompatActivity(),
 
         pbScanning.visibility   = View.VISIBLE
         scanMask.visibility     = View.VISIBLE
+        tvNoDevices.visibility  = View.GONE
     }
 
     private fun setRecyclerUI() {
@@ -122,6 +140,14 @@ class MainActivity: AppCompatActivity(),
         initUI()
     }
 
+    private fun setNoDataUI() {
+        Log.d(TAG, "setNoDataUI")
+
+        pbScanning.visibility   = View.GONE
+        scanMask.visibility     = View.GONE
+        tvNoDevices.visibility  = View.VISIBLE
+    }
+
 
     /************************************************************************************************/
     /**     AUXILIARES                                                                              */
@@ -134,10 +160,15 @@ class MainActivity: AppCompatActivity(),
         bleManager.scanBleDevices {
             Log.d(TAG, "scanBleDevices")
             bleDevices = it
-            for (dev in it) {
-                Log.d(TAG, "Dispositivo: ${dev.getBleDevice()}")
-                setRecyclerUI()
+            if (bleDevices.isEmpty()) {
                 isScanning = false
+                setNoDataUI()
+            } else {
+                isScanning = false
+                for (dev in it) {
+                    Log.d(TAG, "Dispositivo: ${dev.getBleDevice()}")
+                    setRecyclerUI()
+                }
             }
         }
     }
@@ -150,16 +181,7 @@ class MainActivity: AppCompatActivity(),
     companion object {
         private val TAG = MainActivity::class.java.simpleName
 
-        const val EXTRA_MAC                 = "mac"
-        const val EXTRA_NAME                = "name"
-        const val EXTRA_BEACON              = "beacon"
-        const val EXTRA_BEACON_ENCRYPTED    = "beacon_encrypted"
-        const val EXTRA_BEACON_TYPE         = "beacon_type"
-        const val EXTRA_IS_ENCRYPTED        = "is_encrypted"
-        const val EXTRA_DEVICE              = "device"
-
-        private val TIMEOUT                 = 10_000L
-
+        private const val TIMEOUT           = 10_000L
     }
 
 
