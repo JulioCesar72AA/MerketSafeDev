@@ -12,8 +12,13 @@
 
     <!-- TEXT VIEW's -->
     <string name="tv_selected_device">Dispositivo Seleccionado</string>
+    <string name="tv_no_devices">No se encontraron dispositivos cercanos, desliza para volver a intentar</string>
+    <string name="tv_title_access_points">Access Points</string>
 
     <!-- CONTENT DESCRIPTION's -->
     <string name="cd_bluetooth_icon">Bluetooth</string>
+    <string name="cd_logo_cir_wireless_softel">logo CIR Wireless SOFTEL</string>
+    <string name="cd_config_icon">Configuración</string>
+    <string name="cd_test_icon">Probar</string>
 
 </resources>

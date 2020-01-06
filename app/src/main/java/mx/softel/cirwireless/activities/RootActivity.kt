@@ -9,6 +9,7 @@ import kotlinx.android.synthetic.main.activity_root.*
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.fragments.MainFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
+import mx.softel.cirwirelesslib.constants.Constants
 
 class RootActivity : AppCompatActivity(), FragmentNavigation {
 
@@ -42,23 +43,24 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
 
         // Obtenemos la información del intent
         val data = intent.extras!!
-        val device  = data[MainActivity.EXTRA_DEVICE] as BluetoothDevice
-        val name            = data.getString(MainActivity.EXTRA_NAME)!!
-        val mac             = data.getString(MainActivity.EXTRA_MAC)!!
-        val beacon          = data.getString(MainActivity.EXTRA_BEACON)!!
-        val type            = data.getString(MainActivity.EXTRA_BEACON_TYPE)!!
-        val beacEncrypted   = data.getString(MainActivity.EXTRA_BEACON_ENCRYPTED)!!
-        val isEncrypted   = data.getBoolean(MainActivity.EXTRA_IS_ENCRYPTED)
+        val bleDevice                = data[Constants.EXTRA_DEVICE] as BluetoothDevice
+        val name           = data.getString(Constants.EXTRA_NAME)!!
+        val mac            = data.getString(Constants.EXTRA_MAC)!!
+        val beacon         = data.getString(Constants.EXTRA_BEACON)!!
+        val type           = data.getString(Constants.EXTRA_BEACON_TYPE)!!
+        val beacEncrypted  = data.getString(Constants.EXTRA_BEACON_ENCRYPTED)!!
+        val isEncrypted  = data.getBoolean(Constants.EXTRA_IS_ENCRYPTED)
 
         // Mandamos la información necesaria al RootFragment
         val args = Bundle()
         args.apply {
-            putString(MainActivity.EXTRA_DEVICE, name)
-            putString(MainActivity.EXTRA_MAC, mac)
-            putString(MainActivity.EXTRA_BEACON, beacon)
-            putString(MainActivity.EXTRA_BEACON_TYPE, type)
-            putString(MainActivity.EXTRA_BEACON_ENCRYPTED, beacEncrypted)
-            putBoolean(MainActivity.EXTRA_IS_ENCRYPTED, isEncrypted)
+            putString(Constants.EXTRA_DEVICE, name)
+            putString(Constants.EXTRA_MAC, mac)
+            putString(Constants.EXTRA_BEACON, beacon)
+            putString(Constants.EXTRA_BEACON_TYPE, type)
+            putString(Constants.EXTRA_BEACON_ENCRYPTED, beacEncrypted)
+            putBoolean(Constants.EXTRA_IS_ENCRYPTED, isEncrypted)
+            putParcelable(Constants.EXTRA_DEVICE, bleDevice)
         }
 
         // Lo añadimos al fragmento e iniciamos la vista

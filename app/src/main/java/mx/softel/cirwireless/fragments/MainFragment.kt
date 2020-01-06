@@ -1,6 +1,8 @@
 package mx.softel.cirwireless.fragments
 
 
+import android.bluetooth.BluetoothDevice
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -9,18 +11,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 
 import mx.softel.cirwireless.R
-import mx.softel.cirwireless.activities.MainActivity
 import mx.softel.cirwireless.extensions.toast
+import mx.softel.cirwirelesslib.constants.Constants
+import mx.softel.cirwirelesslib.services.BleService
 
 /**
  * A simple [Fragment] subclass.
  */
 class MainFragment : Fragment(), View.OnClickListener {
 
-    private lateinit var btnConfigure   : Button
-    private lateinit var btnTest        : Button
+    // BLUETOOTH
+    private          var bleDevice      : BluetoothDevice? = null
+
+    // VIEW's
+    private lateinit var cvConfigure    : CardView
+    private lateinit var cvTest         : CardView
     private lateinit var tvMac          : TextView
 
     /************************************************************************************************/
@@ -33,21 +41,32 @@ class MainFragment : Fragment(), View.OnClickListener {
         val view = inflater.inflate(R.layout.fragment_main, container, false)
 
         view.apply {
-            btnConfigure    = findViewById(R.id.btnConfigurar)
-            btnTest         = findViewById(R.id.btnProbar)
+            // Asignamos las vistas por su ID
+            //btnConfigure    = findViewById(R.id.btnConfigurar)
             tvMac           = findViewById(R.id.tvMacSelected)
+            cvConfigure     = findViewById(R.id.cvConfigurar)
+            cvTest          = findViewById(R.id.cvProbar)
 
-            tvMac.text = arguments!!.getString(MainActivity.EXTRA_MAC)
+            // Asignamos el texto de los argumentos recibidos
+            tvMac.text = arguments!!.getString(Constants.EXTRA_MAC)
         }
         setOnClick()
-
+        bleDevice   = arguments!!.getParcelable(Constants.EXTRA_DEVICE)
+        Log.d(TAG, "initServices -> bleDevice(${bleDevice?.address})")
         return view
     }
 
-    private fun setOnClick() {
-        btnConfigure.setOnClickListener(this)
-        btnTest.setOnClickListener(this)
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy -> stopBleService")
+        stopBleService()
     }
+
+    private fun setOnClick() {
+        cvTest      .setOnClickListener(this)
+        cvConfigure .setOnClickListener(this)
+    }
+
 
 
     /************************************************************************************************/
@@ -55,10 +74,41 @@ class MainFragment : Fragment(), View.OnClickListener {
     /************************************************************************************************/
     override fun onClick(v: View?) {
         when (v!!.id) {
-            R.id.btnConfigurar  -> { activity!!.toast("Configurar") }
-            R.id.btnProbar      -> { activity!!.toast("Probar") }
+            R.id.cvConfigurar   -> clickConfigure()
+            R.id.cvProbar       -> clickTest()
         }
     }
+
+    private fun clickConfigure() {
+        Log.d(TAG, "clickConfigure -> startBleService")
+        activity!!.toast("Configurar")
+        startBleService()
+    }
+
+    private fun clickTest() {
+        Log.d(TAG, "clickTest -> startBleService")
+        activity!!.toast("Probar")
+        startBleService()
+    }
+
+
+
+
+
+    /************************************************************************************************/
+    /**     SERVICES                                                                                */
+    /************************************************************************************************/
+    private fun startBleService() {
+
+        val intent = Intent(context, BleService::class.java)
+        intent.apply {
+            putExtra(Constants.EXTRA_DEVICE, bleDevice)
+        }
+        activity!!.startService(intent)
+    }
+
+    private fun stopBleService()
+            = activity!!.stopService(Intent(context, BleService::class.java))
 
 
 

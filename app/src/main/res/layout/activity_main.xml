@@ -6,8 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".activities.MainActivity">
 
-
-
+    <!-- Lista actualizable de dispositivos -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/srlScan"
         android:layout_width="match_parent"
@@ -21,6 +20,15 @@
             tools:listitem="@layout/ble_scan_list_prototype"/>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- Texto de NoData -->
+    <TextView
+        android:id="@+id/tvNoDevices"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/tv_no_devices"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
 
     <!-- Máscara de escaneo -->
     <View
