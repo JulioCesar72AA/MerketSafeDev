@@ -16,6 +16,9 @@ import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwirelesslib.constants.Constants
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
+import android.bluetooth.BluetoothAdapter
+
+
 
 class MainActivity: AppCompatActivity(),
                     SwipeRefreshLayout.OnRefreshListener,
@@ -179,7 +182,6 @@ class MainActivity: AppCompatActivity(),
         private val TAG = MainActivity::class.java.simpleName
 
         private const val TIMEOUT           = 10_000L
-
     }
 
 

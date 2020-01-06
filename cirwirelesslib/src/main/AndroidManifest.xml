@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="mx.softel.cirwirelesslib">
 
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+
     <application>
         <service android:name=".services.BleService"/>
     </application>

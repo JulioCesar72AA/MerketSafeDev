@@ -8,11 +8,9 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
-import android.widget.Toast
-import androidx.annotation.UiThread
+import androidx.core.app.ActivityCompat.startActivityForResult
 import mx.softel.cirwirelesslib.constants.Constants
 import java.lang.Exception
-import kotlin.concurrent.thread
 
 class BleService: Service() {
 
@@ -96,10 +94,10 @@ class BleService: Service() {
         }
 
         /*
-        Añadimos la conexión y el callback al arreglo de
-        conexiones abiertas con el fin de realizar la
-        desconexión centralizada del dispositivo
-        */
+         * Añadimos la conexión y el callback al arreglo de
+         * conexiones abiertas con el fin de realizar la
+         * desconexión centralizada del dispositivo
+         */
         bleGattCallbacks.add(gattCallback)
         bleGattConnections.add(bleGatt!!)
     }
@@ -237,10 +235,6 @@ class BleService: Service() {
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
     override fun onBind(intent: Intent?): IBinder? = null
-
-
-
-
 
 
     /************************************************************************************************/
