@@ -102,6 +102,7 @@ class MainActivity: AppCompatActivity(),
 
         pbScanning.visibility   = View.GONE
         scanMask.visibility     = View.GONE
+        tvNoDevices.visibility  = View.GONE
     }
 
     private fun setScanningUI() {
@@ -109,6 +110,7 @@ class MainActivity: AppCompatActivity(),
 
         pbScanning.visibility   = View.VISIBLE
         scanMask.visibility     = View.VISIBLE
+        tvNoDevices.visibility  = View.GONE
     }
 
     private fun setRecyclerUI() {
@@ -123,6 +125,14 @@ class MainActivity: AppCompatActivity(),
         initUI()
     }
 
+    private fun setNoDataUI() {
+        Log.d(TAG, "setNoDataUI")
+
+        pbScanning.visibility   = View.GONE
+        scanMask.visibility     = View.GONE
+        tvNoDevices.visibility  = View.VISIBLE
+    }
+
 
     /************************************************************************************************/
     /**     AUXILIARES                                                                              */
@@ -135,10 +145,15 @@ class MainActivity: AppCompatActivity(),
         bleManager.scanBleDevices {
             Log.d(TAG, "scanBleDevices")
             bleDevices = it
-            for (dev in it) {
-                Log.d(TAG, "Dispositivo: ${dev.getBleDevice()}")
-                setRecyclerUI()
+            if (bleDevices.isEmpty()) {
                 isScanning = false
+                setNoDataUI()
+            } else {
+                isScanning = false
+                for (dev in it) {
+                    Log.d(TAG, "Dispositivo: ${dev.getBleDevice()}")
+                    setRecyclerUI()
+                }
             }
         }
     }

@@ -12,6 +12,7 @@
 
     <!-- TEXT VIEW's -->
     <string name="tv_selected_device">Dispositivo Seleccionado</string>
+    <string name="tv_no_devices">No se encontraron dispositivos cercanos, desliza para volver a intentar</string>
 
     <!-- CONTENT DESCRIPTION's -->
     <string name="cd_bluetooth_icon">Bluetooth</string>
