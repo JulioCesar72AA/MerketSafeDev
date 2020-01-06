@@ -40,6 +40,18 @@ class MainActivity: AppCompatActivity(),
         }
         setScanningUI()
         setOnClick()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume")
+
+        /**
+         * Se añade el escaneo en el [onResume] porque solicita los permisos
+         * de ubicación al usuario, si no los ha proporcionado hace el flujo
+         * [onResume] -> [onPause] -> [onResume], es en el segundo instante
+         * donde se ejecuta el escaneo al solicitar los permisos necesarios
+         */
         scanDevices()
     }
 
