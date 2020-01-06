@@ -17,7 +17,7 @@ class BleService: Service() {
     // BLE MANAGER
     private var bleManager              : BluetoothManager?                 = null
     private var bleAdapter              : BluetoothAdapter?                 = null
-    var bleDevice               : BluetoothDevice?                  = null
+    var bleDevice                       : BluetoothDevice?                  = null
 
     // GATT
     private var bleGatt                 : BluetoothGatt?                    = null
@@ -65,6 +65,7 @@ class BleService: Service() {
         super.onDestroy()
         Log.d(TAG, "onDestroy")
         unregisterRunnableTimeoutTask()
+        disconnectBleDevice(DisconnectionReason.NORMAL_DISCONNECTION)
     }
 
 
@@ -140,7 +141,7 @@ class BleService: Service() {
     private fun unregisterRunnableTimeoutTask() {
         Log.d(TAG, "unregisterRunnableTimeoutTask")
         for (runnable in runnableTimeoutTaskList) {
-            connectionObserver!!.removeCallbacks(runnable)
+            connectionObserver.removeCallbacks(runnable)
         }
         runnableTimeoutTaskList.clear()
     }
