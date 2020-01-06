@@ -27,6 +27,7 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
         setSupportActionBar(rootToolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         getAndSetIntentData()
+        initFragment()
     }
 
     /**
@@ -55,7 +56,11 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
         val type           = data.getString(Constants.EXTRA_BEACON_TYPE)!!
         val beacEncrypted  = data.getString(Constants.EXTRA_BEACON_ENCRYPTED)!!
         val isEncrypted  = data.getBoolean(Constants.EXTRA_IS_ENCRYPTED)*/
+    }
 
+
+    private fun initFragment() {
+        Log.d(TAG, "initFragment")
         // Iniciamos el fragmento deseado
         val fragment = MainFragment.getInstance()
         supportFragmentManager
