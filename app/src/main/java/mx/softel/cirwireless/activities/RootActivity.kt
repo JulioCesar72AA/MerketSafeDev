@@ -1,6 +1,7 @@
 package mx.softel.cirwireless.activities
 
 import android.bluetooth.BluetoothDevice
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -10,8 +11,12 @@ import mx.softel.cirwireless.R
 import mx.softel.cirwireless.fragments.MainFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.Constants
+import mx.softel.cirwirelesslib.services.BleService
 
 class RootActivity : AppCompatActivity(), FragmentNavigation {
+
+    internal lateinit var bleDevice : BluetoothDevice
+    internal lateinit var bleMac    : String
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -43,29 +48,16 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
 
         // Obtenemos la información del intent
         val data = intent.extras!!
-        val bleDevice                = data[Constants.EXTRA_DEVICE] as BluetoothDevice
-        val name           = data.getString(Constants.EXTRA_NAME)!!
-        val mac            = data.getString(Constants.EXTRA_MAC)!!
+        bleDevice   = data[Constants.EXTRA_DEVICE] as BluetoothDevice
+        bleMac      = data.getString(Constants.EXTRA_MAC)!!
+        /*val name           = data.getString(Constants.EXTRA_NAME)!!
         val beacon         = data.getString(Constants.EXTRA_BEACON)!!
         val type           = data.getString(Constants.EXTRA_BEACON_TYPE)!!
         val beacEncrypted  = data.getString(Constants.EXTRA_BEACON_ENCRYPTED)!!
-        val isEncrypted  = data.getBoolean(Constants.EXTRA_IS_ENCRYPTED)
+        val isEncrypted  = data.getBoolean(Constants.EXTRA_IS_ENCRYPTED)*/
 
-        // Mandamos la información necesaria al RootFragment
-        val args = Bundle()
-        args.apply {
-            putString(Constants.EXTRA_DEVICE, name)
-            putString(Constants.EXTRA_MAC, mac)
-            putString(Constants.EXTRA_BEACON, beacon)
-            putString(Constants.EXTRA_BEACON_TYPE, type)
-            putString(Constants.EXTRA_BEACON_ENCRYPTED, beacEncrypted)
-            putBoolean(Constants.EXTRA_IS_ENCRYPTED, isEncrypted)
-            putParcelable(Constants.EXTRA_DEVICE, bleDevice)
-        }
-
-        // Lo añadimos al fragmento e iniciamos la vista
+        // Iniciamos el fragmento deseado
         val fragment = MainFragment.getInstance()
-        fragment.arguments = args
         supportFragmentManager
             .beginTransaction()
             .add(R.id.fragmentContainer, fragment)
@@ -79,9 +71,14 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
     /************************************************************************************************/
     override fun navigateTo(fragment: Fragment,
                             addToBackStack: Boolean,
+                            args: Bundle?,
                             animIn: Int,
                             animOut: Int) {
         Log.d(TAG, "navigateTo")
+
+        if (args != null) {
+            fragment.arguments = args
+        }
 
         val transaction = supportFragmentManager
             .beginTransaction()
@@ -92,6 +89,21 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
 
         transaction.commit()
     }
+
+    /************************************************************************************************/
+    /**     SERVICES                                                                                */
+    /************************************************************************************************/
+    internal fun startBleService() {
+
+        val intent = Intent(this, BleService::class.java)
+        intent.apply {
+            putExtra(Constants.EXTRA_DEVICE, bleDevice)
+        }
+        startService(intent)
+    }
+
+    internal fun stopBleService()
+            = stopService(Intent(this, BleService::class.java))
 
 
     /************************************************************************************************/
