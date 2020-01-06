@@ -5,4 +5,11 @@
     <dimen name="scan_content_margin">12dp</dimen>
     <dimen name="scan_corner_radius">12dp</dimen>
 
+    <!-- CARD VIEW's -->
+    <dimen name="cv_fixed_size">150dp</dimen>
+    <dimen name="cv_margin">8dp</dimen>
+    <dimen name="cv_elevation">4dp</dimen>
+    <dimen name="cv_corner_radius">8dp</dimen>
+    <dimen name="cv_content_margin">24dp</dimen>
+
 </resources>

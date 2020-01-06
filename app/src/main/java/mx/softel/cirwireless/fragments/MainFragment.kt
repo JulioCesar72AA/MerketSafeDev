@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.extensions.toast
@@ -26,8 +27,8 @@ class MainFragment : Fragment(), View.OnClickListener {
     private          var bleDevice      : BluetoothDevice? = null
 
     // VIEW's
-    private lateinit var btnConfigure   : Button
-    private lateinit var btnTest        : Button
+    private lateinit var cvConfigure    : CardView
+    private lateinit var cvTest         : CardView
     private lateinit var tvMac          : TextView
 
     /************************************************************************************************/
@@ -41,9 +42,10 @@ class MainFragment : Fragment(), View.OnClickListener {
 
         view.apply {
             // Asignamos las vistas por su ID
-            btnConfigure    = findViewById(R.id.btnConfigurar)
-            btnTest         = findViewById(R.id.btnProbar)
+            //btnConfigure    = findViewById(R.id.btnConfigurar)
             tvMac           = findViewById(R.id.tvMacSelected)
+            cvConfigure     = findViewById(R.id.cvConfigurar)
+            cvTest          = findViewById(R.id.cvProbar)
 
             // Asignamos el texto de los argumentos recibidos
             tvMac.text = arguments!!.getString(Constants.EXTRA_MAC)
@@ -61,8 +63,8 @@ class MainFragment : Fragment(), View.OnClickListener {
     }
 
     private fun setOnClick() {
-        btnConfigure.setOnClickListener(this)
-        btnTest     .setOnClickListener(this)
+        cvTest      .setOnClickListener(this)
+        cvConfigure .setOnClickListener(this)
     }
 
 
@@ -72,8 +74,8 @@ class MainFragment : Fragment(), View.OnClickListener {
     /************************************************************************************************/
     override fun onClick(v: View?) {
         when (v!!.id) {
-            R.id.btnConfigurar  -> clickConfigure()
-            R.id.btnProbar      -> clickTest()
+            R.id.cvConfigurar   -> clickConfigure()
+            R.id.cvProbar       -> clickTest()
         }
     }
 
