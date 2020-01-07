@@ -21,6 +21,7 @@ class BleService: Service() {
     // BLE MANAGER
     private var bleManager              : BluetoothManager?                 = null
     private var bleAdapter              : BluetoothAdapter?                 = null
+    private var firmware                : String?                           = null
     var bleDevice                       : BluetoothDevice?                  = null
 
     // UUID's
@@ -37,6 +38,7 @@ class BleService: Service() {
     // FLAGS - STATES
     private var descriptorEnabled       : Boolean                           = false
     private var stopTimer               : Boolean                           = false
+    private var correctFirmware         : Boolean                           = false
     private var currentState            : ActualState                       = ActualState.DISCONNECTED
 
     // HANDLERS
@@ -147,6 +149,10 @@ class BleService: Service() {
                 }
             }
             // TODO: Volver a null las características encontradas
+            uuidService                 = null
+            characteristicNotify        = null
+            characteristicWrite         = null
+            characteristicDeviceInfo    = null
 
 
             // Limpiamos el arreglo de las conexiones una vez cerradas
@@ -233,10 +239,22 @@ class BleService: Service() {
         override fun onCharacteristicRead(gatt: BluetoothGatt?,
                                           characteristic: BluetoothGattCharacteristic?,
                                           status: Int) {
-            super.onCharacteristicRead(gatt, characteristic, status)
             Log.i(TAG, "onCharacteristicRead -> ${characteristic?.uuid}")
-            for (data in characteristic!!.value) {
-                Log.i(TAG, "onCharacteristicRead -> $data")
+
+            // Si se leyó correctamente la característica...
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                if (characteristic!!.uuid.toString() == BleConstants.DEVICE_INFO_UUID) {
+                    //for (data in characteristic!!.value) {
+                    //    Log.i(TAG, "onCharacteristicRead -> $data")
+                    //}
+                    val one = characteristic.value[1]
+                    val two = characteristic.value[2]
+                    val three = characteristic.value[3]
+                    firmware = "$one.$two.$three"
+
+                    correctFirmware = (firmware == BleConstants.FIRMWARE_346)
+                    Log.e(TAG, "FIRMWARE $firmware -> CORRECT $correctFirmware")
+                }
             }
         }
 
