@@ -23,4 +23,8 @@
     <dimen name="tv_textsize_32">30dp</dimen>
     <dimen name="tv_textsize_20">20dp</dimen>
 
+    <!-- ICON's -->
+    <dimen name="ic_back_size">32dp</dimen>
+    <dimen name="ic_back_margin">24dp</dimen>
+
 </resources>

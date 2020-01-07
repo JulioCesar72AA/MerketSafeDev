@@ -1,22 +1,20 @@
 package mx.softel.cirwireless.fragments
 
-
-import android.bluetooth.BluetoothDevice
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 
 import mx.softel.cirwireless.R
+import mx.softel.cirwireless.activities.RootActivity
 import mx.softel.cirwireless.extensions.toast
+import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.Constants
-import mx.softel.cirwirelesslib.services.BleService
 
 /**
  * A simple [Fragment] subclass.
@@ -24,9 +22,11 @@ import mx.softel.cirwirelesslib.services.BleService
 class MainFragment : Fragment(), View.OnClickListener {
 
     // BLUETOOTH
-    private          var bleDevice      : BluetoothDevice? = null
+    private lateinit var navigation     : FragmentNavigation
+    private lateinit var root           : RootActivity
 
     // VIEW's
+    private lateinit var ivBack         : ImageView
     private lateinit var cvConfigure    : CardView
     private lateinit var cvTest         : CardView
     private lateinit var tvMac          : TextView
@@ -34,6 +34,12 @@ class MainFragment : Fragment(), View.OnClickListener {
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
     /************************************************************************************************/
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        navigation  = (activity!! as FragmentNavigation)
+        root        = (activity!! as RootActivity)
+    }
+
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -42,27 +48,25 @@ class MainFragment : Fragment(), View.OnClickListener {
 
         view.apply {
             // Asignamos las vistas por su ID
-            //btnConfigure    = findViewById(R.id.btnConfigurar)
+            ivBack          = findViewById(R.id.ivBack)
             tvMac           = findViewById(R.id.tvMacSelected)
             cvConfigure     = findViewById(R.id.cvConfigurar)
             cvTest          = findViewById(R.id.cvProbar)
 
             // Asignamos el texto de los argumentos recibidos
-            tvMac.text = arguments!!.getString(Constants.EXTRA_MAC)
+            tvMac.text      = root.bleMac
         }
         setOnClick()
-        bleDevice   = arguments!!.getParcelable(Constants.EXTRA_DEVICE)
-        Log.d(TAG, "initServices -> bleDevice(${bleDevice?.address})")
         return view
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(TAG, "onDestroy -> stopBleService")
-        stopBleService()
+        Log.d(TAG, "onDestroy")
     }
 
     private fun setOnClick() {
+        ivBack      .setOnClickListener(this)
         cvTest      .setOnClickListener(this)
         cvConfigure .setOnClickListener(this)
     }
@@ -74,41 +78,31 @@ class MainFragment : Fragment(), View.OnClickListener {
     /************************************************************************************************/
     override fun onClick(v: View?) {
         when (v!!.id) {
+            R.id.ivBack         -> root.finish()
             R.id.cvConfigurar   -> clickConfigure()
             R.id.cvProbar       -> clickTest()
         }
     }
 
     private fun clickConfigure() {
-        Log.d(TAG, "clickConfigure -> startBleService")
-        activity!!.toast("Configurar")
-        startBleService()
+        Log.d(TAG, "clickConfigure")
+        toast("Conectando con el dispositivo")
+
+        // Iniciamos el fragmento de AccessPointsFragment
+        val fragment = AccessPointsFragment.getInstance()
+        navigation.navigateTo(fragment, true, null)
     }
 
     private fun clickTest() {
         Log.d(TAG, "clickTest -> startBleService")
-        activity!!.toast("Probar")
-        startBleService()
+        toast("Probar")
     }
 
 
 
 
 
-    /************************************************************************************************/
-    /**     SERVICES                                                                                */
-    /************************************************************************************************/
-    private fun startBleService() {
 
-        val intent = Intent(context, BleService::class.java)
-        intent.apply {
-            putExtra(Constants.EXTRA_DEVICE, bleDevice)
-        }
-        activity!!.startService(intent)
-    }
-
-    private fun stopBleService()
-            = activity!!.stopService(Intent(context, BleService::class.java))
 
 
 

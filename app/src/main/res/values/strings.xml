@@ -22,5 +22,6 @@
     <string name="cd_config_icon">Configuración</string>
     <string name="cd_test_icon">Probar</string>
     <string name="cd_icon_router">Icono Router</string>
+    <string name="cd_back_icon">Volver</string>
 
 </resources>
