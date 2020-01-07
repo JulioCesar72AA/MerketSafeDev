@@ -24,8 +24,6 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_root)
-        setSupportActionBar(rootToolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         getAndSetIntentData()
         initFragment()
     }
@@ -49,13 +47,13 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
 
         // Obtenemos la información del intent
         val data = intent.extras!!
-        bleDevice   = data[Constants.EXTRA_DEVICE] as BluetoothDevice
-        bleMac      = data.getString(Constants.EXTRA_MAC)!!
+        bleDevice        = data[Constants.EXTRA_DEVICE] as BluetoothDevice
+        bleMac           = data.getString(Constants.EXTRA_MAC)!!
         /*val name           = data.getString(Constants.EXTRA_NAME)!!
         val beacon         = data.getString(Constants.EXTRA_BEACON)!!
         val type           = data.getString(Constants.EXTRA_BEACON_TYPE)!!
         val beacEncrypted  = data.getString(Constants.EXTRA_BEACON_ENCRYPTED)!!
-        val isEncrypted  = data.getBoolean(Constants.EXTRA_IS_ENCRYPTED)*/
+        val isEncrypted    = data.getBoolean(Constants.EXTRA_IS_ENCRYPTED)*/
     }
 
 

@@ -20,5 +20,6 @@
     <string name="cd_logo_cir_wireless_softel">logo CIR Wireless SOFTEL</string>
     <string name="cd_config_icon">Configuración</string>
     <string name="cd_test_icon">Probar</string>
+    <string name="cd_back_icon">Volver</string>
 
 </resources>

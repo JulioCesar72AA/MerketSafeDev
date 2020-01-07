@@ -12,4 +12,8 @@
     <dimen name="cv_corner_radius">8dp</dimen>
     <dimen name="cv_content_margin">24dp</dimen>
 
+    <!-- ICON's -->
+    <dimen name="ic_back_size">32dp</dimen>
+    <dimen name="ic_back_margin">24dp</dimen>
+
 </resources>

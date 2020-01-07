@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 
@@ -25,6 +26,7 @@ class MainFragment : Fragment(), View.OnClickListener {
     private lateinit var root           : RootActivity
 
     // VIEW's
+    private lateinit var ivBack         : ImageView
     private lateinit var cvConfigure    : CardView
     private lateinit var cvTest         : CardView
     private lateinit var tvMac          : TextView
@@ -46,6 +48,7 @@ class MainFragment : Fragment(), View.OnClickListener {
 
         view.apply {
             // Asignamos las vistas por su ID
+            ivBack          = findViewById(R.id.ivBack)
             tvMac           = findViewById(R.id.tvMacSelected)
             cvConfigure     = findViewById(R.id.cvConfigurar)
             cvTest          = findViewById(R.id.cvProbar)
@@ -63,6 +66,7 @@ class MainFragment : Fragment(), View.OnClickListener {
     }
 
     private fun setOnClick() {
+        ivBack      .setOnClickListener(this)
         cvTest      .setOnClickListener(this)
         cvConfigure .setOnClickListener(this)
     }
@@ -74,6 +78,7 @@ class MainFragment : Fragment(), View.OnClickListener {
     /************************************************************************************************/
     override fun onClick(v: View?) {
         when (v!!.id) {
+            R.id.ivBack         -> root.finish()
             R.id.cvConfigurar   -> clickConfigure()
             R.id.cvProbar       -> clickTest()
         }
