@@ -29,6 +29,7 @@ class BleService: Service() {
     private var characteristicNotify    : BluetoothGattCharacteristic?      = null
     private var characteristicWrite     : BluetoothGattCharacteristic?      = null
     private var characteristicDeviceInfo: BluetoothGattCharacteristic?      = null
+    private var notificationDescriptor  : BluetoothGattDescriptor?          = null
 
     // GATT
     private var bleGatt                 : BluetoothGatt?                    = null
@@ -39,6 +40,7 @@ class BleService: Service() {
     private var descriptorEnabled       : Boolean                           = false
     private var stopTimer               : Boolean                           = false
     private var correctFirmware         : Boolean                           = false
+    private var waitResponse            : Boolean                           = false
     private var currentState            : ActualState                       = ActualState.DISCONNECTED
 
     // HANDLERS
@@ -243,10 +245,9 @@ class BleService: Service() {
 
             // Si se leyó correctamente la característica...
             if (status == BluetoothGatt.GATT_SUCCESS) {
+
+                // Lectura de DEVICE_INFO_UUID
                 if (characteristic!!.uuid.toString() == BleConstants.DEVICE_INFO_UUID) {
-                    //for (data in characteristic!!.value) {
-                    //    Log.i(TAG, "onCharacteristicRead -> $data")
-                    //}
                     val one = characteristic.value[1]
                     val two = characteristic.value[2]
                     val three = characteristic.value[3]
@@ -254,6 +255,9 @@ class BleService: Service() {
 
                     correctFirmware = (firmware == BleConstants.FIRMWARE_346)
                     Log.e(TAG, "FIRMWARE $firmware -> CORRECT $correctFirmware")
+
+                    enableCharacteristicNotification(true)
+                    writeToDescriptor(byteArrayOf(0x00))
                 }
             }
         }
@@ -261,7 +265,12 @@ class BleService: Service() {
         override fun onCharacteristicChanged(gatt: BluetoothGatt?,
                                              characteristic: BluetoothGattCharacteristic?) {
             super.onCharacteristicChanged(gatt, characteristic)
-            Log.i(TAG, "onCharacteristicChanged  -> ${characteristic!!.value}")
+            Log.i(TAG, "onCharacteristicChanged  -> ${characteristic!!.uuid}")
+            waitResponse = false
+
+            for (data in characteristic.value) {
+                Log.d(TAG, "$data")
+            }
         }
 
         override fun onDescriptorRead(gatt: BluetoothGatt?,
@@ -276,6 +285,12 @@ class BleService: Service() {
                                        status: Int) {
             super.onDescriptorWrite(gatt, descriptor, status)
             Log.i(TAG, "onDescriptorWrite")
+
+            if (!waitResponse) {
+                writeToDescriptor(byteArrayOf(0x01))
+                waitResponse = true
+            }
+
         }
 
     }
@@ -298,7 +313,18 @@ class BleService: Service() {
                     BleConstants.CIR_NAMA_NOTIFY_UUID -> {
                         Log.e(TAG, "NOTIFICACIÓN ${char.uuid}")
                         characteristicNotify = char
-                        // TODO: Iniciar notificación y leer poleo
+
+                        // Obtenemos los descriptores de la notificación
+                        for (desc in char.descriptors) {
+                            Log.e(TAG, "DESCRIPTOR: ${desc.uuid}")
+                            if (desc.uuid.toString() == BleConstants.NOTIFICATION_DESCRIPTOR) {
+                                notificationDescriptor = desc
+                            }
+                        }
+
+                        //enableCharacteristicNotification(true)
+                        //writeToDescriptor(byteArrayOf(0x00))
+
                     }
                     BleConstants.CIR_NAMA_WRITE_UUID -> {
                         Log.e(TAG, "ESCRITURA ${char.uuid}")
@@ -324,6 +350,18 @@ class BleService: Service() {
             }
         }
     }
+
+    private fun writeToDescriptor(command: ByteArray) {
+        if (notificationDescriptor != null)
+        {
+            notificationDescriptor!!.value = command // (new byte [] {0x00});
+            bleGatt!!.writeDescriptor(notificationDescriptor)
+        }
+    }
+
+
+    private fun enableCharacteristicNotification(enable: Boolean)
+            = bleGatt!!.setCharacteristicNotification(characteristicNotify, enable)
 
 
     /************************************************************************************************/
