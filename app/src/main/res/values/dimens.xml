@@ -12,11 +12,13 @@
     <dimen name="cv_elevation_access">7dp</dimen>
     <dimen name="cv_corner_radius">8dp</dimen>
     <dimen name="cv_content_margin">24dp</dimen>
-    <dimen name="cv_margin_access_point">27dp</dimen>
+    <dimen name="cv_margin_access_point">22dp</dimen>
+    <dimen name="cv_margin_access_point_top">50dp</dimen>
     <dimen name="cv_card_access">20dp</dimen>
 
     <!-- IMAGE VIEW's -->
-    <dimen name="img_access_margin_start">14dp</dimen>
+    <dimen name="img_access_margin_start">19dp</dimen>
+    <dimen name="img_access_margin_end">19dp</dimen>
 
     <!-- TEXT VIEW's -->
     <dimen name="tv_lineheight_30">30dp</dimen>
@@ -24,7 +26,7 @@
     <dimen name="tv_textsize_20">20dp</dimen>
 
     <!-- ICON's -->
-    <dimen name="ic_back_size">32dp</dimen>
-    <dimen name="ic_back_margin">24dp</dimen>
+    <dimen name="ic_back_size">28dp</dimen>
+    <dimen name="ic_back_margin">20dp</dimen>
 
 </resources>

@@ -15,6 +15,7 @@
     <string name="tv_no_devices">No se encontraron dispositivos cercanos, desliza para volver a intentar</string>
     <string name="tv_title_access">Access Points</string>
     <string name="tv_test_mac">00:1B:C5:00:08:11</string>
+    <string name="tv_password">Contraseña:</string>
 
     <!-- CONTENT DESCRIPTION's -->
     <string name="cd_bluetooth_icon">Bluetooth</string>
