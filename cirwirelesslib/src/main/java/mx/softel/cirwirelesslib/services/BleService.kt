@@ -12,6 +12,7 @@ import android.util.Log
 import androidx.core.app.ActivityCompat.startActivityForResult
 import mx.softel.cirwirelesslib.constants.BleConstants
 import mx.softel.cirwirelesslib.constants.Constants
+import mx.softel.cirwirelesslib.extensions.toHex
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
@@ -40,7 +41,7 @@ class BleService: Service() {
     private var descriptorEnabled       : Boolean                           = false
     private var stopTimer               : Boolean                           = false
     private var correctFirmware         : Boolean                           = false
-    private var waitResponse            : Boolean                           = false
+    private var isNotifying             : Boolean                           = false
     private var currentState            : ActualState                       = ActualState.DISCONNECTED
 
     // HANDLERS
@@ -134,6 +135,10 @@ class BleService: Service() {
         if (characteristicDeviceInfo != null) {
             bleGatt!!.readCharacteristic(characteristicDeviceInfo)
         }
+
+        //enableCharacteristicNotification(true)
+        //writeToDescriptor(DISABLE_NOTIFICATION)
+        //isNotifying = false
     }
 
 
@@ -213,6 +218,9 @@ class BleService: Service() {
         override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
             super.onMtuChanged(gatt, mtu, status)
             Log.i(TAG, "onMTuChanged")
+
+            // Solicitando la versión de Firmware de la tarjeta
+            getFirmwareData()
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
@@ -226,9 +234,8 @@ class BleService: Service() {
                 getInfoCharacteristics(service)
             }
 
-            // Solicitando la versión de Firmware de la tarjeta
-            getFirmwareData()
-
+            // Actualizamos el MTU de la comunicación
+            bleGatt!!.requestMtu(300)
         }
 
         override fun onCharacteristicWrite(gatt: BluetoothGatt?,
@@ -257,7 +264,8 @@ class BleService: Service() {
                     Log.e(TAG, "FIRMWARE $firmware -> CORRECT $correctFirmware")
 
                     enableCharacteristicNotification(true)
-                    writeToDescriptor(byteArrayOf(0x00))
+                    writeToDescriptor(DISABLE_NOTIFICATION)
+                    isNotifying = false
                 }
             }
         }
@@ -265,12 +273,8 @@ class BleService: Service() {
         override fun onCharacteristicChanged(gatt: BluetoothGatt?,
                                              characteristic: BluetoothGattCharacteristic?) {
             super.onCharacteristicChanged(gatt, characteristic)
-            Log.i(TAG, "onCharacteristicChanged  -> ${characteristic!!.uuid}")
-            waitResponse = false
-
-            for (data in characteristic.value) {
-                Log.d(TAG, "$data")
-            }
+            //Log.i(TAG, "onCharacteristicChanged")
+            Log.i(TAG, "LECTURA: ${characteristic!!.uuid} -> ${characteristic.value.toHex()}")
         }
 
         override fun onDescriptorRead(gatt: BluetoothGatt?,
@@ -286,11 +290,12 @@ class BleService: Service() {
             super.onDescriptorWrite(gatt, descriptor, status)
             Log.i(TAG, "onDescriptorWrite")
 
-            if (!waitResponse) {
-                writeToDescriptor(byteArrayOf(0x01))
-                waitResponse = true
+            // Si aún no está poleando, se levanta el descriptor
+            if (!isNotifying) {
+                Log.e(TAG, "HABILITANDO DESCRIPTOR")
+                writeToDescriptor(ENABLE_NOTIFICATION)
+                isNotifying     = true
             }
-
         }
 
     }
@@ -321,9 +326,6 @@ class BleService: Service() {
                                 notificationDescriptor = desc
                             }
                         }
-
-                        //enableCharacteristicNotification(true)
-                        //writeToDescriptor(byteArrayOf(0x00))
 
                     }
                     BleConstants.CIR_NAMA_WRITE_UUID -> {
@@ -376,8 +378,9 @@ class BleService: Service() {
     companion object {
         private val TAG = BleService::class.java.simpleName
 
+        // Constantes útiles
         private const val MAX_ALLOWED_CONNECTIONS = 8
-
-
+        private val DISABLE_NOTIFICATION= byteArrayOf(0x00)
+        private val ENABLE_NOTIFICATION = byteArrayOf(0x01)
     }
 }
