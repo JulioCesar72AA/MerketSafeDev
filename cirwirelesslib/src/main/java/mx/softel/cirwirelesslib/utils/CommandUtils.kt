@@ -1,6 +1,8 @@
 package mx.softel.cirwirelesslib.utils
 
 import android.util.Log
+import mx.softel.cirwirelesslib.extensions.toByteArray
+import mx.softel.cirwirelesslib.extensions.toHex
 import kotlin.experimental.and
 
 
@@ -8,7 +10,23 @@ object CommandUtils {
 
     private val TAG = CommandUtils::class.java.simpleName
 
-    fun getCrc16(buffer: ByteArray): Int {
+    private val POLEO      = byteArrayOf(0x55, 0x10, 0x13, 0x07, 0xC5.toByte())
+    private val REFRESH_AP = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x47)
+
+
+    fun refreshAccessPointsCmd(): ByteArray {
+        Log.d(TAG, "refreshAccessPointCmd")
+
+        val crc = getCrc16(REFRESH_AP)
+        var cmd = REFRESH_AP
+        cmd += crc[0]
+        cmd += crc[1]
+
+        return cmd
+    }
+
+
+    private fun getCrc16(buffer: ByteArray): ByteArray {
         Log.d(TAG, "getCrc16")
 
         var crc = 0
@@ -21,7 +39,10 @@ object CommandUtils {
         }
 
         crc = crc and 0xffff
-        return crc
+        val data = crc.toByteArray()
+        val byteArray = byteArrayOf(data[2], data[3])
+        Log.d("BleService", "${POLEO.toHex()} ${byteArray.toHex()}")
+        return byteArray
     }
 
 }
