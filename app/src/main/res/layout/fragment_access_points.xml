@@ -46,8 +46,8 @@
                 android:contentDescription="@string/cd_icon_router"
                 android:layout_weight=".9"
                 android:scaleType="centerInside"
-                android:paddingStart="@dimen/img_access_margin_start"
-                android:paddingEnd="@dimen/img_access_margin_end"
+                android:paddingStart="@dimen/cv_access_margin_start"
+                android:paddingEnd="@dimen/cv_access_margin_end"
                 android:src="@drawable/ic_img_access_point" />
 
 

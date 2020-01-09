@@ -45,8 +45,8 @@
                 android:layout_height="@dimen/ic_icon_dispositivo_height"
                 android:layout_weight=".9"
                 android:contentDescription="@string/cd_icon_dispositivos"
-                android:paddingStart="@dimen/img_access_margin_start"
-                android:paddingEnd="@dimen/img_access_margin_end"
+                android:paddingStart="@dimen/cv_access_margin_start"
+                android:paddingEnd="@dimen/cv_access_margin_end"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_img_chip" />
 

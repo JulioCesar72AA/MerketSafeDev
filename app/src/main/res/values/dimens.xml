@@ -15,8 +15,8 @@
     <dimen name="cv_margin_access_point">22dp</dimen>
     <dimen name="cv_margin_access_point_top">50dp</dimen>
     <dimen name="cv_card_access">20dp</dimen>
-    <dimen name="img_access_margin_start">19dp</dimen>
-    <dimen name="img_access_margin_end">19dp</dimen>
+    <dimen name="cv_access_margin_start">19dp</dimen>
+    <dimen name="cv_access_margin_end">19dp</dimen>
     <dimen name="cv_margin30">30dp</dimen>
 
 
