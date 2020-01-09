@@ -248,14 +248,17 @@ class BleService: Service() {
     }
 
     private fun receivedCommand(response: ByteArray): ReceivedCmd {
-        Log.d(TAG, "receivedCommand")
-        return when (response[4]) {
+        val cmd = when (response[4]) {
             POLEO           -> ReceivedCmd.POLEO
             STATUS          -> ReceivedCmd.STATUS
             REFRESH_AP_OK   -> ReceivedCmd.REFRESH_AP
-            GET_AP_MACS     -> ReceivedCmd.GET_AP
+            AT_OK           -> ReceivedCmd.AT_OK
+            AT_NOK          -> ReceivedCmd.AT_NOK
+            WAIT_RESPONSE   -> ReceivedCmd.WAIT_AP
             else            -> ReceivedCmd.UNKNOWN
         }
+        Log.d(TAG, "receivedCommand -> $cmd")
+        return cmd
     }
 
     private fun initPoleCmd() {
@@ -276,7 +279,6 @@ class BleService: Service() {
 
             // Cargamos y escribimos en la característica
             val flag = characteristicWrite!!.setValue(cmd)
-            Log.d(TAG, flag.toString())
             if (flag) {
                 bleGatt!!.writeCharacteristic(characteristicWrite)
                 waitResponse = true
@@ -285,42 +287,66 @@ class BleService: Service() {
         }
     }
 
-    private fun getApDataCmd(characteristic: BluetoothGattCharacteristic) {
-        Log.e(TAG, "getApDataCmd -> ${characteristic.value.toHex()}")
-        waitResponse = false
+    private fun refreshingWifi(characteristic: BluetoothGattCharacteristic) {
+        Log.e(TAG, "refreshingWifi -> ${characteristic.value.toHex()}")
         val response = receivedCommand(characteristic.value)
 
-        if (!waitResponse && response == ReceivedCmd.POLEO) {
-            val cmd = CommandUtils.getAccessPointsCmd()
-            Log.e(TAG, "CMD ACCESS POINTS: ${cmd.toHex()}")
+        when (response) {
 
-            // Cargamos y escribimos en la característica
-            val flag = characteristicWrite!!.setValue(cmd)
-            Log.d(TAG, flag.toString())
-            if (flag) {
-                bleGatt!!.writeCharacteristic(characteristicWrite)
-                waitResponse = true
-                currentState = StateMachine.GET_AP
+            ReceivedCmd.POLEO -> {
+                if (currentState == StateMachine.WIFI_CONFIG) {
+                    val cmd = CommandUtils.configureAccessPointsCmd()
+                    // Cargamos y escribimos en la característica
+                    val flag = characteristicWrite!!.setValue(cmd)
+                    if (flag) {
+                        bleGatt!!.writeCharacteristic(characteristicWrite)
+                        currentState = StateMachine.AT_WAIT_RESPONSE
+                    }
+                }
+                if (currentState == StateMachine.AT_WAIT_RESPONSE) {
+                    // Leemos el comando de AT para verificar que esté correcto
+                    val cmd = CommandUtils.readAtCmd()
+                    val flag = characteristicWrite!!.setValue(cmd)
+                    if (flag) {
+                        bleGatt!!.writeCharacteristic(characteristicWrite)
+                        currentState = StateMachine.AT_WAIT_RESPONSE
+                    }
+                }
             }
-        }
-    }
 
-    private fun getApList(characteristic: BluetoothGattCharacteristic): ArrayList<ByteArray>? {
-        Log.d(TAG , "getApList -> ${characteristic.value.toHex()}")
+            ReceivedCmd.REFRESH_AP -> {
+                Log.d(TAG, "REFRESH ACCESS POINT")
+                val cmd = CommandUtils.configureAccessPointsCmd()
+                // Cargamos y escribimos en la característica
+                val flag = characteristicWrite!!.setValue(cmd)
+                if (flag) {
+                    bleGatt!!.writeCharacteristic(characteristicWrite)
+                    currentState = StateMachine.WIFI_CONFIG
+                }
+            }
+
+
+            ReceivedCmd.AT_OK -> {
+                Log.d(TAG, "AT_OK")
+                // Leemos el comando de AT para verificar que esté correcto
+                val cmd = CommandUtils.readAtCmd()
+                val flag = characteristicWrite!!.setValue(cmd)
+                if (flag) {
+                    bleGatt!!.writeCharacteristic(characteristicWrite)
+                    currentState = StateMachine.AT_WAIT_RESPONSE
+                }
+            }
+            /*ReceivedCmd.AT_NOK -> {
+
+            }*/
+
+
+            ReceivedCmd.WAIT_AP -> {
+                currentState = StateMachine.AT_WAIT_RESPONSE
+            }
+            else -> currentState = StateMachine.STANDBY
+        }
         waitResponse = false
-        val response = receivedCommand(characteristic.value)
-        val apArray = arrayListOf<ByteArray>()
-
-        // Si la respuesta es GET_AP y el tamaño del paquete es 2B...
-        if (response == ReceivedCmd.GET_AP && characteristic.value[3] == 0x2b.toByte()) {
-            //val mac = ByteArray(6)
-
-            // TODO: Ejecutar comandoas AT de WIFI para configurar y leer los AP's
-
-            currentState = StateMachine.STANDBY
-        }
-
-        return if (apArray.isEmpty()) null else apArray
     }
 
 
@@ -375,7 +401,7 @@ class BleService: Service() {
         override fun onCharacteristicWrite(gatt: BluetoothGatt?,
                                            characteristic: BluetoothGattCharacteristic?,
                                            status: Int) {
-            super.onCharacteristicWrite(gatt, characteristic, status)
+            //super.onCharacteristicWrite(gatt, characteristic, status)
             Log.i(TAG, "onCharacteristicWrite -> ${characteristic!!.value.toHex()}")
         }
 
@@ -396,7 +422,11 @@ class BleService: Service() {
 
                     correctFirmware = (firmware == BleConstants.FIRMWARE_346)
                     Log.e(TAG, "FIRMWARE $firmware -> CORRECT $correctFirmware")
-                    if (correctFirmware) initPoleCmd()
+
+
+
+                    // TODO: Evitar escaneos automáticos innecesarios
+                    //if (correctFirmware) initPoleCmd()
                 }
             }
         }
@@ -405,15 +435,15 @@ class BleService: Service() {
                                              characteristic: BluetoothGattCharacteristic?) {
             super.onCharacteristicChanged(gatt, characteristic)
             if (characteristic == null) return
-            val uuid = characteristic.uuid
 
             // STATE MACHINE ACCESS POINTS *********************************************************
             when (currentState) {
-                StateMachine.POLING         -> sendRefreshApCmd()
-                StateMachine.REFRESHING_AP  -> getApDataCmd(characteristic)
-                StateMachine.GET_AP         -> getApList(characteristic)
-                StateMachine.STANDBY        -> Log.d(TAG, "STANDBY (Poling)")
-                else                        -> Log.d(TAG, "Status desconocido")
+                StateMachine.POLING             -> sendRefreshApCmd()
+                StateMachine.REFRESHING_AP      -> refreshingWifi(characteristic)
+                StateMachine.WIFI_CONFIG        -> refreshingWifi(characteristic)
+                StateMachine.AT_WAIT_RESPONSE   -> refreshingWifi(characteristic)
+                StateMachine.STANDBY            -> Log.d(TAG, "STANDBY (Poling) ${characteristic.value.toHex()}")
+                else                            -> Log.d(TAG, "Status desconocido")
             }
             // *************************************************************************************
 
@@ -460,7 +490,9 @@ class BleService: Service() {
         private const val POLEO         = 0xC5.toByte()
         private const val STATUS        = 0xC1.toByte()
         private const val REFRESH_AP_OK = 0x48.toByte()
-        private const val GET_AP_MACS   = 0x4A.toByte()
+        private const val AT_OK         = 0x4C.toByte()
+        private const val AT_NOK        = 0x4D.toByte()
+        private const val WAIT_RESPONSE = 0x36.toByte()
 
         // Validaciones
         private const val SIX_ACCESS_POINTS = 0x2B.toByte()

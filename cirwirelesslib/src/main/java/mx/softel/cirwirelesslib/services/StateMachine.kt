@@ -5,6 +5,8 @@ enum class StateMachine {
     POLING,
     STATUS,
     REFRESHING_AP,
+    WIFI_CONFIG,
     GET_AP,
+    AT_WAIT_RESPONSE,
     STANDBY
 }
