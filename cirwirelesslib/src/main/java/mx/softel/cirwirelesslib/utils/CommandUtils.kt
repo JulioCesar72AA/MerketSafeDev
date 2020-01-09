@@ -10,8 +10,9 @@ object CommandUtils {
 
     private val TAG = CommandUtils::class.java.simpleName
 
-    private val POLEO      = byteArrayOf(0x55, 0x10, 0x13, 0x07, 0xC5.toByte())
-    private val REFRESH_AP = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x47)
+    private val POLEO           = byteArrayOf(0x55, 0x10, 0x13, 0x07, 0xC5.toByte())
+    private val REFRESH_AP      = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x47)
+    private val GET_AP_MAC_LIST = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x49)
 
 
     fun refreshAccessPointsCmd(): ByteArray {
@@ -25,7 +26,22 @@ object CommandUtils {
         return cmd
     }
 
+    fun getAccessPointsCmd(): ByteArray {
+        Log.d(TAG, "getAccessPointsCmd")
 
+        val crc = getCrc16(GET_AP_MAC_LIST)
+        var cmd = GET_AP_MAC_LIST
+        cmd += crc[0]
+        cmd += crc[1]
+
+        return cmd
+    }
+
+
+
+    /************************************************************************************************/
+    /**      CRC                                                                                    */
+    /************************************************************************************************/
     private fun getCrc16(buffer: ByteArray): ByteArray {
         Log.d(TAG, "getCrc16")
 

@@ -4,5 +4,7 @@ enum class StateMachine {
     UNKNOWN,
     POLING,
     STATUS,
-    REFRESHING_AP
+    REFRESHING_AP,
+    GET_AP,
+    STANDBY
 }
