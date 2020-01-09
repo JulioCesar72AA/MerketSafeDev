@@ -90,6 +90,7 @@
                 app:cardBackgroundColor="@color/cardScanBackground" >
 
                    <ListView
+                       android:id="@+id/lvAccessPoints"
                        android:layout_width="match_parent"
                        android:layout_height="match_parent"
                        tools:listitem="@layout/support_simple_spinner_dropdown_item"

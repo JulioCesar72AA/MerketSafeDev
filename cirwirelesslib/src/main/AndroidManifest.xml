@@ -2,6 +2,9 @@
     package="mx.softel.cirwirelesslib">
 
     <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <application>
         <service android:name=".services.BleService"/>
