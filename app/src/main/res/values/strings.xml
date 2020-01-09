@@ -14,8 +14,14 @@
     <string name="tv_selected_device">Dispositivo BLE</string>
     <string name="tv_no_devices">No se encontraron dispositivos cercanos, desliza para volver a intentar</string>
     <string name="tv_title_access">Access Points</string>
+    <string name="tv_title_dispositivos">Dispositivo</string>
     <string name="tv_test_mac">00:1B:C5:00:08:11</string>
     <string name="tv_password">Contraseña:</string>
+    <string name="tv_aceptar">Aceptar</string>
+    <string name="tv_cancelar">Cancelar</string>
+    <string name="tv_ip">IP</string>
+    <string name="tv_dispositivos_ip">10.25.33</string>
+    <string name="tv_dispositivos_ssid">SSID</string>
 
     <!-- CONTENT DESCRIPTION's -->
     <string name="cd_bluetooth_icon">Bluetooth</string>
@@ -23,6 +29,7 @@
     <string name="cd_config_icon">Configuración</string>
     <string name="cd_test_icon">Probar</string>
     <string name="cd_icon_router">Icono Router</string>
+    <string name="cd_icon_dispositivos">Dispositivo</string>
     <string name="cd_back_icon">Volver</string>
 
 </resources>

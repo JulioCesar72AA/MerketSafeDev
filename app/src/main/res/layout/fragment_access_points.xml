@@ -77,7 +77,8 @@
                     android:fontFamily="@font/rubik_regular"
                     android:text="@string/tv_test_mac"
                     android:textColor="@color/colortextwhite"
-                    android:textSize="@dimen/tv_textsize_20" />
+                    android:textSize="@dimen/tv_textsize_20"
+                    tools:text="00:1B:C5:86:A6:1B"/>/>
             </LinearLayout>
 
 
