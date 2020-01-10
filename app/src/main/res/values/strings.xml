@@ -6,6 +6,9 @@
     <!-- TOAST's -->
     <string name="tst_scanning" tools:ignore="Typos">Espere un momento… Escaneando</string>
 
+    <!-- HINT's -->
+    <string name="hint_password">Contraseña</string>
+
     <!-- BUTTON's -->
     <string name="btn_configure">Configurar</string>
     <string name="btn_test">Probar</string>
