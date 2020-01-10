@@ -30,19 +30,7 @@
         android:text="@string/tv_no_devices"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
 
-    <!-- Máscara de escaneo -->
-    <View
-        android:id="@+id/scanMask"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#25000000"/>
-
-    <!-- Progress Bar -->
-    <ProgressBar
-        android:id="@+id/pbScanning"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"/>
+    <include layout="@layout/scanning_mask"/>
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
