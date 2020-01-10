@@ -12,6 +12,7 @@ import mx.softel.cirwireless.fragments.MainFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.Constants
 import mx.softel.cirwirelesslib.services.BleService
+import mx.softel.cirwirelesslib.utils.CommandUtils
 
 class RootActivity : AppCompatActivity(), FragmentNavigation {
 
@@ -26,19 +27,6 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
         setContentView(R.layout.activity_root)
         getAndSetIntentData()
         initFragment()
-    }
-
-    /**
-     * Interface que ejecuta la actividad cuando el usuario hace
-     * click en el ícono de "volver" <- del [getSupportActionBar]
-     */
-    override fun onSupportNavigateUp(): Boolean {
-        // Quitamos el fragmento que esté en la parte superior del backstack
-        val pop = supportFragmentManager.popBackStackImmediate()
-
-        // Si no hay nada que hacer POP, entonces termina la actividad
-        if (!pop) finish()
-        return true
     }
 
 
