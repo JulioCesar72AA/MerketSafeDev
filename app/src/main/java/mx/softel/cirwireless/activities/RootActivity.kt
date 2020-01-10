@@ -6,15 +6,18 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.activity_root.*
 import mx.softel.cirwireless.R
+import mx.softel.cirwireless.dialogs.PasswordDialog
+import mx.softel.cirwireless.extensions.toast
+import mx.softel.cirwireless.fragments.AccessPointsFragment
 import mx.softel.cirwireless.fragments.MainFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.Constants
 import mx.softel.cirwirelesslib.services.BleService
-import mx.softel.cirwirelesslib.utils.CommandUtils
 
-class RootActivity : AppCompatActivity(), FragmentNavigation {
+class RootActivity : AppCompatActivity(),
+    FragmentNavigation,
+    PasswordDialog.OnDialogClickListener {
 
     internal lateinit var bleDevice : BluetoothDevice
     internal lateinit var bleMac    : String
@@ -79,6 +82,21 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
         if (addToBackStack) transaction.addToBackStack(null)
 
         transaction.commit()
+    }
+
+    override fun onDialogClick(buttonId: Int) {
+        when (buttonId) {
+            R.id.btnAccept -> setWifiOnDevice()
+            R.id.btnCancel -> toast("Cancelado")
+        }
+    }
+
+    private fun setWifiOnDevice() {
+        toast("Configurando el dispositivo")
+        val accessPointFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer) as AccessPointsFragment
+        accessPointFragment.setScanningUI()
+
+        // TODO: Ejecutar un método de conexión y envío de datos Wifi
     }
 
     /************************************************************************************************/

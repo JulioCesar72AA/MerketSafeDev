@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.os.Bundle
@@ -20,7 +18,9 @@ import mx.softel.cirwireless.activities.RootActivity
 import mx.softel.cirwireless.dialogs.PasswordDialog
 import mx.softel.cirwireless.extensions.toast
 
-class AccessPointsFragment: Fragment(), AdapterView.OnItemClickListener, View.OnClickListener {
+class AccessPointsFragment: Fragment(),
+    AdapterView.OnItemClickListener,
+    View.OnClickListener {
 
     // ROOT MANAGERS
     private lateinit var root           : RootActivity
@@ -114,7 +114,7 @@ class AccessPointsFragment: Fragment(), AdapterView.OnItemClickListener, View.On
         }
     }
 
-    private fun setScanningUI() {
+    internal fun setScanningUI() {
         progressBar.visibility = View.VISIBLE
         scanMask   .apply {
             visibility = View.VISIBLE
@@ -122,7 +122,7 @@ class AccessPointsFragment: Fragment(), AdapterView.OnItemClickListener, View.On
         }
     }
 
-    private fun setStandardUI() {
+    internal fun setStandardUI() {
         progressBar.visibility = View.GONE
         scanMask   .visibility = View.GONE
     }
