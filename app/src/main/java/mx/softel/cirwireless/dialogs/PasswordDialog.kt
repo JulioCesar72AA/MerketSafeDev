@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.DialogFragment
 import mx.softel.cirwireless.R
-import mx.softel.cirwireless.extensions.toast
 
 class PasswordDialog: DialogFragment(), View.OnClickListener {
 
@@ -20,13 +19,6 @@ class PasswordDialog: DialogFragment(), View.OnClickListener {
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
     /************************************************************************************************/
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // Elegimos un tema por defecto de DialogFragment
-        //setStyle(STYLE_NO_TITLE, R.style.CustomDialog)
-    }
-
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -55,19 +47,21 @@ class PasswordDialog: DialogFragment(), View.OnClickListener {
     /**     ON CLICK                                                                                */
     /************************************************************************************************/
     override fun onClick(v: View?) {
+
+        val parent = activity as (OnDialogClickListener)
         when (v!!.id) {
-            R.id.btnAccept -> setAP()
-            R.id.btnCancel -> cancel()
+            R.id.btnAccept -> parent.dialogAccept("")
+            R.id.btnCancel -> parent.dialogCancel()
         }
+        dismiss()
     }
 
-
-    private fun setAP() {
-        toast("Configurando el dispositivo CIR WIRELESS")
-    }
-
-    private fun cancel() {
-        toast("Cancelado")
+    /************************************************************************************************/
+    /**     INTERFACES                                                                              */
+    /************************************************************************************************/
+    interface OnDialogClickListener {
+        fun dialogAccept(password: String)
+        fun dialogCancel()
     }
 
 

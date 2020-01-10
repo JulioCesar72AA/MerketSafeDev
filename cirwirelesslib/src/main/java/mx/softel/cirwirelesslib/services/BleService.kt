@@ -98,7 +98,7 @@ class BleService: Service() {
     /************************************************************************************************/
     /**     BLUETOOTH                                                                               */
     /************************************************************************************************/
-    private fun connectBleDevice(device: BluetoothDevice) {
+    fun connectBleDevice(device: BluetoothDevice) {
         Log.d(TAG, "connectBleDevice")
 
         descriptorEnabled   = false
