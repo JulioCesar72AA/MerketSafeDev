@@ -47,7 +47,6 @@ class AccessPointsFragment: Fragment(),
         wifiManager = root.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         wifiManager.isWifiEnabled = true
 
-        //root.startBleService()
         Log.d(TAG, "Dispositivo a conectar: ${root.bleDevice.address}")
     }
 

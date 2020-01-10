@@ -59,6 +59,24 @@ class RootActivity : AppCompatActivity(),
     }
 
 
+    /************************************************************************************************/
+    /**     ON CLICK                                                                                */
+    /************************************************************************************************/
+    override fun dialogAccept(password: String) {
+        toast("Configurando el dispositivo")
+        val accessPointFragment = supportFragmentManager
+            .findFragmentById(R.id.fragmentContainer)
+                as AccessPointsFragment
+        accessPointFragment.setScanningUI()
+
+        // TODO: Ejecutar un método de conexión y envío de datos Wifi
+        startBleService()
+    }
+
+    override fun dialogCancel() {
+        toast("Cancelado")
+    }
+
 
     /************************************************************************************************/
     /**     INTERFACES                                                                              */
@@ -84,25 +102,10 @@ class RootActivity : AppCompatActivity(),
         transaction.commit()
     }
 
-    override fun onDialogClick(buttonId: Int) {
-        when (buttonId) {
-            R.id.btnAccept -> setWifiOnDevice()
-            R.id.btnCancel -> toast("Cancelado")
-        }
-    }
-
-    private fun setWifiOnDevice() {
-        toast("Configurando el dispositivo")
-        val accessPointFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer) as AccessPointsFragment
-        accessPointFragment.setScanningUI()
-
-        // TODO: Ejecutar un método de conexión y envío de datos Wifi
-    }
-
     /************************************************************************************************/
     /**     SERVICES                                                                                */
     /************************************************************************************************/
-    internal fun startBleService() {
+    private fun startBleService() {
 
         val intent = Intent(this, BleService::class.java)
         intent.apply {

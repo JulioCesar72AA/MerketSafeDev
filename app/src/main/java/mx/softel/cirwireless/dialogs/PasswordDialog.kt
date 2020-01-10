@@ -47,8 +47,12 @@ class PasswordDialog: DialogFragment(), View.OnClickListener {
     /**     ON CLICK                                                                                */
     /************************************************************************************************/
     override fun onClick(v: View?) {
+
         val parent = activity as (OnDialogClickListener)
-        parent.onDialogClick(v!!.id)
+        when (v!!.id) {
+            R.id.btnAccept -> parent.dialogAccept("")
+            R.id.btnCancel -> parent.dialogCancel()
+        }
         dismiss()
     }
 
@@ -56,7 +60,8 @@ class PasswordDialog: DialogFragment(), View.OnClickListener {
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
     interface OnDialogClickListener {
-        fun onDialogClick(buttonId: Int)
+        fun dialogAccept(password: String)
+        fun dialogCancel()
     }
 
 
