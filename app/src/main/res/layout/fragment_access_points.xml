@@ -111,7 +111,7 @@
                        android:layout_width="match_parent"
                        android:layout_height="match_parent"
                        tools:listitem="@layout/support_simple_spinner_dropdown_item"
-                       android:padding="@dimen/cv_margin_access_point"/>
+                       android:padding="@dimen/cv_margin_access_point" />
 
 
             </androidx.cardview.widget.CardView>

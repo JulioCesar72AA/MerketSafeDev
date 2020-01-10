@@ -8,6 +8,7 @@
     <color name="colorBackShadow">#dbdcdd</color>
     <color name="colortextwhite">#ffffff</color>
     <color name="colorIconBlue">#005ef4</color>
+    <color name="colorTextGray">#d50000</color>
 
 
     <color name="lightMask">#25000000</color>
