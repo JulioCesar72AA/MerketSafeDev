@@ -26,6 +26,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="9"
+            android:fontFamily="@font/rubik_regular"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             tools:text="11:22:33:44:55:66"/>
 

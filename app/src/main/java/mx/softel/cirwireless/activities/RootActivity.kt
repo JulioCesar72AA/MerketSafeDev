@@ -6,14 +6,18 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.activity_root.*
 import mx.softel.cirwireless.R
+import mx.softel.cirwireless.dialogs.PasswordDialog
+import mx.softel.cirwireless.extensions.toast
+import mx.softel.cirwireless.fragments.AccessPointsFragment
 import mx.softel.cirwireless.fragments.MainFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.Constants
 import mx.softel.cirwirelesslib.services.BleService
 
-class RootActivity : AppCompatActivity(), FragmentNavigation {
+class RootActivity : AppCompatActivity(),
+    FragmentNavigation,
+    PasswordDialog.OnDialogClickListener {
 
     internal lateinit var bleDevice : BluetoothDevice
     internal lateinit var bleMac    : String
@@ -26,19 +30,6 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
         setContentView(R.layout.activity_root)
         getAndSetIntentData()
         initFragment()
-    }
-
-    /**
-     * Interface que ejecuta la actividad cuando el usuario hace
-     * click en el ícono de "volver" <- del [getSupportActionBar]
-     */
-    override fun onSupportNavigateUp(): Boolean {
-        // Quitamos el fragmento que esté en la parte superior del backstack
-        val pop = supportFragmentManager.popBackStackImmediate()
-
-        // Si no hay nada que hacer POP, entonces termina la actividad
-        if (!pop) finish()
-        return true
     }
 
 
@@ -68,6 +59,24 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
     }
 
 
+    /************************************************************************************************/
+    /**     ON CLICK                                                                                */
+    /************************************************************************************************/
+    override fun dialogAccept(password: String) {
+        toast("Configurando el dispositivo")
+        val accessPointFragment = supportFragmentManager
+            .findFragmentById(R.id.fragmentContainer)
+                as AccessPointsFragment
+        accessPointFragment.setScanningUI()
+
+        // TODO: Ejecutar un método de conexión y envío de datos Wifi
+        startBleService()
+    }
+
+    override fun dialogCancel() {
+        toast("Cancelado")
+    }
+
 
     /************************************************************************************************/
     /**     INTERFACES                                                                              */
@@ -96,7 +105,7 @@ class RootActivity : AppCompatActivity(), FragmentNavigation {
     /************************************************************************************************/
     /**     SERVICES                                                                                */
     /************************************************************************************************/
-    internal fun startBleService() {
+    private fun startBleService() {
 
         val intent = Intent(this, BleService::class.java)
         intent.apply {

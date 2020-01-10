@@ -86,7 +86,7 @@ class MainFragment : Fragment(), View.OnClickListener {
 
     private fun clickConfigure() {
         Log.d(TAG, "clickConfigure")
-        toast("Conectando con el dispositivo")
+        toast("Actualizando datos")
 
         // Iniciamos el fragmento de AccessPointsFragment
         val fragment = AccessPointsFragment.getInstance()
