@@ -77,12 +77,7 @@ class MainFragment : Fragment(), View.OnClickListener {
     /************************************************************************************************/
     override fun onClick(v: View?) {
         when (v!!.id) {
-            R.id.ivBack         -> {
-                root.apply {
-                    service!!.stopBleService()
-                    finish()
-                }
-            }
+            R.id.ivBack         -> root.finishActivity()
             R.id.cvConfigurar   -> clickConfigure()
             R.id.cvProbar       -> clickTest()
         }

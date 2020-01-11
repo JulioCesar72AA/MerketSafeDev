@@ -78,6 +78,10 @@ class RootActivity : AppCompatActivity(),
             .commit()
     }
 
+    internal fun finishActivity() {
+        finish()
+    }
+
 
     /************************************************************************************************/
     /**     ON CLICK                                                                                */
