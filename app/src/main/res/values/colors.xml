@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimaryDark">#0045C2</color>
     <color name="colorPrimary">#005EF4</color>
-    <color name="colorAccent">#7E57C2</color>
+    <color name="colorAccent">#36c1d8</color>
 
     <color name="cardScanBackground">#F3F3F3</color>
     <color name="colorBackShadow">#dbdcdd</color>
@@ -10,8 +10,6 @@
     <color name="colorIconBlue">#005ef4</color>
     <color name="colorTextGray">#d50000</color>
 
-
     <color name="lightMask">#25000000</color>
     <color name="hardMask">#A5000000</color>
-
 </resources>

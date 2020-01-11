@@ -4,7 +4,7 @@
             <solid
                 android:color="@color/cardScanBackground" />
             <corners
-                android:radius="20dp" />
+                android:radius="10dp" />
             <padding
                 android:bottom="10dp"
                 android:left="10dp"
