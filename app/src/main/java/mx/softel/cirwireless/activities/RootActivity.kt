@@ -1,9 +1,10 @@
 package mx.softel.cirwireless.activities
 
 import android.bluetooth.BluetoothDevice
-import android.content.Intent
+import android.content.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
 import androidx.fragment.app.Fragment
 import mx.softel.cirwireless.R
@@ -12,15 +13,21 @@ import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.fragments.AccessPointsFragment
 import mx.softel.cirwireless.fragments.MainFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
-import mx.softel.cirwirelesslib.constants.Constants
+import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.services.BleService
+
 
 class RootActivity : AppCompatActivity(),
     FragmentNavigation,
-    PasswordDialog.OnDialogClickListener {
+    PasswordDialog.OnDialogClickListener,
+    BleService.OnBleConnection {
 
     internal lateinit var bleDevice : BluetoothDevice
     internal lateinit var bleMac    : String
+
+    // SERVICE CONNECTIONS / FLAGS
+    internal var service             : BleService?       = null
+    private var isServiceConnected                      = false
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -32,14 +39,27 @@ class RootActivity : AppCompatActivity(),
         initFragment()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        // Iniciamos el Broadcast Receiver
+        doBindService()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Quitamos el Broadcast Receiver
+        doUnbindService()
+    }
 
     private fun getAndSetIntentData() {
         Log.d(TAG, "getIntent")
 
         // Obtenemos la información del intent
         val data = intent.extras!!
-        bleDevice        = data[Constants.EXTRA_DEVICE] as BluetoothDevice
-        bleMac           = data.getString(Constants.EXTRA_MAC)!!
+        bleDevice        = data[EXTRA_DEVICE] as BluetoothDevice
+        bleMac           = data.getString(EXTRA_MAC)!!
         /*val name           = data.getString(Constants.EXTRA_NAME)!!
         val beacon         = data.getString(Constants.EXTRA_BEACON)!!
         val type           = data.getString(Constants.EXTRA_BEACON_TYPE)!!
@@ -68,9 +88,7 @@ class RootActivity : AppCompatActivity(),
             .findFragmentById(R.id.fragmentContainer)
                 as AccessPointsFragment
         accessPointFragment.setScanningUI()
-
-        // TODO: Ejecutar un método de conexión y envío de datos Wifi
-        startBleService()
+        //startBleService()                   // Iniciamos el servicio de Bluetooth
     }
 
     override fun dialogCancel() {
@@ -102,20 +120,59 @@ class RootActivity : AppCompatActivity(),
         transaction.commit()
     }
 
-    /************************************************************************************************/
-    /**     SERVICES                                                                                */
-    /************************************************************************************************/
-    private fun startBleService() {
-
-        val intent = Intent(this, BleService::class.java)
-        intent.apply {
-            putExtra(Constants.EXTRA_DEVICE, bleDevice)
-        }
-        startService(intent)
+    // BLE SERVICE INTERFACES
+    override fun connectionStatus(status: Int) {
+        Log.e(TAG, "connectionStatus -> $status")
     }
 
-    internal fun stopBleService()
-            = stopService(Intent(this, BleService::class.java))
+   /* override fun sendCommand(data: ByteArray) {
+
+    }
+
+    override fun onBleResponse(data: ByteArray) {
+
+    }*/
+
+
+    /************************************************************************************************/
+    /**     BLE SERVICE CONNECTION                                                                  */
+    /************************************************************************************************/
+    private val connection = object : ServiceConnection {
+
+        override fun onServiceConnected(name: ComponentName?, xservice: IBinder?) {
+            // Obtenemos la instancia del servicio una vez conectado
+            Log.d(TAG, "onServiceConnected")
+            service = (xservice as (BleService.LocalBinder)).getService()
+            service!!.apply {
+                registerActivity(this@RootActivity)
+                connectBleDevice(bleDevice)
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            Log.d(TAG, "onServiceDisconnected")
+            service!!.stopBleService()
+        }
+    }
+
+    private fun doBindService() {
+        Log.d(TAG, "doBindService")
+        // Conecta la aplicación con el servicio
+        bindService(Intent(this, BleService::class.java),
+            connection, Context.BIND_AUTO_CREATE)
+        isServiceConnected = true
+    }
+
+    private fun doUnbindService() {
+        Log.d(TAG, "doUnbindService")
+        if (isServiceConnected) {
+            // Termina la conexión existente con el servicio
+            service!!.stopBleService()
+            unbindService(connection)
+            isServiceConnected = false
+        }
+    }
+
 
 
     /************************************************************************************************/

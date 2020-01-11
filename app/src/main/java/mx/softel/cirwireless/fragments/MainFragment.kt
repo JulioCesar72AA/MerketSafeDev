@@ -14,7 +14,6 @@ import mx.softel.cirwireless.R
 import mx.softel.cirwireless.activities.RootActivity
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.interfaces.FragmentNavigation
-import mx.softel.cirwirelesslib.constants.Constants
 
 /**
  * A simple [Fragment] subclass.
@@ -78,7 +77,12 @@ class MainFragment : Fragment(), View.OnClickListener {
     /************************************************************************************************/
     override fun onClick(v: View?) {
         when (v!!.id) {
-            R.id.ivBack         -> root.finish()
+            R.id.ivBack         -> {
+                root.apply {
+                    service!!.stopBleService()
+                    finish()
+                }
+            }
             R.id.cvConfigurar   -> clickConfigure()
             R.id.cvProbar       -> clickTest()
         }

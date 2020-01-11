@@ -1,28 +1,33 @@
 package mx.softel.cirwirelesslib.services
 
+import android.app.Activity
 import android.app.Service
 import android.bluetooth.*
 import android.content.Context
 import android.content.Intent
+import android.os.Binder
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
-import mx.softel.cirwirelesslib.constants.BleConstants
-import mx.softel.cirwirelesslib.constants.Constants
+import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.utils.CommandUtils
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
 
+
 class BleService: Service() {
+
+    // INTERFACES
+    private lateinit var activity       : OnBleConnection
+    private lateinit var ctx            : Context
 
     // BLE MANAGER
     private var bleManager              : BluetoothManager?                 = null
     private var bleAdapter              : BluetoothAdapter?                 = null
     private var firmware                : String?                           = null
-    private var bleDevice               : BluetoothDevice?                  = null
     private var accessPointList         : ArrayList<ByteArray>?             = null
 
     // UUID's
@@ -61,14 +66,17 @@ class BleService: Service() {
     /************************************************************************************************/
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "onStartCommand")
-        bleDevice = intent?.extras?.get(Constants.EXTRA_DEVICE) as BluetoothDevice
-        if (bleDevice != null) connectBleDevice(bleDevice!!)
+        //bleDevice = intent?.extras?.get(EXTRA_DEVICE) as BluetoothDevice
+
+        // TODO: Iniciar la conexión
+        //if (bleDevice != null) connectBleDevice(bleDevice!!)
         return START_STICKY
     }
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "onCreate")
+
 
         if (initBleService()) {
             Log.d(TAG, "Se inició correctamente el servicio BLE")
@@ -81,9 +89,9 @@ class BleService: Service() {
         super.onDestroy()
         Log.d(TAG, "onDestroy")
         unregisterRunnableTimeoutTask()
-        disconnectBleDevice(DisconnectionReason.NORMAL_DISCONNECTION)
+        stopBleService()
+        //disconnectBleDevice(DisconnectionReason.NORMAL_DISCONNECTION)
     }
-
 
     private fun initBleService(): Boolean {
         Log.d(TAG, "initBleService")
@@ -94,19 +102,30 @@ class BleService: Service() {
         return (bleAdapter != null)
     }
 
+    fun stopBleService() {
+        disconnectBleDevice(DisconnectionReason.NORMAL_DISCONNECTION)
+        stopSelf()
+    }
+
+    fun registerActivity(act: Activity) {
+        activity = act as OnBleConnection
+        ctx = act
+    }
+
 
     /************************************************************************************************/
     /**     BLUETOOTH                                                                               */
     /************************************************************************************************/
-    fun connectBleDevice(device: BluetoothDevice) {
+    fun connectBleDevice(device: BluetoothDevice/*, appContext: Context*/) {
         Log.d(TAG, "connectBleDevice")
 
         descriptorEnabled   = false
+        //ctx = appContext
 
         bleGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            device.connectGatt(applicationContext, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
+            device.connectGatt(ctx, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
         } else {
-            device.connectGatt(applicationContext, false, gattCallback)
+            device.connectGatt(ctx, false, gattCallback)
         }
 
         /*
@@ -360,6 +379,10 @@ class BleService: Service() {
             super.onConnectionStateChange(gatt, status, newState)
             Log.i(TAG, "onConnectionStateChange -> Status($status) -> NewState($newState)")
 
+
+            activity.connectionStatus(status)
+
+
             // Si ocurre el error 133 o el error 257...
             if (status == DisconnectionReason.ERROR_133.code
                 || status == DisconnectionReason.ERROR_257.code) {
@@ -369,7 +392,7 @@ class BleService: Service() {
             // Si ya se encuentra conectado...
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.e(TAG, "Conectado!!!!!!")
-                bleGatt!!.discoverServices()
+                //bleGatt!!.discoverServices()
             }
         }
 
@@ -475,9 +498,25 @@ class BleService: Service() {
 
 
     /************************************************************************************************/
+    /**     BINDER                                                                                  */
+    /************************************************************************************************/
+    override fun onBind(intent: Intent?): IBinder? = binder
+
+    private val binder : IBinder = LocalBinder()
+
+    class LocalBinder : Binder() {
+        fun getService() : BleService = BleService()
+    }
+
+
+    /************************************************************************************************/
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
-    override fun onBind(intent: Intent?): IBinder? = null
+    interface OnBleConnection {
+        fun connectionStatus(status: Int)
+        //fun sendCommand(data: ByteArray)
+        //fun onBleResponse(data: ByteArray)
+    }
 
 
     /************************************************************************************************/
@@ -501,5 +540,6 @@ class BleService: Service() {
         private const val MAX_ALLOWED_CONNECTIONS = 8
         private val DISABLE_NOTIFICATION= byteArrayOf(0x00)
         private val ENABLE_NOTIFICATION = byteArrayOf(0x01)
+
     }
 }
