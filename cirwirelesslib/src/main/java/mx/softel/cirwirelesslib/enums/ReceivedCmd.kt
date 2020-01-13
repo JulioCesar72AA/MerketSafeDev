@@ -1,4 +1,4 @@
-package mx.softel.cirwirelesslib.services
+package mx.softel.cirwirelesslib.enums
 
 enum class ReceivedCmd {
     UNKNOWN,

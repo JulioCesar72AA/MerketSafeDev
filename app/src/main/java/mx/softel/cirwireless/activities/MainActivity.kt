@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.adapters.ScanRecyclerAdapter
 import mx.softel.cirwireless.extensions.toast
-import mx.softel.cirwirelesslib.constants.Constants
+import mx.softel.cirwirelesslib.constants.*
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
 
@@ -95,13 +95,13 @@ class MainActivity: AppCompatActivity(),
         val intent = Intent(this, RootActivity::class.java)
         intent.apply {
             val dev = bleDevices[position]
-            putExtra(Constants.EXTRA_DEVICE,              dev.getBleDevice())
-            putExtra(Constants.EXTRA_NAME,                dev.getName())
-            putExtra(Constants.EXTRA_MAC,                 dev.getMac())
-            putExtra(Constants.EXTRA_BEACON,              dev.getBeaconDeviceString())
-            putExtra(Constants.EXTRA_BEACON_ENCRYPTED,    dev.getDeviceBeaconIsEncrypted())
-            putExtra(Constants.EXTRA_BEACON_TYPE,         dev.getBeaconType())
-            putExtra(Constants.EXTRA_IS_ENCRYPTED,        dev.isEncrypted())
+            putExtra(EXTRA_DEVICE,              dev.getBleDevice())
+            putExtra(EXTRA_NAME,                dev.getName())
+            putExtra(EXTRA_MAC,                 dev.getMac())
+            putExtra(EXTRA_BEACON,              dev.getBeaconDeviceString())
+            putExtra(EXTRA_BEACON_ENCRYPTED,    dev.getDeviceBeaconIsEncrypted())
+            putExtra(EXTRA_BEACON_TYPE,         dev.getBeaconType())
+            putExtra(EXTRA_IS_ENCRYPTED,        dev.isEncrypted())
             startActivity(this)
         }
     }
