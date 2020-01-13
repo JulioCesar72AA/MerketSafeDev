@@ -140,6 +140,7 @@ class AccessPointsFragment: Fragment(),
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         val dialog = PasswordDialog()
         dialog.apply {
+            apSelected = apList[position]
             show(root.supportFragmentManager, null)
         }
         toast(apList[position])

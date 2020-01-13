@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import mx.softel.cirwireless.R
 
@@ -15,17 +16,28 @@ class PasswordDialog: DialogFragment(), View.OnClickListener {
 
     private lateinit var btnContinue    : Button
     private lateinit var btnCancel      : Button
+    private lateinit var tvAccessPoints : TextView
+
+    internal lateinit var apSelected     : String
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
     /************************************************************************************************/
+
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.pop_up_password, container, false)
         view.apply {
-            btnContinue = findViewById(R.id.btnAccept)
-            btnCancel   = findViewById(R.id.btnCancel)
+            // Conectamos las vistas
+            tvAccessPoints  = findViewById(R.id.tvAccessPoint)
+            btnContinue     = findViewById(R.id.btnAccept)
+            btnCancel       = findViewById(R.id.btnCancel)
+
+            // Iniciamos la vista
+            tvAccessPoints.text = apSelected
+
+            // Establecemos los eventos de click en la vista
             setOnClickListeners()
         }
         return view

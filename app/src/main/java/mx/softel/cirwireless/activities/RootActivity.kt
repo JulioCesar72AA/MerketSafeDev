@@ -214,7 +214,6 @@ class RootActivity : AppCompatActivity(),
                 // Si no es REFRESH_AP, simplemente ignoramos el resultado hasta cambiar de estado
             }
             else -> Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
-
         }
     }
     // *********************************************************************************************
