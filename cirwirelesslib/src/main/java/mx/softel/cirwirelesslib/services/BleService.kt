@@ -11,6 +11,10 @@ import android.os.Handler
 import android.os.IBinder
 import android.util.Log
 import mx.softel.cirwirelesslib.constants.*
+import mx.softel.cirwirelesslib.enums.ActualState
+import mx.softel.cirwirelesslib.enums.DisconnectionReason
+import mx.softel.cirwirelesslib.enums.ReceivedCmd
+import mx.softel.cirwirelesslib.enums.StateMachine
 import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.utils.CommandUtils
 import java.lang.Exception
@@ -28,7 +32,6 @@ class BleService: Service() {
     private var bleManager              : BluetoothManager?                 = null
     private var bleAdapter              : BluetoothAdapter?                 = null
     private var firmware                : String?                           = null
-    private var accessPointList         : ArrayList<ByteArray>?             = null
 
     // UUID's
     private var uuidService             : UUID?                             = null
@@ -43,11 +46,7 @@ class BleService: Service() {
     private var bleGattCallbacks        : ArrayList<BluetoothGattCallback>  = ArrayList()
 
     // FLAGS - STATES
-    private var descriptorEnabled       : Boolean                           = false
-    //private var stopTimer               : Boolean                           = false
     private var correctFirmware         : Boolean                           = false
-    private var isNotifying             : Boolean                           = false
-    private var waitResponse            : Boolean                           = false
     private var currentState            : StateMachine                      = StateMachine.UNKNOWN
 
     // HANDLERS
@@ -66,10 +65,6 @@ class BleService: Service() {
     /************************************************************************************************/
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "onStartCommand")
-        //bleDevice = intent?.extras?.get(EXTRA_DEVICE) as BluetoothDevice
-
-        // TODO: Iniciar la conexión
-        //if (bleDevice != null) connectBleDevice(bleDevice!!)
         return START_STICKY
     }
 
@@ -77,7 +72,7 @@ class BleService: Service() {
         super.onCreate()
         Log.d(TAG, "onCreate")
 
-
+        // Iniciamos el servicio
         if (initBleService()) {
             Log.d(TAG, "Se inició correctamente el servicio BLE")
         } else {
@@ -90,9 +85,15 @@ class BleService: Service() {
         Log.d(TAG, "onDestroy")
         unregisterRunnableTimeoutTask()
         stopBleService()
-        //disconnectBleDevice(DisconnectionReason.NORMAL_DISCONNECTION)
     }
 
+    /**
+     * ## initBleService
+     * Inicializa el [bleManager] y lo asocia con su adaptador, para
+     * dar por iniciado el servicio
+     *
+     * @return Estatus del servicio (iniciado o no)
+     */
     private fun initBleService(): Boolean {
         Log.d(TAG, "initBleService")
 
@@ -102,11 +103,24 @@ class BleService: Service() {
         return (bleAdapter != null)
     }
 
+    /**
+     * ## stopBleService
+     * Desconecta los dispositivos actualmente conectados.
+     * Detiene el servicio.
+     */
     fun stopBleService() {
         disconnectBleDevice(DisconnectionReason.NORMAL_DISCONNECTION)
         stopSelf()
     }
 
+    /**
+     * ## registerActivity
+     * Genera una instancia de la actividad que está asociada a la comunicación
+     * y la castea a la interface implementada internamente para la conexión
+     * y asociación de métodos entre aplicación y servicio
+     *
+     * @param act Actividad asociada al servicio
+     */
     fun registerActivity(act: Activity) {
         activity = act as OnBleConnection
         ctx = act
@@ -116,12 +130,17 @@ class BleService: Service() {
     /************************************************************************************************/
     /**     BLUETOOTH                                                                               */
     /************************************************************************************************/
-    fun connectBleDevice(device: BluetoothDevice/*, appContext: Context*/) {
+
+    /**
+     * ## connectBleDevice
+     * Realiza la conexión con el dispositivo
+     *
+     * @param device
+     */
+    fun connectBleDevice(device: BluetoothDevice) {
         Log.d(TAG, "connectBleDevice")
 
-        descriptorEnabled   = false
-        //ctx = appContext
-
+        // Realizamos la conexión utilizando la instancia de la actividad registrada
         bleGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             device.connectGatt(ctx, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
         } else {
@@ -138,6 +157,12 @@ class BleService: Service() {
     }
 
 
+    /**
+     * ## disconnetionBleDevice
+     * Desconecta el/los dispositivo(s) conectados
+     *
+     * @param disconnectionReason Código de desconexión para manejo de errores
+     */
     fun disconnectBleDevice(disconnectionReason: DisconnectionReason) {
         Log.d(TAG, "disconnectBleDevice -> Reason($disconnectionReason)")
 
@@ -153,6 +178,13 @@ class BleService: Service() {
     /************************************************************************************************/
     /**     AUXILIARES                                                                              */
     /************************************************************************************************/
+
+    /**
+     * ## cleanBleConnections
+     * Elimina las conexiones de los dispositivos asociados e
+     * inicializa en null las variables asociadas a características,
+     * servicios y descriptores
+     */
     private fun cleanBleConnections() {
         Log.d(TAG, "cleanBleConnections")
         if (!bleGattConnections.isNullOrEmpty()) {
@@ -168,13 +200,15 @@ class BleService: Service() {
             characteristicWrite         = null
             characteristicDeviceInfo    = null
 
-
             // Limpiamos el arreglo de las conexiones una vez cerradas
             bleGattConnections.clear()
         }
     }
 
-
+    /**
+     * ## unregisterRunnableTimeoutTask
+     * Elimina los callbacks asociados al timeout del servicio
+     */
     private fun unregisterRunnableTimeoutTask() {
         Log.d(TAG, "unregisterRunnableTimeoutTask")
         for (runnable in runnableTimeoutTaskList) {
@@ -183,6 +217,13 @@ class BleService: Service() {
         runnableTimeoutTaskList.clear()
     }
 
+    /**
+     * ## disconnectionReasonCode
+     * Parsea el Status de la desconexión en un código del Enum [DisconnectionReason]
+     *
+     * @param status Código entregado por onConnectionStateChanged
+     * @return Elemento de [DisconnectionReason]
+     */
     private fun disconnectionReasonCode(status: Int): DisconnectionReason
             = when (status) {
         133     -> DisconnectionReason.ERROR_133
@@ -194,6 +235,13 @@ class BleService: Service() {
     /************************************************************************************************/
     /**     CHARACTERISTICS                                                                         */
     /************************************************************************************************/
+
+    /**
+     * ## getCommCharacteristics
+     * Obtiene las características del servicio
+     *
+     * @param service Servicio Bluetooth del dispositivo conectado
+     */
     private fun getCommCharacteristics(service: BluetoothGattService) {
         Log.d(TAG, "getCommCharacteristics")
         val uuid = service.uuid.toString()
@@ -228,6 +276,14 @@ class BleService: Service() {
         }
     }
 
+    /**
+     * ## getInfoCharacteristics
+     * Obtiene las características del servicio e inicializa los datos
+     * del [BleConstants.DEVICE_INFO_SERVICE_UUID] para validar el firmware
+     * de la tarjeta en cuestión
+     *
+     * @param service Servicio Bluetooth del dispositivo conectado
+     */
     private fun getInfoCharacteristics(service: BluetoothGattService) {
         Log.d(TAG, "getInfoCharacteristics")
         val uuid = service.uuid.toString()
@@ -244,28 +300,55 @@ class BleService: Service() {
         }
     }
 
-    private fun writeToDescriptor(command: ByteArray) {
+    /**
+     * ## writeToDescriptor
+     * Escribe en el descriptor inicializado un arreglo de Bytes que quedan
+     * definidos como [ENABLE_NOTIFICATION] y [DISABLE_NOTIFICATION].
+     * Nos permite Iniciar o desactivar el descriptor
+     * @param command
+     */
+    fun writeToDescriptor(command: ByteArray) {
         if (notificationDescriptor != null) {
             notificationDescriptor!!.value = command
             bleGatt!!.writeDescriptor(notificationDescriptor)
         }
     }
 
-
-    private fun enableCharacteristicNotification(enable: Boolean)
+    /**
+     * ## enableCharacteristicNotification
+     * Activa o desactiva la notificación en la característica designada
+     * por [characteristicNotify], según [enable]
+     *
+     * @param enable Bander para activar-desactivar la notificación
+     */
+    fun enableCharacteristicNotification(enable: Boolean)
             = bleGatt!!.setCharacteristicNotification(characteristicNotify, enable)
 
 
     /************************************************************************************************/
     /**     COMMANDS                                                                                */
     /************************************************************************************************/
-    private fun getFirmwareData() {
+
+    /**
+     * ## getFirmwareData
+     * Realiza una lectura de [characteristicDeviceInfo] para posteriormente
+     * obtener el Firmware en [BluetoothGattCallback.onCharacteristicChanged]
+     */
+    fun getFirmwareData() {
         Log.d(TAG, "getFirmwareData")
         if (characteristicDeviceInfo != null) {
             bleGatt!!.readCharacteristic(characteristicDeviceInfo)
         }
     }
 
+    /**
+     * ## receivedCommand
+     * A partir de la respuesta recibida del dispositivo, parsea la
+     * respuesta a un elemento de [ReceivedCmd]
+     *
+     * @param response Arreglo de bytes de la respuesta del dispositivo
+     * @return Elemento [ReceivedCmd] con la descripción de la respuesta
+     */
     private fun receivedCommand(response: ByteArray): ReceivedCmd {
         val cmd = when (response[4]) {
             POLEO           -> ReceivedCmd.POLEO
@@ -280,33 +363,57 @@ class BleService: Service() {
         return cmd
     }
 
-    private fun initPoleCmd() {
+    /**
+     * ## actualState
+     * Castea el status de [Int] a [ActualState]
+     *
+     * @param status Valor entero del status recibido
+     * @return Elemento [ActualState] con la descripción del status
+     */
+    private fun actualState(status: Int): ActualState {
+        return when (status) {
+            0       -> ActualState.DISCONNECTED
+            1       -> ActualState.CONNECTING
+            2       -> ActualState.CONNECTED
+            3       -> ActualState.DISCONNECTING
+            else    -> ActualState.UNKNOWN
+        }
+    }
+
+    /**
+     * ## initPoleCmd
+     * Habilita la notificación en el dispositivo para permitir
+     * la comunicación por poleo
+     */
+    fun initPoleCmd() {
         Log.d(TAG, "initPoleCmd")
 
         enableCharacteristicNotification(true)
         writeToDescriptor(DISABLE_NOTIFICATION)
-        isNotifying  = false
         currentState = StateMachine.POLING
     }
 
-    private fun sendRefreshApCmd() {
+    /**
+     * ## sendRefreshApCmd
+     * Ejecuta el comando de actualización de AccesPoints en el dispositivo
+     */
+    fun sendRefreshApCmd() {
         Log.d(TAG, "sendRefreshApCmd")
 
-        if (!waitResponse) {
-            val cmd = CommandUtils.refreshAccessPointsCmd()
-            Log.e(TAG, "CMD ACCESS POINTS: ${cmd.toHex()}")
+        val cmd = CommandUtils.refreshAccessPointsCmd()
+        Log.e(TAG, "CMD ACCESS POINTS: ${cmd.toHex()}")
 
-            // Cargamos y escribimos en la característica
-            val flag = characteristicWrite!!.setValue(cmd)
-            if (flag) {
-                bleGatt!!.writeCharacteristic(characteristicWrite)
-                waitResponse = true
-                currentState = StateMachine.REFRESHING_AP
-            }
+        // Cargamos y escribimos en la característica
+        val flag = characteristicWrite!!.setValue(cmd)
+        if (flag) {
+            bleGatt!!.writeCharacteristic(characteristicWrite)
+            currentState = StateMachine.REFRESHING_AP
         }
     }
 
-    private fun refreshingWifi(characteristic: BluetoothGattCharacteristic) {
+
+
+    /*fun refreshingWifi(characteristic: BluetoothGattCharacteristic) {
         Log.e(TAG, "refreshingWifi -> ${characteristic.value.toHex()}")
         val response = receivedCommand(characteristic.value)
 
@@ -365,8 +472,7 @@ class BleService: Service() {
             }
             else -> currentState = StateMachine.STANDBY
         }
-        waitResponse = false
-    }
+    }*/
 
 
 
@@ -379,9 +485,8 @@ class BleService: Service() {
             super.onConnectionStateChange(gatt, status, newState)
             Log.i(TAG, "onConnectionStateChange -> Status($status) -> NewState($newState)")
 
-
-            activity.connectionStatus(status)
-
+            // Comunicación con el UI
+            activity.connectionStatus(actualState(newState))
 
             // Si ocurre el error 133 o el error 257...
             if (status == DisconnectionReason.ERROR_133.code
@@ -392,7 +497,6 @@ class BleService: Service() {
             // Si ya se encuentra conectado...
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.e(TAG, "Conectado!!!!!!")
-                //bleGatt!!.discoverServices()
             }
         }
 
@@ -445,29 +549,25 @@ class BleService: Service() {
 
                     correctFirmware = (firmware == BleConstants.FIRMWARE_346)
                     Log.e(TAG, "FIRMWARE $firmware -> CORRECT $correctFirmware")
-
-
-
-                    // TODO: Evitar escaneos automáticos innecesarios
-                    //if (correctFirmware) initPoleCmd()
                 }
             }
         }
 
         override fun onCharacteristicChanged(gatt: BluetoothGatt?,
                                              characteristic: BluetoothGattCharacteristic?) {
-            super.onCharacteristicChanged(gatt, characteristic)
+            //super.onCharacteristicChanged(gatt, characteristic)
             if (characteristic == null) return
+            Log.e(TAG, "RESPUESTA -> ${characteristic.value.toHex()}")
 
             // STATE MACHINE ACCESS POINTS *********************************************************
-            when (currentState) {
+            /*when (currentState) {
                 StateMachine.POLING             -> sendRefreshApCmd()
                 StateMachine.REFRESHING_AP      -> refreshingWifi(characteristic)
                 StateMachine.WIFI_CONFIG        -> refreshingWifi(characteristic)
                 StateMachine.AT_WAIT_RESPONSE   -> refreshingWifi(characteristic)
                 StateMachine.STANDBY            -> Log.d(TAG, "STANDBY (Poling) ${characteristic.value.toHex()}")
                 else                            -> Log.d(TAG, "Status desconocido")
-            }
+            }*/
             // *************************************************************************************
 
         }
@@ -486,11 +586,8 @@ class BleService: Service() {
             Log.i(TAG, "onDescriptorWrite")
 
             // Si aún no está poleando, se levanta el descriptor
-            if (!isNotifying) {
-                Log.e(TAG, "HABILITANDO DESCRIPTOR")
-                writeToDescriptor(ENABLE_NOTIFICATION)
-                isNotifying     = true
-            }
+            Log.e(TAG, "HABILITANDO DESCRIPTOR")
+            writeToDescriptor(ENABLE_NOTIFICATION)
         }
 
     }
@@ -513,7 +610,7 @@ class BleService: Service() {
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
     interface OnBleConnection {
-        fun connectionStatus(status: Int)
+        fun connectionStatus(status: ActualState)
         //fun sendCommand(data: ByteArray)
         //fun onBleResponse(data: ByteArray)
     }

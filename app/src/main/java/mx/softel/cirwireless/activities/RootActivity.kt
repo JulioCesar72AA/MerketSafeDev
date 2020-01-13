@@ -14,6 +14,7 @@ import mx.softel.cirwireless.fragments.AccessPointsFragment
 import mx.softel.cirwireless.fragments.MainFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.*
+import mx.softel.cirwirelesslib.enums.ActualState
 import mx.softel.cirwirelesslib.services.BleService
 
 
@@ -27,7 +28,7 @@ class RootActivity : AppCompatActivity(),
 
     // SERVICE CONNECTIONS / FLAGS
     internal var service             : BleService?       = null
-    private var isServiceConnected                      = false
+    private  var isServiceConnected                      = false
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -42,17 +43,23 @@ class RootActivity : AppCompatActivity(),
     override fun onResume() {
         super.onResume()
 
-        // Iniciamos el Broadcast Receiver
+        // Asociamos el servicio de BLE
         doBindService()
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        // Quitamos el Broadcast Receiver
+        // Desasociamos el servicio de BLE
         doUnbindService()
     }
 
+    /**
+     * ## getAndSetIntentData
+     * Obtiene los elementos recibidos en el intent, para posteriormente
+     * mandarlo al fragment que muestre los datos, así como el objeto
+     * del dispositivo con el cual se va a interactuar
+     */
     private fun getAndSetIntentData() {
         Log.d(TAG, "getIntent")
 
@@ -60,14 +67,13 @@ class RootActivity : AppCompatActivity(),
         val data = intent.extras!!
         bleDevice        = data[EXTRA_DEVICE] as BluetoothDevice
         bleMac           = data.getString(EXTRA_MAC)!!
-        /*val name           = data.getString(Constants.EXTRA_NAME)!!
-        val beacon         = data.getString(Constants.EXTRA_BEACON)!!
-        val type           = data.getString(Constants.EXTRA_BEACON_TYPE)!!
-        val beacEncrypted  = data.getString(Constants.EXTRA_BEACON_ENCRYPTED)!!
-        val isEncrypted    = data.getBoolean(Constants.EXTRA_IS_ENCRYPTED)*/
     }
 
-
+    /**
+     * ## initFragment
+     * Inicializa el fragmento [MainFragment] para el manejo de
+     * la instancia principal de conexión
+     */
     private fun initFragment() {
         Log.d(TAG, "initFragment")
         // Iniciamos el fragmento deseado
@@ -78,14 +84,23 @@ class RootActivity : AppCompatActivity(),
             .commit()
     }
 
-    internal fun finishActivity() {
-        finish()
-    }
+    /**
+     * ## finishActivity
+     * Corrige un Bug de back button en fragmento
+     */
+    internal fun finishActivity() = finish()
 
 
     /************************************************************************************************/
     /**     ON CLICK                                                                                */
     /************************************************************************************************/
+
+    /**
+     * ## dialogAccept
+     * Se ejecuta al hacer click en "Aceptar" del diálogo de Password
+     *
+     * @param password Texto de password ingresado por el usuario
+     */
     override fun dialogAccept(password: String) {
         toast("Configurando el dispositivo")
         val accessPointFragment = supportFragmentManager
@@ -95,6 +110,10 @@ class RootActivity : AppCompatActivity(),
         //startBleService()                   // Iniciamos el servicio de Bluetooth
     }
 
+    /**
+     * ## dialogCancel
+     * Se ejecuta al hacer click en "Cancelar" del diálogo de Password
+     */
     override fun dialogCancel() {
         toast("Cancelado")
     }
@@ -103,6 +122,18 @@ class RootActivity : AppCompatActivity(),
     /************************************************************************************************/
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
+
+    /**
+     * ## navigateTo
+     * Interface que ayuda con la navegación entre fragmentos contenidos en
+     * esta actividad
+     *
+     * @param fragment Fragmento a ser iniciado
+     * @param addToBackStack Bandera para añadirlo al BackStack
+     * @param args Argumentos (si es requerido) para iniciar el fragmento
+     * @param animIn Animación de entrada (fadeIn por default)
+     * @param animOut Animación de salida (fadeOut por default)
+     */
     override fun navigateTo(fragment: Fragment,
                             addToBackStack: Boolean,
                             args: Bundle?,
@@ -125,17 +156,15 @@ class RootActivity : AppCompatActivity(),
     }
 
     // BLE SERVICE INTERFACES
-    override fun connectionStatus(status: Int) {
+    /**
+     * ## connectionStatus
+     * Se ejecuta cada que el servicio BLE cambia de estatus de conexión
+     *
+     * @param status Estatus de conexión
+     */
+    override fun connectionStatus(status: ActualState) {
         Log.e(TAG, "connectionStatus -> $status")
     }
-
-   /* override fun sendCommand(data: ByteArray) {
-
-    }
-
-    override fun onBleResponse(data: ByteArray) {
-
-    }*/
 
 
     /************************************************************************************************/
