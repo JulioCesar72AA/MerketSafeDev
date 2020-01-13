@@ -74,7 +74,7 @@ class AccessPointsFragment: Fragment(),
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy -> stopBleService")
-        root.stopBleService()
+        //root.stopBleService()
     }
 
     private fun setOnClickListeners() {

@@ -1,6 +1,7 @@
-package mx.softel.cirwirelesslib.services
+package mx.softel.cirwirelesslib.enums
 
 enum class DisconnectionReason(val code: Int) {
+    UNKNOWN                             (0),
     DISCONNECTION_OCURRED               (1),
     DEVICE_NOT_CONFIGURED               (2),
     NORMAL_DISCONNECTION                (3),
@@ -13,6 +14,7 @@ enum class DisconnectionReason(val code: Int) {
     BAD_CONFIGURED                      (10),
     TEMPLATE_ALREADY_INSTALLED          (11),
     FIRMWARE_NOT_COMPATIBLE             (12),
+    CONNECTION_FAILED                   (62),
     ERROR_257                           (257),
     ERROR_133                           (133)
 }
