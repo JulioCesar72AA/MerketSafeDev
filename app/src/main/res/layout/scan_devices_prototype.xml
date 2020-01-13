@@ -10,7 +10,7 @@
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground"
     app:cardCornerRadius="@dimen/scan_corner_radius"
-    app:cardElevation="2dp"
+    app:cardElevation="@dimen/cv_elevation_prototype"
     app:cardBackgroundColor="@color/cardScanBackground"
     app:cardUseCompatPadding="true">
     
@@ -23,7 +23,7 @@
         
         <TextView
             android:id="@+id/tvScanMac"
-            android:layout_width="0dp"
+            android:layout_width="@dimen/no_dimen"
             android:layout_height="wrap_content"
             android:layout_weight="9"
             android:fontFamily="@font/rubik_regular"
@@ -31,8 +31,8 @@
             tools:text="11:22:33:44:55:66"/>
 
         <ImageView
-            android:layout_width="0dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/no_dimen"
+            android:layout_height="@dimen/heigh_icon_ble_dimen"
             android:layout_weight="1"
             android:gravity="end"
             android:src="@drawable/ic_bluetooth_connected"

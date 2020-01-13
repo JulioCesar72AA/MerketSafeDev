@@ -1,10 +1,11 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
-
     <dimen name="button_magin">32dp</dimen>
     <dimen name="scan_content_margin">12dp</dimen>
     <dimen name="scan_corner_radius">12dp</dimen>
-
+    <dimen name="height_ic_bluetooth_">12dp</dimen>
+    <dimen name="no_dimen">0dp</dimen>
+    <dimen name="heigh_icon_ble_dimen">24dp</dimen>
     <!-- CARD VIEW's -->
     <dimen name="cv_fixed_size">150dp</dimen>
     <dimen name="cv_margin">8dp</dimen>
@@ -18,6 +19,7 @@
     <dimen name="cv_access_margin_start">19dp</dimen>
     <dimen name="cv_access_margin_end">19dp</dimen>
     <dimen name="cv_margin30">30dp</dimen>
+    <dimen name="cv_elevation_prototype">2dp</dimen>
 
 
     <!-- TEXT VIEW's -->
@@ -39,5 +41,7 @@
 
     <!-- PADDING Y MARGIN -->
     <dimen name="padding17">17dp</dimen>
+    <dimen name="padding_popup_relative">27dp</dimen>
+    <dimen name="padding_splash">50dp</dimen>
 
 </resources>
