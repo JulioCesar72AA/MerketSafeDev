@@ -163,7 +163,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight=".45"
-                            android:text="Softel CMX"
+                            android:text="@string/tv_redes_access"
                             android:textSize="@dimen/tv_textsize18"  />
                     </LinearLayout>
 
@@ -180,7 +180,7 @@
                             android:layout_height="match_parent"
                             android:layout_weight=".55"
                             android:fontFamily="@font/rubik_bold"
-                            android:text="RSSI"
+                            android:text="@string/tv_sdi_access"
                             android:textColor="@color/colorIconBlue"
                             android:textSize="@dimen/tv_textsize18"  />
 
@@ -188,7 +188,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight=".45"
-                            android:text="-30"
+                            android:text="@string/tv_ssdi_number_access"
                             android:textSize="@dimen/tv_textsize18"  />
                     </LinearLayout>
 
@@ -205,7 +205,7 @@
                             android:layout_height="match_parent"
                             android:layout_weight=".55"
                             android:fontFamily="@font/rubik_bold"
-                            android:text="AP"
+                            android:text="@string/tv_ap_access"
                             android:textColor="@color/colorIconBlue"
                             android:textSize="@dimen/tv_textsize18"  />
 
@@ -231,7 +231,7 @@
                             android:layout_height="match_parent"
                             android:layout_weight=".55"
                             android:fontFamily="@font/rubik_bold"
-                            android:text="INTERNET"
+                            android:text="@string/tv_internet_access"
                             android:textColor="@color/colorIconBlue"
                             android:textSize="@dimen/tv_textsize18"  />
 
@@ -256,7 +256,7 @@
                             android:layout_height="match_parent"
                             android:layout_weight=".55"
                             android:fontFamily="@font/rubik_bold"
-                            android:text="DATA"
+                            android:text="@string/tv_data_access"
                             android:textColor="@color/colorIconBlue"
                             android:textSize="@dimen/tv_textsize18"  />
 
@@ -281,7 +281,7 @@
                             android:layout_height="match_parent"
                             android:layout_weight=".55"
                             android:fontFamily="@font/rubik_bold"
-                            android:text="STATUS"
+                            android:text="@string/tv_status_access"
                             android:textColor="@color/colorIconBlue"
                             android:textSize="@dimen/tv_textsize18"  />
 
