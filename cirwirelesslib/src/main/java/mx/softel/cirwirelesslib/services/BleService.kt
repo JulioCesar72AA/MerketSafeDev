@@ -41,7 +41,7 @@ class BleService: Service() {
     private var notificationDescriptor  : BluetoothGattDescriptor?          = null
 
     // GATT
-    private var bleGatt                 : BluetoothGatt?                    = null
+    var bleGatt                 : BluetoothGatt?                    = null
     private var bleGattConnections      : ArrayList<BluetoothGatt>          = ArrayList()
     private var bleGattCallbacks        : ArrayList<BluetoothGattCallback>  = ArrayList()
 
@@ -174,6 +174,16 @@ class BleService: Service() {
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
+    }
+
+    /**
+     * ## discoverDeviceServices
+     * Inicia el escaneo a profundidad de los servicios y características
+     * de comunicación con el dispositivo
+     */
+    fun discoverDeviceServices() {
+        Log.d(TAG, "discoverDeviceServices")
+        bleGatt?.discoverServices()
     }
 
 
@@ -323,7 +333,7 @@ class BleService: Service() {
      *
      * @param enable Bander para activar-desactivar la notificación
      */
-    fun enableCharacteristicNotification(enable: Boolean)
+    private fun enableCharacteristicNotification(enable: Boolean)
             = bleGatt!!.setCharacteristicNotification(characteristicNotify, enable)
 
 
@@ -334,7 +344,7 @@ class BleService: Service() {
     /**
      * ## getFirmwareData
      * Realiza una lectura de [characteristicDeviceInfo] para posteriormente
-     * obtener el Firmware en [BluetoothGattCallback.onCharacteristicChanged]
+     * obtener el Firmware en [BluetoothGattCallback.onCharacteristicRead]
      */
     fun getFirmwareData() {
         Log.d(TAG, "getFirmwareData")
@@ -415,66 +425,8 @@ class BleService: Service() {
 
 
 
-    /*fun refreshingWifi(characteristic: BluetoothGattCharacteristic) {
-        Log.e(TAG, "refreshingWifi -> ${characteristic.value.toHex()}")
-        val response = receivedCommand(characteristic.value)
-
-        when (response) {
-
-            ReceivedCmd.POLEO -> {
-                if (currentState == StateMachine.WIFI_CONFIG) {
-                    val cmd = CommandUtils.configureAccessPointsCmd()
-                    // Cargamos y escribimos en la característica
-                    val flag = characteristicWrite!!.setValue(cmd)
-                    if (flag) {
-                        bleGatt!!.writeCharacteristic(characteristicWrite)
-                        currentState = StateMachine.AT_WAIT_RESPONSE
-                    }
-                }
-                if (currentState == StateMachine.AT_WAIT_RESPONSE) {
-                    // Leemos el comando de AT para verificar que esté correcto
-                    val cmd = CommandUtils.readAtCmd()
-                    val flag = characteristicWrite!!.setValue(cmd)
-                    if (flag) {
-                        bleGatt!!.writeCharacteristic(characteristicWrite)
-                        currentState = StateMachine.AT_WAIT_RESPONSE
-                    }
-                }
-            }
-
-            ReceivedCmd.REFRESH_AP -> {
-                Log.d(TAG, "REFRESH ACCESS POINT")
-                val cmd = CommandUtils.configureAccessPointsCmd()
-                // Cargamos y escribimos en la característica
-                val flag = characteristicWrite!!.setValue(cmd)
-                if (flag) {
-                    bleGatt!!.writeCharacteristic(characteristicWrite)
-                    currentState = StateMachine.WIFI_CONFIG
-                }
-            }
 
 
-            ReceivedCmd.AT_OK -> {
-                Log.d(TAG, "AT_OK")
-                // Leemos el comando de AT para verificar que esté correcto
-                val cmd = CommandUtils.readAtCmd()
-                val flag = characteristicWrite!!.setValue(cmd)
-                if (flag) {
-                    bleGatt!!.writeCharacteristic(characteristicWrite)
-                    currentState = StateMachine.AT_WAIT_RESPONSE
-                }
-            }
-            /*ReceivedCmd.AT_NOK -> {
-
-            }*/
-
-
-            ReceivedCmd.WAIT_AP -> {
-                currentState = StateMachine.AT_WAIT_RESPONSE
-            }
-            else -> currentState = StateMachine.STANDBY
-        }
-    }*/
 
 
 
@@ -486,9 +438,6 @@ class BleService: Service() {
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
             Log.i(TAG, "onConnectionStateChange -> Status($status) -> NewState($newState)")
-
-            // Comunicación con el UI
-
 
             // Si ocurre el error 133 o el error 257...
             if (status == DisconnectionReason.ERROR_133.code
@@ -559,6 +508,9 @@ class BleService: Service() {
 
                     correctFirmware = (firmware == BleConstants.FIRMWARE_346)
                     Log.e(TAG, "FIRMWARE $firmware -> CORRECT $correctFirmware")
+
+                    if (!correctFirmware)
+                        disconnectBleDevice(DisconnectionReason.FIRMWARE_UNSOPPORTED)
                 }
             }
         }
@@ -623,6 +575,7 @@ class BleService: Service() {
         fun connectionStatus(status: ActualState,
                              newState: ActualState,
                              disconnectionReason: DisconnectionReason?)
+        fun commandState(state: StateMachine, response: ByteArray)
         //fun sendCommand(data: ByteArray)
         //fun onBleResponse(data: ByteArray)
     }
