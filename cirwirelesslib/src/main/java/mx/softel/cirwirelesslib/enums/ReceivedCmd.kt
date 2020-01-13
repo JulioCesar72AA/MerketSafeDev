@@ -4,7 +4,7 @@ enum class ReceivedCmd {
     UNKNOWN,
     POLEO,
     STATUS,
-    REFRESH_AP,
+    REFRESH_AP_OK,
     AT_OK,
     AT_NOK,
     WAIT_AP,

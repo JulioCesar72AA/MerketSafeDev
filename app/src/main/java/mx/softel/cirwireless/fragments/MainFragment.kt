@@ -65,6 +65,10 @@ class MainFragment : Fragment(), View.OnClickListener {
         Log.d(TAG, "onDestroy")
     }
 
+    /**
+     * ## setOnClick
+     * Inicializa los eventos de click para los elementos en la vista
+     */
     private fun setOnClick() {
         ivBack      .setOnClickListener(this)
         cvTest      .setOnClickListener(this)
@@ -79,6 +83,13 @@ class MainFragment : Fragment(), View.OnClickListener {
     /************************************************************************************************/
     /**     ON CLICK                                                                                */
     /************************************************************************************************/
+
+    /**
+     * ## onClick
+     * Implementación de la interface [View.OnClickListener]
+     *
+     * @param v Vista asociada al evento click
+     */
     override fun onClick(v: View?) {
         when (v!!.id) {
             R.id.ivBack         -> root.finishActivity(DisconnectionReason.NORMAL_DISCONNECTION)
@@ -87,6 +98,11 @@ class MainFragment : Fragment(), View.OnClickListener {
         }
     }
 
+    /**
+     * ## clickConfigure
+     * Refresca los Access Points del dispositivo, y la actividad [RootActivity]
+     * realiza el manejo de eventos por respuesta recibida del comando
+     */
     private fun clickConfigure() {
         Log.d(TAG, "clickConfigure")
         toast("Actualizando datos")
@@ -95,9 +111,12 @@ class MainFragment : Fragment(), View.OnClickListener {
         root.service!!.sendRefreshApCmd()
     }
 
+
     private fun clickTest() {
         Log.d(TAG, "clickTest -> startBleService")
         toast("Probar")
+
+        // TODO: Implementar el flujo de obtención de datos para el nuevo fragment
     }
 
 
@@ -115,7 +134,7 @@ class MainFragment : Fragment(), View.OnClickListener {
         /**
          * Singleton access to [MainFragment]
          */
-        fun getInstance() = MainFragment()
+        @JvmStatic fun getInstance() = MainFragment()
     }
 
 }

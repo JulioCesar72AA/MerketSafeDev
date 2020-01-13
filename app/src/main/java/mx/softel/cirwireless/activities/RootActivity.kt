@@ -206,12 +206,15 @@ class RootActivity : AppCompatActivity(),
         when (state) {
             StateMachine.REFRESH_AP -> {
                 Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
-                if (command == ReceivedCmd.REFRESH_AP) {
+                if (command == ReceivedCmd.REFRESH_AP_OK) {
                     // Iniciamos el fragmento de AccessPointsFragment
                     val fragment = AccessPointsFragment.getInstance()
                     navigateTo(fragment, true, null)
                 }
-                // Si no es REFRESH_AP, simplemente ignoramos el resultado hasta cambiar de estado
+                // Si no es REFRESH_AP_OK, simplemente ignoramos el resultado hasta cambiar de estado
+            }
+            StateMachine.GET_AP -> {
+                Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
             }
             else -> Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
         }

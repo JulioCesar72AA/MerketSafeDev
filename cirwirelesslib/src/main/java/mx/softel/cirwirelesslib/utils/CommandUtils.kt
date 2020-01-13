@@ -21,7 +21,12 @@ object CommandUtils {
         return REFRESH_AP + getCrc16(REFRESH_AP)
     }
 
-    fun configureAccessPointsCmd(): ByteArray {
+    fun getAccessPointsCmd(): ByteArray {
+        Log.d(TAG, "getAccessPointsCmd")
+        return GET_AP_MAC_LIST + getCrc16(GET_AP_MAC_LIST)
+    }
+
+    /*fun configureAccessPointsCmd(): ByteArray {
         Log.d(TAG, "getAccessPointsCmd")
 
         val atCmd = "AT+CWLAPOPT=1,8".toByteArray()
@@ -42,13 +47,7 @@ object CommandUtils {
     fun readAtCmd(): ByteArray {
         Log.d(TAG, "readAtCmd")
         return AT_READ + getCrc16(AT_READ)
-    }
-
-
-    fun getAccessPointsCmd(): ByteArray {
-        Log.d(TAG, "getAccessPointsCmd")
-        return GET_AP_MAC_LIST + getCrc16(GET_AP_MAC_LIST)
-    }
+    }*/
 
 
 

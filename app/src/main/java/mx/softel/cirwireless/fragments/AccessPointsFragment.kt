@@ -46,8 +46,6 @@ class AccessPointsFragment: Fragment(),
         root        = (activity!! as RootActivity)
         wifiManager = root.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         wifiManager.isWifiEnabled = true
-
-        Log.d(TAG, "Dispositivo a conectar: ${root.bleDevice.address}")
     }
 
     override fun onCreateView(inflater: LayoutInflater,
@@ -74,9 +72,12 @@ class AccessPointsFragment: Fragment(),
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy -> stopBleService")
-        //root.stopBleService()
     }
 
+    /**
+     * ## setOnClickListeners
+     * Inicializa los eventos de click para los elementos en la vista
+     */
     private fun setOnClickListeners() {
         scanMask.setOnClickListener(this)
         backBtn.setOnClickListener(this)
@@ -85,18 +86,30 @@ class AccessPointsFragment: Fragment(),
     /************************************************************************************************/
     /**     BROADCAST                                                                               */
     /************************************************************************************************/
+
+    /**
+     * ## wifiReceiver: [BroadcastReceiver]
+     * Ejecuta la acción cuando el teléfono termina de escanear los Access Points cercanos
+     */
     private val wifiReceiver = object: BroadcastReceiver() {
 
         override fun onReceive(context: Context?, intent: Intent?) {
             wifiResults = wifiManager.scanResults
             root.unregisterReceiver(this)
 
+            // Rellena la lista para mostrar en la pantalla estándar
             for (data in wifiResults) {
                 Log.d(TAG, "${data.SSID} - ${data.frequency} - ${data.centerFreq0} - ${data.centerFreq1}")
+
+                // El dispositivo solo puede conectarse a 2.4 de frecuencia, así que filtramos...
                 if (data.frequency < 3000 && data.SSID.length > 2)
                     if (!apList.contains(data.SSID)) apList.add(data.SSID)
                 arrayAdapter.notifyDataSetChanged()
+
+                // TODO: Añadir los "destacados" de la lista de macs del dispositivo
             }
+
+            // Inicializa la vista estándar
             setStandardUI()
         }
 
@@ -105,6 +118,12 @@ class AccessPointsFragment: Fragment(),
     /************************************************************************************************/
     /**     VISTA                                                                                   */
     /************************************************************************************************/
+
+    /**
+     * ## setWifiList
+     * Inicializa la lista de AccessPoints visibles para el teléfono,
+     * asocia el adaptador y los datos a la [ListView]
+     */
     private fun setWifiList() {
         arrayAdapter = ArrayAdapter(root, android.R.layout.simple_list_item_1, apList)
         lvAccessPoints.apply {
@@ -113,6 +132,10 @@ class AccessPointsFragment: Fragment(),
         }
     }
 
+    /**
+     * ## setScanningUI
+     * Muestra la vista boqueada de escaneo de datos
+     */
     internal fun setScanningUI() {
         progressBar.visibility = View.VISIBLE
         scanMask   .apply {
@@ -121,6 +144,10 @@ class AccessPointsFragment: Fragment(),
         }
     }
 
+    /**
+     * ## setStandardUI
+     * Muestra una pantalla natural, sin bloqueos de escaneo
+     */
     internal fun setStandardUI() {
         progressBar.visibility = View.GONE
         scanMask   .visibility = View.GONE
@@ -130,6 +157,13 @@ class AccessPointsFragment: Fragment(),
     /************************************************************************************************/
     /**     ON CLICK                                                                                */
     /************************************************************************************************/
+
+    /**
+     * ## onClick
+     * Implementación de la interface [View.OnClickListener]
+     *
+     * @param v Vista asociada al evento click
+     */
     override fun onClick(v: View?) {
         when(v!!.id) {
             R.id.scanMask       -> toast("Espera un momento, escaneando Access Points")
@@ -137,6 +171,15 @@ class AccessPointsFragment: Fragment(),
         }
     }
 
+    /**
+     * ## onItemClick
+     * Implementación de la interface [AdapterView.OnItemClickListener]
+     *
+     * @param parent Adaptador del cual proviene el evento
+     * @param view Vista seleccionada dentro del adaptador
+     * @param position Índice del elemento seleccionado
+     * @param id Id asociado a la vista seleccionada
+     */
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         val dialog = PasswordDialog.getInstance()
         dialog.apply {
@@ -150,10 +193,19 @@ class AccessPointsFragment: Fragment(),
     /************************************************************************************************/
     /**     WIFI                                                                                    */
     /************************************************************************************************/
+
+    /**
+     * ## scanWifi
+     * Realiza el escaneo de los AccessPoints que el teléfono puede ver
+     */
     private fun scanWifi() {
+        // Leemos los Access Points del celular
         apList.clear()
         root.registerReceiver(wifiReceiver, IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
         wifiManager.startScan()
+
+        // Leemos los Access Points del dispositivo
+        root.service!!.getMacListCmd()
     }
 
 
@@ -166,7 +218,7 @@ class AccessPointsFragment: Fragment(),
         /**
          * Singleton access to [AccessPointsFragment]
          */
-        fun getInstance() = AccessPointsFragment()
+        @JvmStatic fun getInstance() = AccessPointsFragment()
     }
 
 }

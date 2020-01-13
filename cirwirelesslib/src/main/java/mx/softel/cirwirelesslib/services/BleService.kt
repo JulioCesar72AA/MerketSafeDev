@@ -367,7 +367,7 @@ class BleService: Service() {
         val cmd = when (response[4]) {
             POLEO           -> ReceivedCmd.POLEO
             STATUS          -> ReceivedCmd.STATUS
-            REFRESH_AP_OK   -> ReceivedCmd.REFRESH_AP
+            REFRESH_AP_OK   -> ReceivedCmd.REFRESH_AP_OK
             AT_OK           -> ReceivedCmd.AT_OK
             AT_NOK          -> ReceivedCmd.AT_NOK
             WAIT_RESPONSE   -> ReceivedCmd.WAIT_AP
@@ -415,7 +415,6 @@ class BleService: Service() {
         Log.d(TAG, "sendRefreshApCmd")
 
         val cmd = CommandUtils.refreshAccessPointsCmd()
-        Log.e(TAG, "CMD ACCESS POINTS: ${cmd.toHex()}")
 
         // Cargamos y escribimos en la característica
         val flag = characteristicWrite!!.setValue(cmd)
@@ -424,6 +423,21 @@ class BleService: Service() {
             currentState = StateMachine.REFRESH_AP
         }
     }
+
+    fun getMacListCmd() {
+        Log.d(TAG, "getMacListCmd")
+
+        val cmd = CommandUtils.getAccessPointsCmd()
+
+        // Cargamos y escribimos en la característica
+        val flag = characteristicWrite!!.setValue(cmd)
+        if (flag) {
+            bleGatt!!.writeCharacteristic(characteristicWrite)
+            currentState = StateMachine.GET_AP
+        }
+    }
+
+    // TODO: Parsear la respuesta del comando de getAccessPointsCmd y devolver una lista de Mac's
 
 
 
@@ -530,7 +544,7 @@ class BleService: Service() {
             // STATE MACHINE ACCESS POINTS *********************************************************
             /*when (currentState) {
                 StateMachine.POLING             -> sendRefreshApCmd()
-                StateMachine.REFRESH_AP      -> refreshingWifi(characteristic)
+                StateMachine.REFRESH_AP_OK      -> refreshingWifi(characteristic)
                 StateMachine.WIFI_CONFIG        -> refreshingWifi(characteristic)
                 StateMachine.AT_WAIT_RESPONSE   -> refreshingWifi(characteristic)
                 StateMachine.STANDBY            -> Log.d(TAG, "STANDBY (Poling) ${characteristic.value.toHex()}")
