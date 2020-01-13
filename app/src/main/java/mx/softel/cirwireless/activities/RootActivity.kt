@@ -125,6 +125,7 @@ class RootActivity : AppCompatActivity(),
      * @param password Texto de password ingresado por el usuario
      */
     override fun dialogAccept(password: String) {
+
         toast("Configurando el dispositivo")
         val accessPointFragment = supportFragmentManager
             .findFragmentById(R.id.fragmentContainer)
@@ -201,7 +202,6 @@ class RootActivity : AppCompatActivity(),
     }
 
     override fun commandState(state: StateMachine, response: ByteArray, command: ReceivedCmd) {
-
 
         when (state) {
             StateMachine.REFRESH_AP -> {
