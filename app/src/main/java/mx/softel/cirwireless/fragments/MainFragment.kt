@@ -73,6 +73,9 @@ class MainFragment : Fragment(), View.OnClickListener {
 
 
 
+
+
+
     /************************************************************************************************/
     /**     ON CLICK                                                                                */
     /************************************************************************************************/
@@ -88,15 +91,19 @@ class MainFragment : Fragment(), View.OnClickListener {
         Log.d(TAG, "clickConfigure")
         toast("Actualizando datos")
 
-        // Iniciamos el fragmento de AccessPointsFragment
-        val fragment = AccessPointsFragment.getInstance()
-        navigation.navigateTo(fragment, true, null)
+        // Actualizamos los AccessPoints que el dispositivo ve
+        root.service!!.sendRefreshApCmd()
     }
 
     private fun clickTest() {
         Log.d(TAG, "clickTest -> startBleService")
         toast("Probar")
     }
+
+
+
+
+
 
 
     /************************************************************************************************/

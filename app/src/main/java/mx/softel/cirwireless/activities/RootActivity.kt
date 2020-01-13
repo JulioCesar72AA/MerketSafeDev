@@ -17,6 +17,7 @@ import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.ActualState
 import mx.softel.cirwirelesslib.enums.DisconnectionReason
+import mx.softel.cirwirelesslib.enums.ReceivedCmd
 import mx.softel.cirwirelesslib.enums.StateMachine
 import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.services.BleService
@@ -98,7 +99,8 @@ class RootActivity : AppCompatActivity(),
 
     /**
      * ## finishActivity
-     * Corrige un Bug de back button en fragmento
+     * Desconecta los dispositivos asociados, elimina los callbacks
+     * y termina la actividad, para volver a la lista de dispositivos escaneados
      */
     internal fun finishActivity(disconnectionReason: DisconnectionReason) {
         service!!.disconnectBleDevice(disconnectionReason)
@@ -198,8 +200,22 @@ class RootActivity : AppCompatActivity(),
         }
     }
 
-    override fun commandState(state: StateMachine, response: ByteArray) {
-        Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}")
+    override fun commandState(state: StateMachine, response: ByteArray, command: ReceivedCmd) {
+
+
+        when (state) {
+            StateMachine.REFRESH_AP -> {
+                Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
+                if (command == ReceivedCmd.REFRESH_AP) {
+                    // Iniciamos el fragmento de AccessPointsFragment
+                    val fragment = AccessPointsFragment.getInstance()
+                    navigateTo(fragment, true, null)
+                }
+                // Si no es REFRESH_AP, simplemente ignoramos el resultado hasta cambiar de estado
+            }
+            else -> Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
+
+        }
     }
     // *********************************************************************************************
 
@@ -308,6 +324,7 @@ class RootActivity : AppCompatActivity(),
     companion object {
         private val TAG = RootActivity::class.java.simpleName
 
-        private val UI_TIMEOUT = 500L
+        // Timeouts de la actividad
+        private const val UI_TIMEOUT = 500L
     }
 }

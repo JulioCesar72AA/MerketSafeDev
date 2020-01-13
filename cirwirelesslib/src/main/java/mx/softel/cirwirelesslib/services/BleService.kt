@@ -48,6 +48,7 @@ class BleService: Service() {
     // FLAGS - STATES
     private var correctFirmware         : Boolean                           = false
     private var currentState            : StateMachine                      = StateMachine.UNKNOWN
+    private var isDescriptorOn          : Boolean                           = false
 
     // HANDLERS
     private var connectionObserver      : Handler                           = Handler()
@@ -211,6 +212,7 @@ class BleService: Service() {
             characteristicNotify        = null
             characteristicWrite         = null
             characteristicDeviceInfo    = null
+            isDescriptorOn              = false
 
             // Limpiamos el arreglo de las conexiones una vez cerradas
             bleGattConnections.clear()
@@ -419,7 +421,7 @@ class BleService: Service() {
         val flag = characteristicWrite!!.setValue(cmd)
         if (flag) {
             bleGatt!!.writeCharacteristic(characteristicWrite)
-            currentState = StateMachine.REFRESHING_AP
+            currentState = StateMachine.REFRESH_AP
         }
     }
 
@@ -511,6 +513,8 @@ class BleService: Service() {
 
                     if (!correctFirmware)
                         disconnectBleDevice(DisconnectionReason.FIRMWARE_UNSOPPORTED)
+
+                    initPoleCmd()
                 }
             }
         }
@@ -521,10 +525,12 @@ class BleService: Service() {
             if (characteristic == null) return
             Log.e(TAG, "RESPUESTA -> ${characteristic.value.toHex()}")
 
+            activity.commandState(currentState, characteristic.value, receivedCommand(characteristic.value))
+
             // STATE MACHINE ACCESS POINTS *********************************************************
             /*when (currentState) {
                 StateMachine.POLING             -> sendRefreshApCmd()
-                StateMachine.REFRESHING_AP      -> refreshingWifi(characteristic)
+                StateMachine.REFRESH_AP      -> refreshingWifi(characteristic)
                 StateMachine.WIFI_CONFIG        -> refreshingWifi(characteristic)
                 StateMachine.AT_WAIT_RESPONSE   -> refreshingWifi(characteristic)
                 StateMachine.STANDBY            -> Log.d(TAG, "STANDBY (Poling) ${characteristic.value.toHex()}")
@@ -548,8 +554,11 @@ class BleService: Service() {
             Log.i(TAG, "onDescriptorWrite")
 
             // Si aún no está poleando, se levanta el descriptor
-            Log.e(TAG, "HABILITANDO DESCRIPTOR")
-            writeToDescriptor(ENABLE_NOTIFICATION)
+            if (!isDescriptorOn) {
+                Log.e(TAG, "HABILITANDO DESCRIPTOR")
+                writeToDescriptor(ENABLE_NOTIFICATION)
+                isDescriptorOn = true
+            }
         }
 
     }
@@ -575,7 +584,9 @@ class BleService: Service() {
         fun connectionStatus(status: ActualState,
                              newState: ActualState,
                              disconnectionReason: DisconnectionReason?)
-        fun commandState(state: StateMachine, response: ByteArray)
+        fun commandState(state: StateMachine,
+                         response: ByteArray,
+                         command: ReceivedCmd)
         //fun sendCommand(data: ByteArray)
         //fun onBleResponse(data: ByteArray)
     }

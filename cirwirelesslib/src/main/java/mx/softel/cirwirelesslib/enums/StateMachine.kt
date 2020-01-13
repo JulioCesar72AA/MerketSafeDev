@@ -4,7 +4,7 @@ enum class StateMachine {
     UNKNOWN,
     POLING,
     STATUS,
-    REFRESHING_AP,
+    REFRESH_AP,
     WIFI_CONFIG,
     GET_AP,
     AT_WAIT_RESPONSE,

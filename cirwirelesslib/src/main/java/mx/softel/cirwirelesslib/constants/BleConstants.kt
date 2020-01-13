@@ -15,6 +15,6 @@ object BleConstants {
     const val NOTIFICATION_DESCRIPTOR   = "00002902-0000-1000-8000-00805f9b34fb"
 
     // FIRMWARE VERSIONS
-    const val FIRMWARE_346              = "3.4.6__"
+    const val FIRMWARE_346              = "3.4.6"
 
 }
