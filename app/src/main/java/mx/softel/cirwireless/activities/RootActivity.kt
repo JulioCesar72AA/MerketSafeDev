@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -15,6 +16,7 @@ import mx.softel.cirwireless.fragments.MainFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.ActualState
+import mx.softel.cirwirelesslib.enums.DisconnectionReason
 import mx.softel.cirwirelesslib.services.BleService
 
 
@@ -23,12 +25,20 @@ class RootActivity : AppCompatActivity(),
     PasswordDialog.OnDialogClickListener,
     BleService.OnBleConnection {
 
+    // BLUETOOTH DEVICE
     internal lateinit var bleDevice : BluetoothDevice
     internal lateinit var bleMac    : String
 
     // SERVICE CONNECTIONS / FLAGS
-    internal var service             : BleService?       = null
-    private  var isServiceConnected                      = false
+    internal var service             : BleService?      = null
+    private  var isServiceConnected                     = false
+
+    private val handler = Handler()
+
+    private var disconnectionReason = DisconnectionReason.UNKNOWN
+    private val runnable = Runnable {
+        finishActivity(disconnectionReason)
+    }
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -88,7 +98,11 @@ class RootActivity : AppCompatActivity(),
      * ## finishActivity
      * Corrige un Bug de back button en fragmento
      */
-    internal fun finishActivity() = finish()
+    internal fun finishActivity(disconnectionReason: DisconnectionReason) {
+        service!!.disconnectBleDevice(disconnectionReason)
+        handler.removeCallbacks(runnable)
+        finish()
+    }
 
 
     /************************************************************************************************/
@@ -107,7 +121,6 @@ class RootActivity : AppCompatActivity(),
             .findFragmentById(R.id.fragmentContainer)
                 as AccessPointsFragment
         accessPointFragment.setScanningUI()
-        //startBleService()                   // Iniciamos el servicio de Bluetooth
     }
 
     /**
@@ -162,8 +175,49 @@ class RootActivity : AppCompatActivity(),
      *
      * @param status Estatus de conexión
      */
-    override fun connectionStatus(status: ActualState) {
-        Log.e(TAG, "connectionStatus -> $status")
+    override fun connectionStatus(status: ActualState,
+                                  newState: ActualState,
+                                  disconnectionReason: DisconnectionReason?) {
+        Log.e(TAG, "connectionStatus -> $status : $newState")
+
+        // newState solo puede ser CONNECTED o DISCONNECTED
+        when (newState) {
+            ActualState.CONNECTED       -> connectedDevice()
+            else                        -> errorConnection(disconnectionReason!!)
+        }
+    }
+
+    /**
+     * ## errorConnection
+     * Muestra un mensaje con una descripción genérica de conexión cuando
+     * no se puede conectar al dispositivo.
+     * Ejecuta desconexión y regresa a la pantalla de selección [MainActivity]
+     *
+     * @param reason
+     */
+    private fun errorConnection(reason: DisconnectionReason) {
+        Log.d(TAG, "errorConnection")
+        disconnectionReason = reason
+        when (reason) {
+            DisconnectionReason.ERROR_133, DisconnectionReason.ERROR_257 -> {
+                runOnUiThread { toast("Ocurrió un error") }
+                handler.apply {
+                    postDelayed(runnable, 1000)
+                }
+            }
+            DisconnectionReason.DISCONNECTION_OCURRED, DisconnectionReason.CONNECTION_FAILED -> {
+                runOnUiThread { toast("No se puede conectar con el dispositivo") }
+                handler.apply {
+                    postDelayed(runnable, 1000)
+                }
+            }
+            else -> toast("Desconectando el dispositivo")
+        }
+    }
+
+    private fun connectedDevice() {
+        Log.d(TAG, "connectedDevice")
+        runOnUiThread { toast("Dispositivo conectado") }
     }
 
 

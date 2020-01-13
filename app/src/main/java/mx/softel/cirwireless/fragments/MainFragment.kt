@@ -14,6 +14,7 @@ import mx.softel.cirwireless.R
 import mx.softel.cirwireless.activities.RootActivity
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.interfaces.FragmentNavigation
+import mx.softel.cirwirelesslib.enums.DisconnectionReason
 
 /**
  * A simple [Fragment] subclass.
@@ -77,7 +78,7 @@ class MainFragment : Fragment(), View.OnClickListener {
     /************************************************************************************************/
     override fun onClick(v: View?) {
         when (v!!.id) {
-            R.id.ivBack         -> root.finishActivity()
+            R.id.ivBack         -> root.finishActivity(DisconnectionReason.NORMAL_DISCONNECTION)
             R.id.cvConfigurar   -> clickConfigure()
             R.id.cvProbar       -> clickTest()
         }
@@ -96,13 +97,6 @@ class MainFragment : Fragment(), View.OnClickListener {
         Log.d(TAG, "clickTest -> startBleService")
         toast("Probar")
     }
-
-
-
-
-
-
-
 
 
     /************************************************************************************************/

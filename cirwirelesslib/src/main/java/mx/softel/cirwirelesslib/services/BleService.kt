@@ -109,7 +109,6 @@ class BleService: Service() {
      * Detiene el servicio.
      */
     fun stopBleService() {
-        disconnectBleDevice(DisconnectionReason.NORMAL_DISCONNECTION)
         stopSelf()
     }
 
@@ -168,6 +167,9 @@ class BleService: Service() {
 
         try {
             // Limpiamos las conexiones creadas
+            activity.connectionStatus(ActualState.DISCONNECTING,
+                ActualState.DISCONNECTED,
+                disconnectionReason)
             cleanBleConnections()
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -486,17 +488,25 @@ class BleService: Service() {
             Log.i(TAG, "onConnectionStateChange -> Status($status) -> NewState($newState)")
 
             // Comunicación con el UI
-            activity.connectionStatus(actualState(newState))
+
 
             // Si ocurre el error 133 o el error 257...
             if (status == DisconnectionReason.ERROR_133.code
-                || status == DisconnectionReason.ERROR_257.code) {
-                disconnectBleDevice(disconnectionReasonCode(status))
+                || status == DisconnectionReason.ERROR_257.code
+                || status == DisconnectionReason.CONNECTION_FAILED.code) {
+                val reason = disconnectionReasonCode(status)
+                disconnectBleDevice(reason)
+                activity.connectionStatus(actualState(status),
+                                          actualState(newState),
+                                          reason)
             }
 
             // Si ya se encuentra conectado...
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.e(TAG, "Conectado!!!!!!")
+                activity.connectionStatus(actualState(status),
+                                          actualState(newState),
+                        null)
             }
         }
 
@@ -610,7 +620,9 @@ class BleService: Service() {
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
     interface OnBleConnection {
-        fun connectionStatus(status: ActualState)
+        fun connectionStatus(status: ActualState,
+                             newState: ActualState,
+                             disconnectionReason: DisconnectionReason?)
         //fun sendCommand(data: ByteArray)
         //fun onBleResponse(data: ByteArray)
     }
@@ -634,7 +646,7 @@ class BleService: Service() {
         private const val SIX_ACCESS_POINTS = 0x2B.toByte()
 
         // Constantes útiles
-        private const val MAX_ALLOWED_CONNECTIONS = 8
+        const val MAX_ALLOWED_CONNECTIONS = 8
         private val DISABLE_NOTIFICATION= byteArrayOf(0x00)
         private val ENABLE_NOTIFICATION = byteArrayOf(0x01)
 
