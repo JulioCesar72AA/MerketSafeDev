@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.dialogs.PasswordDialog
@@ -29,8 +30,10 @@ class RootActivity : AppCompatActivity(),
     BleService.OnBleConnection {
 
     // BLUETOOTH DEVICE
-    internal lateinit var bleDevice : BluetoothDevice
-    internal lateinit var bleMac    : String
+    internal lateinit var bleDevice     : BluetoothDevice
+    internal lateinit var bleMac        : String
+    internal lateinit var ssidSelected  : String
+    internal lateinit var passwordTyped : String
 
     // SERVICE CONNECTIONS / FLAGS
     internal var service             : BleService?      = null
@@ -101,6 +104,8 @@ class RootActivity : AppCompatActivity(),
             .commit()
     }
 
+    private fun backFragment() = supportFragmentManager.popBackStackImmediate()
+
     /**
      * ## finishActivity
      * Desconecta los dispositivos asociados, elimina los callbacks
@@ -130,7 +135,11 @@ class RootActivity : AppCompatActivity(),
      */
     override fun dialogAccept(password: String) {
 
-        toast("Configurando el dispositivo")
+        toast("Configurando el WIFI del dispositivo", Toast.LENGTH_LONG)
+
+        service!!.sendSsidCmd(ssidSelected)
+        passwordTyped = password
+
         val accessPointFragment = supportFragmentManager
             .findFragmentById(R.id.fragmentContainer)
                 as AccessPointsFragment
@@ -219,18 +228,32 @@ class RootActivity : AppCompatActivity(),
         Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
         when (state) {
             StateMachine.REFRESH_AP -> {
-                // Si se recibe el comando REFRESH_AP_OK
                 if (command == ReceivedCmd.REFRESH_AP_OK) {
-                    // Iniciamos el fragmento de AccessPointsFragment
                     val fragment = AccessPointsFragment.getInstance()
                     navigateTo(fragment, true, null)
                 }
-                // Si no es REFRESH_AP_OK, simplemente ignoramos el resultado hasta cambiar de estado
+                /* Ignoramos el resto de los comandos */
             }
             StateMachine.GET_AP -> {
                 if (command == ReceivedCmd.GET_AP) {
                     // Casteamos el resultado en una lista de Strings
                     deviceMacList = service!!.fromResponseGetMacList(response)
+                }
+            }
+            StateMachine.WIFI_CONFIG -> {
+                when (command) {
+                    ReceivedCmd.WIFI_SSID_OK    -> service!!.sendPasswordCmd(passwordTyped)
+                    ReceivedCmd.WIFI_SSID_FAIL  -> service!!.sendSsidCmd(ssidSelected)
+                    ReceivedCmd.WIFI_PASS_FAIL  -> service!!.sendPasswordCmd(passwordTyped)
+                    ReceivedCmd.WIFI_PASS_OK    -> {
+                        runOnUiThread {
+                            toast("Wifi configurado correctamente")
+                            backFragment()
+                        }
+                        Log.d(TAG, "Dispositivo configurado correctamente")
+                        service!!.currentState = StateMachine.POLING
+                    }
+                    else -> { /* Ignoramos el resto de las respuestas */ }
                 }
             }
             else -> Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")

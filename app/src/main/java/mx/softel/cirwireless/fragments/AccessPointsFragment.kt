@@ -201,6 +201,7 @@ class AccessPointsFragment: Fragment(),
         val dialog = PasswordDialog.getInstance()
         dialog.apply {
             apSelected = apMacList[position]
+            root.ssidSelected = apSelected
             show(root.supportFragmentManager, null)
         }
         toast(apMacList[position])
