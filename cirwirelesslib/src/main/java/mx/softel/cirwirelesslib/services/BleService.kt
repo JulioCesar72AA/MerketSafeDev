@@ -11,10 +11,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.util.Log
 import mx.softel.cirwirelesslib.constants.*
-import mx.softel.cirwirelesslib.enums.ActualState
-import mx.softel.cirwirelesslib.enums.DisconnectionReason
-import mx.softel.cirwirelesslib.enums.ReceivedCmd
-import mx.softel.cirwirelesslib.enums.StateMachine
+import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.utils.CommandUtils
 import java.lang.Exception
@@ -377,6 +374,7 @@ class BleService: Service() {
             WIFI_SSID_FAIL  -> ReceivedCmd.WIFI_SSID_FAIL
             WIFI_PASS_OK    -> ReceivedCmd.WIFI_PASS_OK
             WIFI_PASS_FAIL  -> ReceivedCmd.WIFI_PASS_FAIL
+            WIFI_STATUS     -> ReceivedCmd.WIFI_STATUS
             else            -> ReceivedCmd.UNKNOWN
         }
         Log.d(TAG, "receivedCommand -> $cmd")
@@ -397,6 +395,20 @@ class BleService: Service() {
             2       -> ActualState.CONNECTED
             3       -> ActualState.DISCONNECTING
             else    -> ActualState.UNKNOWN
+        }
+    }
+
+    private fun wifiStatus(response: ByteArray): WifiStatus {
+        return when (response[5]) {
+            0.toByte() -> WifiStatus.WIFI_CONFIGURING
+            1.toByte() -> WifiStatus.WIFI_NOT_CONNECTED
+            2.toByte() -> WifiStatus.WIFI_SSID_FAILED
+            3.toByte() -> WifiStatus.WIFI_CONNECTING
+            4.toByte() -> WifiStatus.WIFI_CONNECTED
+            5.toByte() -> WifiStatus.WIFI_IP_FAILED
+            6.toByte() -> WifiStatus.WIFI_GET_LOCATION
+            7.toByte() -> WifiStatus.WIFI_INTERNET_READY
+            else       -> WifiStatus.WIFI_TRANSMITING
         }
     }
 
@@ -473,6 +485,19 @@ class BleService: Service() {
         }
     }
 
+    fun sendStatusWifiCmd() {
+        Log.d(TAG, "sendStatusWifiCmd")
+
+        val cmd = CommandUtils.getWifiStatusCmd()
+
+        // Cargamos y escribimos en la característica
+        val flag = characteristicWrite!!.setValue(cmd)
+        if (flag) {
+            bleGatt!!.writeCharacteristic(characteristicWrite)
+            currentState = StateMachine.WIFI_CONFIG
+        }
+    }
+
     /**
      * ## fromResponseGetMacList
      * A partir de la respuesta obtenida por [getMacListCmd] parsea la respuesta
@@ -486,7 +511,7 @@ class BleService: Service() {
         Log.d(TAG, "fromResponseGetMacList")
 
         // Validamos que el tamaño de la respuesta sea correcto para parsear los datos
-        if (response[3] != 0x2B.toByte()) {
+        if (response[3] != SIX_ACCESS_POINTS) {
             Log.e(TAG, "El tamaño de bytes de la respuesta es incompatible")
             return null
         }
@@ -607,9 +632,16 @@ class BleService: Service() {
             if (characteristic == null) return
             Log.e(TAG, "RESPUESTA -> ${characteristic.value.toHex()}")
 
-            activity.commandState(currentState,
-                                  characteristic.value,
-                                  receivedCommand(characteristic.value))
+            if (receivedCommand(characteristic.value) == ReceivedCmd.WIFI_STATUS) {
+                activity.wifiStatus(currentState,
+                                    characteristic.value,
+                                    wifiStatus(characteristic.value))
+            } else {
+                activity.commandState(currentState,
+                                      characteristic.value,
+                                      receivedCommand(characteristic.value))
+            }
+
 
             // STATE MACHINE ACCESS POINTS *********************************************************
             /*when (currentState) {
@@ -671,6 +703,9 @@ class BleService: Service() {
         fun commandState(state: StateMachine,
                          response: ByteArray,
                          command: ReceivedCmd)
+        fun wifiStatus(state: StateMachine,
+                       response: ByteArray,
+                       wifiStatus: WifiStatus)
         //fun sendCommand(data: ByteArray)
         //fun onBleResponse(data: ByteArray)
     }
@@ -683,25 +718,26 @@ class BleService: Service() {
         private val TAG = BleService::class.java.simpleName
 
         // Discriminantes de respuestas
-        private const val POLEO                 = 0xC5.toByte()
-        private const val STATUS                = 0xC1.toByte()
-        private const val REFRESH_AP_OK         = 0x48.toByte()
-        private const val GET_AP                = 0x4A.toByte()
-        private const val AT_OK                 = 0x4C.toByte()
-        private const val AT_NOK                = 0x4D.toByte()
-        private const val WAIT_RESPONSE         = 0x36.toByte()
         private const val WIFI_SSID_OK          = 0x22.toByte()
         private const val WIFI_SSID_FAIL        = 0x23.toByte()
         private const val WIFI_PASS_OK          = 0x25.toByte()
         private const val WIFI_PASS_FAIL        = 0x26.toByte()
+        private const val WIFI_STATUS           = 0x28.toByte()
+        private const val WAIT_RESPONSE         = 0x36.toByte()
+        private const val REFRESH_AP_OK         = 0x48.toByte()
+        private const val GET_AP                = 0x4A.toByte()
+        private const val AT_OK                 = 0x4C.toByte()
+        private const val AT_NOK                = 0x4D.toByte()
+        private const val STATUS                = 0xC1.toByte()
+        private const val POLEO                 = 0xC5.toByte()
 
         // Validaciones
-        private const val SIX_ACCESS_POINTS = 0x2B.toByte()
+        private const val SIX_ACCESS_POINTS     = 0x2B.toByte()
 
         // Constantes útiles
-        const val MAX_ALLOWED_CONNECTIONS = 8
-        private val DISABLE_NOTIFICATION= byteArrayOf(0x00)
-        private val ENABLE_NOTIFICATION = byteArrayOf(0x01)
+        const val MAX_ALLOWED_CONNECTIONS             = 8
+        private val DISABLE_NOTIFICATION    = byteArrayOf(0x00)
+        private val ENABLE_NOTIFICATION     = byteArrayOf(0x01)
 
     }
 }

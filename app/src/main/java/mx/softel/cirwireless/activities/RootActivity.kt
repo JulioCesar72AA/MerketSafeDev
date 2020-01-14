@@ -16,10 +16,7 @@ import mx.softel.cirwireless.fragments.AccessPointsFragment
 import mx.softel.cirwireless.fragments.MainFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.*
-import mx.softel.cirwirelesslib.enums.ActualState
-import mx.softel.cirwirelesslib.enums.DisconnectionReason
-import mx.softel.cirwirelesslib.enums.ReceivedCmd
-import mx.softel.cirwirelesslib.enums.StateMachine
+import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.services.BleService
 
@@ -246,18 +243,29 @@ class RootActivity : AppCompatActivity(),
                     ReceivedCmd.WIFI_SSID_FAIL  -> service!!.sendSsidCmd(ssidSelected)
                     ReceivedCmd.WIFI_PASS_FAIL  -> service!!.sendPasswordCmd(passwordTyped)
                     ReceivedCmd.WIFI_PASS_OK    -> {
-                        //TODO: Añadir las validaciones de WIFI para manejo de status y errores de conexión
+                        // Iniciamos la validación de la comunicación Wifi
+                        service!!.sendStatusWifiCmd()
+
                         runOnUiThread {
                             toast("Wifi configurado correctamente")
                             backFragment()
                         }
                         Log.d(TAG, "Dispositivo configurado correctamente")
-                        service!!.currentState = StateMachine.POLING
+                        service!!.currentState = StateMachine.WIFI_CONFIG
                     }
                     else -> { /* Ignoramos el resto de las respuestas */ }
                 }
             }
             else -> Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
+        }
+    }
+
+
+    override fun wifiStatus(state: StateMachine, response: ByteArray, wifiStatus: WifiStatus) {
+        Log.e(TAG, "STATE: $state -> RESPONSE: ${response.toHex()} -> WIFI STATUS: $wifiStatus")
+        when (wifiStatus) {
+            WifiStatus.WIFI_CONFIGURING -> service!!.sendStatusWifiCmd()
+            else -> { service!!.sendStatusWifiCmd() }
         }
     }
     // *********************************************************************************************

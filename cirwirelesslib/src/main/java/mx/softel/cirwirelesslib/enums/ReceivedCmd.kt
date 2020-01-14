@@ -12,5 +12,6 @@ enum class ReceivedCmd {
     WIFI_SSID_OK,
     WIFI_SSID_FAIL,
     WIFI_PASS_OK,
-    WIFI_PASS_FAIL
+    WIFI_PASS_FAIL,
+    WIFI_STATUS
 }

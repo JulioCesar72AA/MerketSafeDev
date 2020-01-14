@@ -72,7 +72,7 @@ class AccessPointsFragment: Fragment(),
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(TAG, "onDestroy -> stopBleService")
+        Log.d(TAG, "onDestroy")
     }
 
     /**
