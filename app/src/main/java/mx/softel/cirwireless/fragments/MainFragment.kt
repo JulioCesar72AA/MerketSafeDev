@@ -105,10 +105,14 @@ class MainFragment : Fragment(), View.OnClickListener {
      */
     private fun clickConfigure() {
         Log.d(TAG, "clickConfigure")
-        toast("Actualizando datos")
 
         // Actualizamos los AccessPoints que el dispositivo ve
-        root.service!!.sendRefreshApCmd()
+        if (root.service!!.characteristicWrite == null)
+            clickConfigure()
+        else{
+            toast("Actualizando datos")
+            root.service!!.sendRefreshApCmd()
+        }
     }
 
 

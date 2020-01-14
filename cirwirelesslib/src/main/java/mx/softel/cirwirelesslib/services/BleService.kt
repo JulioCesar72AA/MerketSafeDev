@@ -18,6 +18,7 @@ import mx.softel.cirwirelesslib.enums.StateMachine
 import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.utils.CommandUtils
 import java.lang.Exception
+import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -34,11 +35,11 @@ class BleService: Service() {
     private var firmware                : String?                           = null
 
     // UUID's
-    private var uuidService             : UUID?                             = null
-    private var characteristicNotify    : BluetoothGattCharacteristic?      = null
-    private var characteristicWrite     : BluetoothGattCharacteristic?      = null
-    private var characteristicDeviceInfo: BluetoothGattCharacteristic?      = null
-    private var notificationDescriptor  : BluetoothGattDescriptor?          = null
+    var uuidService             : UUID?                             = null
+    var characteristicNotify    : BluetoothGattCharacteristic?      = null
+    var characteristicWrite     : BluetoothGattCharacteristic?      = null
+    var characteristicDeviceInfo: BluetoothGattCharacteristic?      = null
+    var notificationDescriptor  : BluetoothGattDescriptor?          = null
 
     // GATT
     var bleGatt                 : BluetoothGatt?                    = null
@@ -47,7 +48,7 @@ class BleService: Service() {
 
     // FLAGS - STATES
     private var correctFirmware         : Boolean                           = false
-    private var currentState            : StateMachine                      = StateMachine.UNKNOWN
+    var currentState            : StateMachine                      = StateMachine.UNKNOWN
     private var isDescriptorOn          : Boolean                           = false
 
     // HANDLERS
@@ -368,6 +369,7 @@ class BleService: Service() {
             POLEO           -> ReceivedCmd.POLEO
             STATUS          -> ReceivedCmd.STATUS
             REFRESH_AP_OK   -> ReceivedCmd.REFRESH_AP_OK
+            GET_AP          -> ReceivedCmd.GET_AP
             AT_OK           -> ReceivedCmd.AT_OK
             AT_NOK          -> ReceivedCmd.AT_NOK
             WAIT_RESPONSE   -> ReceivedCmd.WAIT_AP
@@ -424,6 +426,10 @@ class BleService: Service() {
         }
     }
 
+    /**
+     * ## getMacListCmd
+     * Ejecuta el comando para pedir los AccessPoints que el dispositivo almacenó (6)
+     */
     fun getMacListCmd() {
         Log.d(TAG, "getMacListCmd")
 
@@ -438,7 +444,31 @@ class BleService: Service() {
     }
 
     // TODO: Parsear la respuesta del comando de getAccessPointsCmd y devolver una lista de Mac's
+    fun fromResponseGetMacList(response: ByteArray): ArrayList<String>? {
+        Log.d(TAG, "fromResponseGetMacList")
 
+        // Validamos que el tamaño de la respuesta sea correcto para parsear los datos
+        if (response[3] != 0x2B.toByte()) {
+            Log.e(TAG, "El tamaño de bytes de la respuesta es incompatible")
+            return null
+        }
+
+        val list = ArrayList<String>()
+        val byteElement = ByteArray(6)
+        var macString = ""
+
+        for (i in 0..5) {
+            // Iteramos por cada elemento de las MAC del arreglo
+            for (j in 0..5) {
+                byteElement[j] = response[(6 * i) + (j + 5)]
+            }
+            // Casteamos el ByteArray en un String para el array final
+            macString = byteElement.toHex().replace(" ", ":")
+            Log.d(TAG, "macString: $macString")
+            list.add(macString)
+        }
+        return list
+    }
 
 
 
@@ -539,7 +569,9 @@ class BleService: Service() {
             if (characteristic == null) return
             Log.e(TAG, "RESPUESTA -> ${characteristic.value.toHex()}")
 
-            activity.commandState(currentState, characteristic.value, receivedCommand(characteristic.value))
+            activity.commandState(currentState,
+                                  characteristic.value,
+                                  receivedCommand(characteristic.value))
 
             // STATE MACHINE ACCESS POINTS *********************************************************
             /*when (currentState) {
@@ -616,6 +648,7 @@ class BleService: Service() {
         private const val POLEO         = 0xC5.toByte()
         private const val STATUS        = 0xC1.toByte()
         private const val REFRESH_AP_OK = 0x48.toByte()
+        private const val GET_AP        = 0x4A.toByte()
         private const val AT_OK         = 0x4C.toByte()
         private const val AT_NOK        = 0x4D.toByte()
         private const val WAIT_RESPONSE = 0x36.toByte()

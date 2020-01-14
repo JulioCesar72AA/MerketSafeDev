@@ -36,12 +36,16 @@ class RootActivity : AppCompatActivity(),
     internal var service             : BleService?      = null
     private  var isServiceConnected                     = false
 
+    // HANDLERS / RUNNABLES
     private val handler = Handler()
-
-    private var disconnectionReason = DisconnectionReason.UNKNOWN
     private val runnable = Runnable {
         finishActivity(disconnectionReason)
     }
+
+    // FLAGS / EXTRA VARIABLES
+    private var disconnectionReason                         = DisconnectionReason.UNKNOWN
+    internal var deviceMacList      : ArrayList<String>?    = null
+
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -201,11 +205,21 @@ class RootActivity : AppCompatActivity(),
         }
     }
 
+    /**
+     * ## commandState
+     * Recibe la respuesta del dispositivo y su estado actual en la
+     * máquina de estados, para poder dar un flujo adecuado
+     *
+     * @param state Estado actual (Máquina de estados)
+     * @param response Respuesta en bytes del dispositivo
+     * @param command Tipo de respuesta recibida
+     */
     override fun commandState(state: StateMachine, response: ByteArray, command: ReceivedCmd) {
 
+        Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
         when (state) {
             StateMachine.REFRESH_AP -> {
-                Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
+                // Si se recibe el comando REFRESH_AP_OK
                 if (command == ReceivedCmd.REFRESH_AP_OK) {
                     // Iniciamos el fragmento de AccessPointsFragment
                     val fragment = AccessPointsFragment.getInstance()
@@ -214,7 +228,10 @@ class RootActivity : AppCompatActivity(),
                 // Si no es REFRESH_AP_OK, simplemente ignoramos el resultado hasta cambiar de estado
             }
             StateMachine.GET_AP -> {
-                Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
+                if (command == ReceivedCmd.GET_AP) {
+                    // Casteamos el resultado en una lista de Strings
+                    deviceMacList = service!!.fromResponseGetMacList(response)
+                }
             }
             else -> Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
         }

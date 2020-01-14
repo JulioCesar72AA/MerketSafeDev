@@ -17,6 +17,7 @@ import mx.softel.cirwireless.R
 import mx.softel.cirwireless.activities.RootActivity
 import mx.softel.cirwireless.dialogs.PasswordDialog
 import mx.softel.cirwireless.extensions.toast
+import mx.softel.cirwirelesslib.enums.StateMachine
 
 class AccessPointsFragment: Fragment(),
     AdapterView.OnItemClickListener,
@@ -28,7 +29,7 @@ class AccessPointsFragment: Fragment(),
 
     // LIST DATA
     private lateinit var wifiResults    : MutableList<ScanResult>
-    private          var apList         = ArrayList<String>()
+    private          var apMacList      = ArrayList<String>()     // Lista validada de MACS
     private lateinit var arrayAdapter   : ArrayAdapter<String>
 
     // VIEWS
@@ -99,18 +100,28 @@ class AccessPointsFragment: Fragment(),
 
             // Rellena la lista para mostrar en la pantalla estándar
             for (data in wifiResults) {
-                Log.d(TAG, "${data.SSID} - ${data.frequency} - ${data.centerFreq0} - ${data.centerFreq1}")
+                Log.d(TAG, "${data.SSID} - ${data.BSSID}")
 
-                // El dispositivo solo puede conectarse a 2.4 de frecuencia, así que filtramos...
-                if (data.frequency < 3000 && data.SSID.length > 2)
-                    if (!apList.contains(data.SSID)) apList.add(data.SSID)
-                arrayAdapter.notifyDataSetChanged()
-
-                // TODO: Añadir los "destacados" de la lista de macs del dispositivo
+                // Establecemos una nueva lista de macs validadas por el dispositivo
+                if (root.deviceMacList == null) return
+                for (mac in root.deviceMacList!!) {
+                    if (data.BSSID == mac) {
+                        Log.d(TAG, "macList: ${data.SSID} -> Mac: $mac")
+                        if (!data.SSID.isNullOrEmpty()) apMacList.add(data.SSID)
+                    }
+                }
             }
 
-            // Inicializa la vista estándar
-            setStandardUI()
+            for (data in wifiResults) {
+                // Completamos la lista con los dispositivos escaneados por el teléfono
+                // El dispositivo solo puede conectarse a 2.4 de frecuencia, así que filtramos...
+                if (data.frequency < 3000 && data.SSID.length > 2)
+                    if (!apMacList.contains(data.SSID) && !data.SSID.isNullOrEmpty())
+                        apMacList.add(data.SSID)
+
+                arrayAdapter.notifyDataSetChanged()
+                setStandardUI()
+            }
         }
 
     }
@@ -125,7 +136,8 @@ class AccessPointsFragment: Fragment(),
      * asocia el adaptador y los datos a la [ListView]
      */
     private fun setWifiList() {
-        arrayAdapter = ArrayAdapter(root, android.R.layout.simple_list_item_1, apList)
+        //arrayAdapter = ArrayAdapter(root, android.R.layout.simple_list_item_1, apList)
+        arrayAdapter = ArrayAdapter(root, android.R.layout.simple_list_item_1, apMacList)
         lvAccessPoints.apply {
             adapter             = arrayAdapter
             onItemClickListener = this@AccessPointsFragment
@@ -167,7 +179,12 @@ class AccessPointsFragment: Fragment(),
     override fun onClick(v: View?) {
         when(v!!.id) {
             R.id.scanMask       -> toast("Espera un momento, escaneando Access Points")
-            R.id.ivBackAccess   -> root.supportFragmentManager.popBackStackImmediate()
+            R.id.ivBackAccess   -> {
+                root.apply {
+                    service!!.currentState = StateMachine.POLING
+                    supportFragmentManager.popBackStackImmediate()
+                }
+            }
         }
     }
 
@@ -183,10 +200,10 @@ class AccessPointsFragment: Fragment(),
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         val dialog = PasswordDialog.getInstance()
         dialog.apply {
-            apSelected = apList[position]
+            apSelected = apMacList[position]
             show(root.supportFragmentManager, null)
         }
-        toast(apList[position])
+        toast(apMacList[position])
     }
 
 
@@ -200,7 +217,7 @@ class AccessPointsFragment: Fragment(),
      */
     private fun scanWifi() {
         // Leemos los Access Points del celular
-        apList.clear()
+        apMacList.clear()
         root.registerReceiver(wifiReceiver, IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
         wifiManager.startScan()
 
