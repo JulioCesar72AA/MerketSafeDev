@@ -8,5 +8,9 @@ enum class ReceivedCmd {
     AT_OK,
     AT_NOK,
     WAIT_AP,
-    GET_AP
+    GET_AP,
+    WIFI_SSID_OK,
+    WIFI_SSID_FAIL,
+    WIFI_PASS_OK,
+    WIFI_PASS_FAIL
 }

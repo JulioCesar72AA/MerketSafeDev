@@ -373,6 +373,10 @@ class BleService: Service() {
             AT_OK           -> ReceivedCmd.AT_OK
             AT_NOK          -> ReceivedCmd.AT_NOK
             WAIT_RESPONSE   -> ReceivedCmd.WAIT_AP
+            WIFI_SSID_OK    -> ReceivedCmd.WIFI_SSID_OK
+            WIFI_SSID_FAIL  -> ReceivedCmd.WIFI_SSID_FAIL
+            WIFI_PASS_OK    -> ReceivedCmd.WIFI_PASS_OK
+            WIFI_PASS_FAIL  -> ReceivedCmd.WIFI_PASS_FAIL
             else            -> ReceivedCmd.UNKNOWN
         }
         Log.d(TAG, "receivedCommand -> $cmd")
@@ -443,7 +447,41 @@ class BleService: Service() {
         }
     }
 
-    // TODO: Parsear la respuesta del comando de getAccessPointsCmd y devolver una lista de Mac's
+    fun sendSsidCmd(ssid: String) {
+        Log.d(TAG, "sendSsidCmd")
+
+        val cmd = CommandUtils.setSsidCmd(ssid)
+
+        // Cargamos y escribimos en la característica
+        val flag = characteristicWrite!!.setValue(cmd)
+        if (flag) {
+            bleGatt!!.writeCharacteristic(characteristicWrite)
+            currentState = StateMachine.WIFI_CONFIG
+        }
+    }
+
+    fun sendPasswordCmd(password: String) {
+        Log.d(TAG, "sendSsidCmd")
+
+        val cmd = CommandUtils.setPasswordCmd(password)
+
+        // Cargamos y escribimos en la característica
+        val flag = characteristicWrite!!.setValue(cmd)
+        if (flag) {
+            bleGatt!!.writeCharacteristic(characteristicWrite)
+            currentState = StateMachine.WIFI_CONFIG
+        }
+    }
+
+    /**
+     * ## fromResponseGetMacList
+     * A partir de la respuesta obtenida por [getMacListCmd] parsea la respuesta
+     * para convertir el arreglo de bytes en una lista de Strings conteniendo las
+     * direcciones MAC leídas por el dispositivo
+     *
+     * @param response Arreglo de Bytes que responde el dispositivo
+     * @return Lista de MAC's visibles para el dispositivo
+     */
     fun fromResponseGetMacList(response: ByteArray): ArrayList<String>? {
         Log.d(TAG, "fromResponseGetMacList")
 
@@ -455,7 +493,7 @@ class BleService: Service() {
 
         val list = ArrayList<String>()
         val byteElement = ByteArray(6)
-        var macString = ""
+        var macString: String
 
         for (i in 0..5) {
             // Iteramos por cada elemento de las MAC del arreglo
@@ -645,13 +683,17 @@ class BleService: Service() {
         private val TAG = BleService::class.java.simpleName
 
         // Discriminantes de respuestas
-        private const val POLEO         = 0xC5.toByte()
-        private const val STATUS        = 0xC1.toByte()
-        private const val REFRESH_AP_OK = 0x48.toByte()
-        private const val GET_AP        = 0x4A.toByte()
-        private const val AT_OK         = 0x4C.toByte()
-        private const val AT_NOK        = 0x4D.toByte()
-        private const val WAIT_RESPONSE = 0x36.toByte()
+        private const val POLEO                 = 0xC5.toByte()
+        private const val STATUS                = 0xC1.toByte()
+        private const val REFRESH_AP_OK         = 0x48.toByte()
+        private const val GET_AP                = 0x4A.toByte()
+        private const val AT_OK                 = 0x4C.toByte()
+        private const val AT_NOK                = 0x4D.toByte()
+        private const val WAIT_RESPONSE         = 0x36.toByte()
+        private const val WIFI_SSID_OK          = 0x22.toByte()
+        private const val WIFI_SSID_FAIL        = 0x23.toByte()
+        private const val WIFI_PASS_OK          = 0x25.toByte()
+        private const val WIFI_PASS_FAIL        = 0x26.toByte()
 
         // Validaciones
         private const val SIX_ACCESS_POINTS = 0x2B.toByte()
