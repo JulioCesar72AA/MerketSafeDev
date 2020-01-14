@@ -246,6 +246,7 @@ class RootActivity : AppCompatActivity(),
                     ReceivedCmd.WIFI_SSID_FAIL  -> service!!.sendSsidCmd(ssidSelected)
                     ReceivedCmd.WIFI_PASS_FAIL  -> service!!.sendPasswordCmd(passwordTyped)
                     ReceivedCmd.WIFI_PASS_OK    -> {
+                        //TODO: Añadir las validaciones de WIFI para manejo de status y errores de conexión
                         runOnUiThread {
                             toast("Wifi configurado correctamente")
                             backFragment()

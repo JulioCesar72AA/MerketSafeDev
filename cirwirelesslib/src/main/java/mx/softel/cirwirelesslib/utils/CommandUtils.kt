@@ -13,6 +13,7 @@ object CommandUtils {
     private val GET_AP_MAC_LIST     = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x49)
     private val SET_SSID            = byteArrayOf(0x55, 0x13, 0x10, 0x00, 0x21)
     private val SET_PASSWORD        = byteArrayOf(0x55, 0x13, 0x10, 0x00, 0x24)
+    private val WIFI_STATUS         = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x27)
     private val AT_GENERIC          = byteArrayOf(0x55, 0x13, 0x10, 0x00, 0x4B)
     private val AT_READ             = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x34)
 
@@ -25,6 +26,11 @@ object CommandUtils {
     fun getAccessPointsCmd(): ByteArray {
         Log.d(TAG, "getAccessPointsCmd")
         return GET_AP_MAC_LIST + getCrc16(GET_AP_MAC_LIST)
+    }
+
+    fun getWifiStatusCmd(): ByteArray {
+        Log.d(TAG, "getWifiStatusCmd")
+        return WIFI_STATUS + getCrc16(WIFI_STATUS)
     }
 
     fun setSsidCmd(ssid: String): ByteArray {
