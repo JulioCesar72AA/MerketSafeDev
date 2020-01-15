@@ -7,6 +7,7 @@ enum class StateMachine {
     REFRESH_AP,
     WIFI_CONFIG,
     GET_AP,
+    WIFI_STATUS,
     AT_WAIT_RESPONSE,
     STANDBY
 }

@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
+import androidx.core.os.postDelayed
 import androidx.fragment.app.Fragment
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.dialogs.PasswordDialog
@@ -40,6 +41,9 @@ class RootActivity : AppCompatActivity(),
     private val handler = Handler()
     private val runnable = Runnable {
         finishActivity(disconnectionReason)
+    }
+    private val serviceRunnable = Runnable {
+        service!!.sendStatusWifiCmd()
     }
 
     // FLAGS / EXTRA VARIABLES
@@ -251,7 +255,7 @@ class RootActivity : AppCompatActivity(),
                             backFragment()
                         }
                         Log.d(TAG, "Dispositivo configurado correctamente")
-                        service!!.currentState = StateMachine.WIFI_CONFIG
+                        service!!.currentState = StateMachine.WIFI_STATUS
                     }
                     else -> { /* Ignoramos el resto de las respuestas */ }
                 }
@@ -264,8 +268,18 @@ class RootActivity : AppCompatActivity(),
     override fun wifiStatus(state: StateMachine, response: ByteArray, wifiStatus: WifiStatus) {
         Log.e(TAG, "STATE: $state -> RESPONSE: ${response.toHex()} -> WIFI STATUS: $wifiStatus")
         when (wifiStatus) {
-            WifiStatus.WIFI_CONFIGURING -> service!!.sendStatusWifiCmd()
-            else -> { service!!.sendStatusWifiCmd() }
+            WifiStatus.WIFI_CONFIGURING     -> updateWifiStatusInfo()
+            WifiStatus.WIFI_NOT_CONNECTED   -> updateWifiStatusInfo()
+            WifiStatus.WIFI_SSID_FAILED     -> runOnUiThread { toast("Error en el SSID") }
+            WifiStatus.WIFI_CONNECTING      -> updateWifiStatusInfo()
+            WifiStatus.WIFI_CONNECTED       -> updateWifiStatusInfo()
+            WifiStatus.WIFI_IP_FAILED       -> updateWifiStatusInfo()
+            WifiStatus.WIFI_GET_LOCATION    -> updateWifiStatusInfo()
+            WifiStatus.WIFI_INTERNET_READY  -> updateWifiStatusInfo()
+            WifiStatus.WIFI_TRANSMITING     -> {
+                updateWifiStatusInfo()
+                service!!.currentState = StateMachine.POLING
+            }
         }
     }
     // *********************************************************************************************
@@ -315,6 +329,13 @@ class RootActivity : AppCompatActivity(),
         Log.d(TAG, "connectedDevice")
         runOnUiThread { toast("Dispositivo conectado") }
         service!!.discoverDeviceServices()
+    }
+
+    private fun updateWifiStatusInfo() {
+        handler.apply {
+            postDelayed(serviceRunnable, SERVICE_TIMEOUT)
+            removeCallbacks(serviceRunnable)
+        }
     }
 
 
@@ -376,6 +397,7 @@ class RootActivity : AppCompatActivity(),
         private val TAG = RootActivity::class.java.simpleName
 
         // Timeouts de la actividad
-        private const val UI_TIMEOUT = 500L
+        private const val UI_TIMEOUT        = 500L
+        private const val SERVICE_TIMEOUT   = 800L
     }
 }

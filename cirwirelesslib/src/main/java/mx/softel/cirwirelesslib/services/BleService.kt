@@ -632,7 +632,7 @@ class BleService: Service() {
             if (characteristic == null) return
             Log.e(TAG, "RESPUESTA -> ${characteristic.value.toHex()}")
 
-            if (receivedCommand(characteristic.value) == ReceivedCmd.WIFI_STATUS) {
+            if (currentState == StateMachine.WIFI_STATUS) {
                 activity.wifiStatus(currentState,
                                     characteristic.value,
                                     wifiStatus(characteristic.value))
