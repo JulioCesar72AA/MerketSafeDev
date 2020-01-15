@@ -7,9 +7,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.core.os.postDelayed
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.dialogs.PasswordDialog
 import mx.softel.cirwireless.extensions.toast
@@ -28,14 +30,14 @@ class RootActivity : AppCompatActivity(),
     BleService.OnBleConnection {
 
     // BLUETOOTH DEVICE
-    internal lateinit var bleDevice     : BluetoothDevice
-    internal lateinit var bleMac        : String
-    internal lateinit var ssidSelected  : String
-    internal lateinit var passwordTyped : String
+    internal lateinit var bleDevice: BluetoothDevice
+    internal lateinit var bleMac: String
+    internal lateinit var ssidSelected: String
+    internal lateinit var passwordTyped: String
 
     // SERVICE CONNECTIONS / FLAGS
-    internal var service             : BleService?      = null
-    private  var isServiceConnected                     = false
+    internal var service: BleService? = null
+    private var isServiceConnected = false
 
     // HANDLERS / RUNNABLES
     private val handler = Handler()
@@ -45,10 +47,13 @@ class RootActivity : AppCompatActivity(),
     private val serviceRunnable = Runnable {
         service!!.sendStatusWifiCmd()
     }
+    private val initRunnable = Runnable {
+        setStandardUI()
+    }
 
     // FLAGS / EXTRA VARIABLES
-    private var disconnectionReason                         = DisconnectionReason.UNKNOWN
-    internal var deviceMacList      : ArrayList<String>?    = null
+    private var disconnectionReason = DisconnectionReason.UNKNOWN
+    internal var deviceMacList: ArrayList<String>? = null
 
 
     /************************************************************************************************/
@@ -57,8 +62,12 @@ class RootActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_root)
+        setScanningUI()
         getAndSetIntentData()
         initFragment()
+        handler.apply {
+            postDelayed(initRunnable, CONFIG_TIMEOUT)
+        }
     }
 
     override fun onResume() {
@@ -73,6 +82,21 @@ class RootActivity : AppCompatActivity(),
 
         // Desasociamos el servicio de BLE
         doUnbindService()
+    }
+
+    internal fun setScanningUI() {
+        scanMask.apply {
+            visibility = View.VISIBLE
+            background = getDrawable(R.color.hardMask)
+            setOnClickListener { toast("Espere un momento") }
+        }
+        pbScanning.visibility = View.VISIBLE
+    }
+
+    internal fun setStandardUI() {
+        Log.e(TAG, "setStandardUI")
+        scanMask.visibility = View.GONE
+        pbScanning.visibility = View.GONE
     }
 
     /**
@@ -140,11 +164,7 @@ class RootActivity : AppCompatActivity(),
 
         service!!.sendSsidCmd(ssidSelected)
         passwordTyped = password
-
-        val accessPointFragment = supportFragmentManager
-            .findFragmentById(R.id.fragmentContainer)
-                as AccessPointsFragment
-        accessPointFragment.setScanningUI()
+        setScanningUI()
     }
 
     /**
@@ -279,6 +299,7 @@ class RootActivity : AppCompatActivity(),
             WifiStatus.WIFI_TRANSMITING     -> {
                 updateWifiStatusInfo()
                 service!!.currentState = StateMachine.POLING
+                setStandardUI()
             }
         }
     }
@@ -399,5 +420,6 @@ class RootActivity : AppCompatActivity(),
         // Timeouts de la actividad
         private const val UI_TIMEOUT        = 500L
         private const val SERVICE_TIMEOUT   = 800L
+        private const val CONFIG_TIMEOUT    = 1500L
     }
 }

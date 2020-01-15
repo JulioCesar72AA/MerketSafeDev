@@ -35,8 +35,6 @@ class AccessPointsFragment: Fragment(),
     // VIEWS
     private lateinit var lvAccessPoints : ListView
     private lateinit var backBtn        : ImageView
-    private lateinit var scanMask       : View
-    private lateinit var progressBar    : ProgressBar
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -58,12 +56,10 @@ class AccessPointsFragment: Fragment(),
         view.apply {
             lvAccessPoints  = findViewById(R.id.lvAccessPoints)
             backBtn         = findViewById(R.id.ivBackAccess)
-            scanMask        = findViewById(R.id.scanMask)
-            progressBar     = findViewById(R.id.pbScanning)
         }
 
         setOnClickListeners()
-        setScanningUI()
+        root.setScanningUI()
         setWifiList()
         scanWifi()
 
@@ -80,7 +76,6 @@ class AccessPointsFragment: Fragment(),
      * Inicializa los eventos de click para los elementos en la vista
      */
     private fun setOnClickListeners() {
-        scanMask.setOnClickListener(this)
         backBtn.setOnClickListener(this)
     }
 
@@ -120,7 +115,7 @@ class AccessPointsFragment: Fragment(),
                         apMacList.add(data.SSID)
 
                 arrayAdapter.notifyDataSetChanged()
-                setStandardUI()
+                root.setStandardUI()
             }
         }
 
@@ -142,27 +137,6 @@ class AccessPointsFragment: Fragment(),
             adapter             = arrayAdapter
             onItemClickListener = this@AccessPointsFragment
         }
-    }
-
-    /**
-     * ## setScanningUI
-     * Muestra la vista boqueada de escaneo de datos
-     */
-    internal fun setScanningUI() {
-        progressBar.visibility = View.VISIBLE
-        scanMask   .apply {
-            visibility = View.VISIBLE
-            background = root.getDrawable(R.color.hardMask)
-        }
-    }
-
-    /**
-     * ## setStandardUI
-     * Muestra una pantalla natural, sin bloqueos de escaneo
-     */
-    internal fun setStandardUI() {
-        progressBar.visibility = View.GONE
-        scanMask   .visibility = View.GONE
     }
 
 
