@@ -118,7 +118,4 @@
         </LinearLayout>
     </TableLayout>
 
-    <!-- Scanning Mask -->
-    <include layout="@layout/scanning_mask"/>
-
 </RelativeLayout>

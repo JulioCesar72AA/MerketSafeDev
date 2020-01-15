@@ -8,24 +8,40 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import mx.softel.cirwireless.R
+import mx.softel.cirwireless.extensions.toast
 
 class PasswordDialog: DialogFragment(), View.OnClickListener {
 
     private lateinit var btnContinue    : Button
     private lateinit var btnCancel      : Button
+    private lateinit var tvAccessPoints : TextView
+    private lateinit var etPassword     : EditText
+
+    internal lateinit var apSelected    : String
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
     /************************************************************************************************/
+
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.pop_up_password, container, false)
         view.apply {
-            btnContinue = findViewById(R.id.btnAccept)
-            btnCancel   = findViewById(R.id.btnCancel)
+            // Conectamos las vistas
+            tvAccessPoints  = findViewById(R.id.tvAccessPoint)
+            btnContinue     = findViewById(R.id.btnAccept)
+            btnCancel       = findViewById(R.id.btnCancel)
+            etPassword      = findViewById(R.id.etPassword)
+
+            // Iniciamos la vista
+            tvAccessPoints.text = apSelected
+
+            // Establecemos los eventos de click en la vista
             setOnClickListeners()
         }
         return view
@@ -50,7 +66,13 @@ class PasswordDialog: DialogFragment(), View.OnClickListener {
 
         val parent = activity as (OnDialogClickListener)
         when (v!!.id) {
-            R.id.btnAccept -> parent.dialogAccept("")
+            R.id.btnAccept -> {
+                if (etPassword.text.isBlank() || etPassword.text.isEmpty()) {
+                    toast("Debes ingresar un password válido")
+                    return
+                }
+                parent.dialogAccept(etPassword.text.toString())
+            }
             R.id.btnCancel -> parent.dialogCancel()
         }
         dismiss()
@@ -70,6 +92,8 @@ class PasswordDialog: DialogFragment(), View.OnClickListener {
     /************************************************************************************************/
     companion object {
         private val TAG = PasswordDialog::class.java.simpleName
+
+        fun getInstance() = PasswordDialog()
     }
 
 }
