@@ -42,5 +42,6 @@
     <string name="cd_icon_router">Icono Router</string>
     <string name="cd_icon_dispositivos">Dispositivo</string>
     <string name="cd_back_icon">Volver</string>
+    <string name="cd_password_icon">Password</string>
 
 </resources>

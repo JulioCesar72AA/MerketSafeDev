@@ -7,7 +7,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
+import android.view.View
+import android.widget.Toast
+import androidx.core.os.postDelayed
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.dialogs.PasswordDialog
 import mx.softel.cirwireless.extensions.toast
@@ -15,8 +19,8 @@ import mx.softel.cirwireless.fragments.AccessPointsFragment
 import mx.softel.cirwireless.fragments.MainFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.*
-import mx.softel.cirwirelesslib.enums.ActualState
-import mx.softel.cirwirelesslib.enums.DisconnectionReason
+import mx.softel.cirwirelesslib.enums.*
+import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.services.BleService
 
 
@@ -26,19 +30,31 @@ class RootActivity : AppCompatActivity(),
     BleService.OnBleConnection {
 
     // BLUETOOTH DEVICE
-    internal lateinit var bleDevice : BluetoothDevice
-    internal lateinit var bleMac    : String
+    internal lateinit var bleDevice: BluetoothDevice
+    internal lateinit var bleMac: String
+    internal lateinit var ssidSelected: String
+    internal lateinit var passwordTyped: String
 
     // SERVICE CONNECTIONS / FLAGS
-    internal var service             : BleService?      = null
-    private  var isServiceConnected                     = false
+    internal var service: BleService? = null
+    private var isServiceConnected = false
 
+    // HANDLERS / RUNNABLES
     private val handler = Handler()
-
-    private var disconnectionReason = DisconnectionReason.UNKNOWN
     private val runnable = Runnable {
         finishActivity(disconnectionReason)
     }
+    private val serviceRunnable = Runnable {
+        service!!.sendStatusWifiCmd()
+    }
+    private val initRunnable = Runnable {
+        setStandardUI()
+    }
+
+    // FLAGS / EXTRA VARIABLES
+    private var disconnectionReason = DisconnectionReason.UNKNOWN
+    internal var deviceMacList: ArrayList<String>? = null
+
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -46,8 +62,12 @@ class RootActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_root)
+        setScanningUI()
         getAndSetIntentData()
         initFragment()
+        handler.apply {
+            postDelayed(initRunnable, CONFIG_TIMEOUT)
+        }
     }
 
     override fun onResume() {
@@ -62,6 +82,21 @@ class RootActivity : AppCompatActivity(),
 
         // Desasociamos el servicio de BLE
         doUnbindService()
+    }
+
+    internal fun setScanningUI() {
+        scanMask.apply {
+            visibility = View.VISIBLE
+            background = getDrawable(R.color.hardMask)
+            setOnClickListener { toast("Espere un momento") }
+        }
+        pbScanning.visibility = View.VISIBLE
+    }
+
+    internal fun setStandardUI() {
+        Log.e(TAG, "setStandardUI")
+        scanMask.visibility = View.GONE
+        pbScanning.visibility = View.GONE
     }
 
     /**
@@ -94,15 +129,23 @@ class RootActivity : AppCompatActivity(),
             .commit()
     }
 
+    private fun backFragment() = supportFragmentManager.popBackStackImmediate()
+
     /**
      * ## finishActivity
-     * Corrige un Bug de back button en fragmento
+     * Desconecta los dispositivos asociados, elimina los callbacks
+     * y termina la actividad, para volver a la lista de dispositivos escaneados
      */
     internal fun finishActivity(disconnectionReason: DisconnectionReason) {
         service!!.disconnectBleDevice(disconnectionReason)
         handler.removeCallbacks(runnable)
         finish()
     }
+
+
+
+
+
 
 
     /************************************************************************************************/
@@ -116,11 +159,12 @@ class RootActivity : AppCompatActivity(),
      * @param password Texto de password ingresado por el usuario
      */
     override fun dialogAccept(password: String) {
-        toast("Configurando el dispositivo")
-        val accessPointFragment = supportFragmentManager
-            .findFragmentById(R.id.fragmentContainer)
-                as AccessPointsFragment
-        accessPointFragment.setScanningUI()
+
+        toast("Configurando el WIFI del dispositivo", Toast.LENGTH_LONG)
+
+        service!!.sendSsidCmd(ssidSelected)
+        passwordTyped = password
+        setScanningUI()
     }
 
     /**
@@ -132,10 +176,14 @@ class RootActivity : AppCompatActivity(),
     }
 
 
+
+
+
+
+
     /************************************************************************************************/
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
-
     /**
      * ## navigateTo
      * Interface que ayuda con la navegación entre fragmentos contenidos en
@@ -168,7 +216,7 @@ class RootActivity : AppCompatActivity(),
         transaction.commit()
     }
 
-    // BLE SERVICE INTERFACES
+    // BLE SERVICE INTERFACES **********************************************************************
     /**
      * ## connectionStatus
      * Se ejecuta cada que el servicio BLE cambia de estatus de conexión
@@ -188,6 +236,77 @@ class RootActivity : AppCompatActivity(),
     }
 
     /**
+     * ## commandState
+     * Recibe la respuesta del dispositivo y su estado actual en la
+     * máquina de estados, para poder dar un flujo adecuado
+     *
+     * @param state Estado actual (Máquina de estados)
+     * @param response Respuesta en bytes del dispositivo
+     * @param command Tipo de respuesta recibida
+     */
+    override fun commandState(state: StateMachine, response: ByteArray, command: ReceivedCmd) {
+
+        Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
+        when (state) {
+            StateMachine.REFRESH_AP -> {
+                if (command == ReceivedCmd.REFRESH_AP_OK) {
+                    val fragment = AccessPointsFragment.getInstance()
+                    navigateTo(fragment, true, null)
+                }
+                /* Ignoramos el resto de los comandos */
+            }
+            StateMachine.GET_AP -> {
+                if (command == ReceivedCmd.GET_AP) {
+                    // Casteamos el resultado en una lista de Strings
+                    deviceMacList = service!!.fromResponseGetMacList(response)
+                }
+            }
+            StateMachine.WIFI_CONFIG -> {
+                when (command) {
+                    ReceivedCmd.WIFI_SSID_OK    -> service!!.sendPasswordCmd(passwordTyped)
+                    ReceivedCmd.WIFI_SSID_FAIL  -> service!!.sendSsidCmd(ssidSelected)
+                    ReceivedCmd.WIFI_PASS_FAIL  -> service!!.sendPasswordCmd(passwordTyped)
+                    ReceivedCmd.WIFI_PASS_OK    -> {
+                        // Iniciamos la validación de la comunicación Wifi
+                        service!!.sendStatusWifiCmd()
+
+                        runOnUiThread {
+                            toast("Wifi configurado correctamente")
+                            backFragment()
+                        }
+                        Log.d(TAG, "Dispositivo configurado correctamente")
+                        service!!.currentState = StateMachine.WIFI_STATUS
+                    }
+                    else -> { /* Ignoramos el resto de las respuestas */ }
+                }
+            }
+            else -> Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
+        }
+    }
+
+
+    override fun wifiStatus(state: StateMachine, response: ByteArray, wifiStatus: WifiStatus) {
+        Log.e(TAG, "STATE: $state -> RESPONSE: ${response.toHex()} -> WIFI STATUS: $wifiStatus")
+        when (wifiStatus) {
+            WifiStatus.WIFI_CONFIGURING     -> updateWifiStatusInfo()
+            WifiStatus.WIFI_NOT_CONNECTED   -> updateWifiStatusInfo()
+            WifiStatus.WIFI_SSID_FAILED     -> runOnUiThread { toast("Error en el SSID") }
+            WifiStatus.WIFI_CONNECTING      -> updateWifiStatusInfo()
+            WifiStatus.WIFI_CONNECTED       -> updateWifiStatusInfo()
+            WifiStatus.WIFI_IP_FAILED       -> updateWifiStatusInfo()
+            WifiStatus.WIFI_GET_LOCATION    -> updateWifiStatusInfo()
+            WifiStatus.WIFI_INTERNET_READY  -> updateWifiStatusInfo()
+            WifiStatus.WIFI_TRANSMITING     -> {
+                updateWifiStatusInfo()
+                service!!.currentState = StateMachine.POLING
+                setStandardUI()
+            }
+        }
+    }
+    // *********************************************************************************************
+
+
+    /**
      * ## errorConnection
      * Muestra un mensaje con una descripción genérica de conexión cuando
      * no se puede conectar al dispositivo.
@@ -202,23 +321,48 @@ class RootActivity : AppCompatActivity(),
             DisconnectionReason.ERROR_133, DisconnectionReason.ERROR_257 -> {
                 runOnUiThread { toast("Ocurrió un error") }
                 handler.apply {
-                    postDelayed(runnable, 1000)
+                    postDelayed(runnable, UI_TIMEOUT)
                 }
             }
             DisconnectionReason.DISCONNECTION_OCURRED, DisconnectionReason.CONNECTION_FAILED -> {
                 runOnUiThread { toast("No se puede conectar con el dispositivo") }
                 handler.apply {
-                    postDelayed(runnable, 1000)
+                    postDelayed(runnable, UI_TIMEOUT)
+                }
+            }
+            DisconnectionReason.FIRMWARE_UNSOPPORTED -> {
+                runOnUiThread { toast("Dispositivo no soportado") }
+                handler.apply {
+                    postDelayed(runnable, UI_TIMEOUT)
                 }
             }
             else -> toast("Desconectando el dispositivo")
         }
     }
 
+    /**
+     * ## connectedDevice
+     * Notifica en pantalla que el dispositivo fue correctamente conectado.
+     * Manda a escanear los servicios que el dispositivo contiene, e inicializa
+     * algunas características necesarias para la comunicación
+     */
     private fun connectedDevice() {
         Log.d(TAG, "connectedDevice")
         runOnUiThread { toast("Dispositivo conectado") }
+        service!!.discoverDeviceServices()
     }
+
+    private fun updateWifiStatusInfo() {
+        handler.apply {
+            postDelayed(serviceRunnable, SERVICE_TIMEOUT)
+            removeCallbacks(serviceRunnable)
+        }
+    }
+
+
+
+
+
 
 
     /************************************************************************************************/
@@ -262,10 +406,20 @@ class RootActivity : AppCompatActivity(),
 
 
 
+
+
+
+
+
     /************************************************************************************************/
     /**     COMPANION OBJECT                                                                        */
     /************************************************************************************************/
     companion object {
         private val TAG = RootActivity::class.java.simpleName
+
+        // Timeouts de la actividad
+        private const val UI_TIMEOUT        = 500L
+        private const val SERVICE_TIMEOUT   = 800L
+        private const val CONFIG_TIMEOUT    = 1500L
     }
 }

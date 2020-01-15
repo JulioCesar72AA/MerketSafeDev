@@ -9,9 +9,11 @@ object CommandUtils {
 
     private val TAG = CommandUtils::class.java.simpleName
 
-    private val POLEO               = byteArrayOf(0x55, 0x10, 0x13, 0x07, 0xC5.toByte())
     private val REFRESH_AP          = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x47)
     private val GET_AP_MAC_LIST     = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x49)
+    private val SET_SSID            = byteArrayOf(0x55, 0x13, 0x10, 0x00, 0x21)
+    private val SET_PASSWORD        = byteArrayOf(0x55, 0x13, 0x10, 0x00, 0x24)
+    private val WIFI_STATUS         = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x27)
     private val AT_GENERIC          = byteArrayOf(0x55, 0x13, 0x10, 0x00, 0x4B)
     private val AT_READ             = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x34)
 
@@ -21,7 +23,51 @@ object CommandUtils {
         return REFRESH_AP + getCrc16(REFRESH_AP)
     }
 
-    fun configureAccessPointsCmd(): ByteArray {
+    fun getAccessPointsCmd(): ByteArray {
+        Log.d(TAG, "getAccessPointsCmd")
+        return GET_AP_MAC_LIST + getCrc16(GET_AP_MAC_LIST)
+    }
+
+    fun getWifiStatusCmd(): ByteArray {
+        Log.d(TAG, "getWifiStatusCmd")
+        return WIFI_STATUS + getCrc16(WIFI_STATUS)
+    }
+
+    fun setSsidCmd(ssid: String): ByteArray {
+        Log.d(TAG, "setSsidCmd")
+
+        // Iniciamos el cálculo del tamaño, así como la conversión a bytes del SSID
+        val nameBytes = ssid.toByteArray()
+        val size = SET_SSID.size + nameBytes.size + 2
+        var cmd = SET_SSID + nameBytes
+        cmd[3] = size.toByte()
+
+        // Calculamos el CRC del comando completo
+        val crc = getCrc16(cmd)
+
+        // Lo concatenamos con el comando final
+        cmd += crc
+        return cmd
+    }
+
+    fun setPasswordCmd(password: String): ByteArray {
+        Log.d(TAG, "setPasswordCmd")
+
+        // Iniciamos el cálculo del tamaño, así como la conversión a bytes del password
+        val passBytes = password.toByteArray()
+        val size = SET_PASSWORD.size + passBytes.size + 2
+        var cmd = SET_PASSWORD + passBytes
+        cmd[3] = size.toByte()
+
+        // Calculamos el CRC del comando completo
+        val crc = getCrc16(cmd)
+
+        // Lo concatenamos en el comando final
+        cmd += crc
+        return cmd
+    }
+
+    /*fun configureAccessPointsCmd(): ByteArray {
         Log.d(TAG, "getAccessPointsCmd")
 
         val atCmd = "AT+CWLAPOPT=1,8".toByteArray()
@@ -42,13 +88,7 @@ object CommandUtils {
     fun readAtCmd(): ByteArray {
         Log.d(TAG, "readAtCmd")
         return AT_READ + getCrc16(AT_READ)
-    }
-
-
-    fun getAccessPointsCmd(): ByteArray {
-        Log.d(TAG, "getAccessPointsCmd")
-        return GET_AP_MAC_LIST + getCrc16(GET_AP_MAC_LIST)
-    }
+    }*/
 
 
 
@@ -70,7 +110,7 @@ object CommandUtils {
         crc = crc and 0xffff
         val data = crc.toByteArray()
         val byteArray = byteArrayOf(data[2], data[3])
-        Log.d("BleService", "${POLEO.toHex()} ${byteArray.toHex()}")
+        //Log.d("BleService", "${POLEO.toHex()} ${byteArray.toHex()}")
         return byteArray
     }
 
