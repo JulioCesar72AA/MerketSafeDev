@@ -307,11 +307,12 @@ class RootActivity : AppCompatActivity(),
         val atResponse      = response[4] == 0x35.toByte()
 
         // Validamos el status cada 5 poleos
-        if (statusCountDown >= 5) {
+        if (statusCountDown >= 8) {
             service!!.sendStatusWifiCmd()
             statusCountDown = 0
             return
         }
+
         if (pole || status) {
             Log.d(TAG, "WIFI STATUS -> POLEO/STATUS")
             statusCountDown++
@@ -320,6 +321,7 @@ class RootActivity : AppCompatActivity(),
 
         if (atResponseFail) {
             service!!.sendIpAtCmd()
+            return
         }
 
         // Enviamos lectura AT con comando AT
@@ -344,7 +346,20 @@ class RootActivity : AppCompatActivity(),
         Log.e(TAG, "STATE: $state -> RESPONSE: ${response.toHex()} -> WIFI STATUS: $wifiStatus")
         when (wifiStatus) {
             WifiStatus.WIFI_CONFIGURING     -> {}
-            WifiStatus.WIFI_NOT_CONNECTED   -> { service!!.sendIpAtCmd() }
+            WifiStatus.WIFI_NOT_CONNECTED   -> {
+
+                if (retryConnection >= 2) {
+                    retryConnection = 0
+                    service!!.currentState = StateMachine.POLING
+                    runOnUiThread {
+                        toast("No se pudo configurar el Wifi")
+                        setStandardUI()
+                    }
+                } else {
+                    service!!.sendIpAtCmd()
+                    retryConnection++
+                }
+            }
             WifiStatus.WIFI_SSID_FAILED     -> {}
             WifiStatus.WIFI_CONNECTING      -> {}
             WifiStatus.WIFI_CONNECTED       -> {
@@ -486,7 +501,7 @@ class RootActivity : AppCompatActivity(),
 
         private var statusCountDown     = 0
         private var waitCountDown       = 0
-        private var retryConncection    = 0
+        private var retryConnection     = 0
         private var verifyConnection    = 0
 
         // Timeouts de la actividad
