@@ -471,6 +471,17 @@ class BleService: Service() {
         }
     }
 
+    fun sendIpAtCmd() {
+        Log.d(TAG, "sendIpAtCmd")
+
+        val cmd = CommandUtils.checkIpAddressCmd()
+
+        val flag = characteristicWrite!!.setValue(cmd)
+        if (flag) {
+            bleGatt!!.writeCharacteristic(characteristicWrite)
+        }
+    }
+
     fun readAtResponseCmd() {
         Log.d(TAG, "sendAtResponseCmd")
 

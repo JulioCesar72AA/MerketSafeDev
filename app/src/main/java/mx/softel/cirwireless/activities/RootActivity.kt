@@ -300,9 +300,13 @@ class RootActivity : AppCompatActivity(),
 
     override fun wifiStatus(state: StateMachine, response: ByteArray, wifiStatus: WifiStatus) {
 
-        val pole    = response[4] == 0xC5.toByte()
-        val status  = response[4] == 0xC1.toByte()
+        val pole            = response[4] == 0xC5.toByte()
+        val status          = response[4] == 0xC1.toByte()
+        val atOk            = response[4] == 0x4C.toByte()
+        val atResponseFail  = response[4] == 0x36.toByte()
+        val atResponse      = response[4] == 0x35.toByte()
 
+        // Validamos el status cada 5 poleos
         if (statusCountDown >= 5) {
             service!!.sendStatusWifiCmd()
             statusCountDown = 0
@@ -314,34 +318,53 @@ class RootActivity : AppCompatActivity(),
             return
         }
 
+        if (atResponseFail) {
+            service!!.sendIpAtCmd()
+        }
+
+        // Enviamos lectura AT con comando AT
+        if (atOk) {
+            service!!.readAtResponseCmd()
+            return
+        }
+
+        // Validamos la lectura AT
+        if (atResponse
+            //&& response.toString().contains(WIFI_VALIDATION_IP)
+            && !response.toString().contains(WIFI_VALIDATION_IP_NOT_ASSIGNED)) {
+            service!!.currentState = StateMachine.POLING
+            runOnUiThread {
+                setStandardUI()
+                backFragment()
+                toast("Wifi configurado correctamente")
+            }
+            return
+        }
+
         Log.e(TAG, "STATE: $state -> RESPONSE: ${response.toHex()} -> WIFI STATUS: $wifiStatus")
         when (wifiStatus) {
             WifiStatus.WIFI_CONFIGURING     -> {}
-            WifiStatus.WIFI_NOT_CONNECTED   -> runOnUiThread {
-                if (retryConncection >= 2) {
-                    toast("Wifi no conectado")
-                    statusCountDown = 0
-                    retryConncection = 0
-                    service!!.currentState = StateMachine.POLING
-                    setStandardUI()
-                } else {
-                    retryConncection++
-                }
-            }
+            WifiStatus.WIFI_NOT_CONNECTED   -> { service!!.sendIpAtCmd() }
             WifiStatus.WIFI_SSID_FAILED     -> {}
             WifiStatus.WIFI_CONNECTING      -> {}
-            WifiStatus.WIFI_CONNECTED       -> {}
+            WifiStatus.WIFI_CONNECTED       -> {
+                service!!.sendIpAtCmd()
+                runOnUiThread {
+                    toast("Verificando conexión")
+                }
+            }
             WifiStatus.WIFI_IP_FAILED       -> {}
             WifiStatus.WIFI_GET_LOCATION    -> {}
-            WifiStatus.WIFI_INTERNET_READY  -> {}
-            WifiStatus.WIFI_TRANSMITING     -> runOnUiThread {
-                if (verifyConnection >= 2) {
-                    service!!.currentState = StateMachine.POLING
-                    verifyConnection = 0
-                    setStandardUI()
-                    backFragment()
-                } else {
-                    verifyConnection++
+            WifiStatus.WIFI_INTERNET_READY  -> {
+                service!!.sendIpAtCmd()
+                runOnUiThread {
+                    toast("Ajustando los últimos detalles")
+                }
+            }
+            WifiStatus.WIFI_TRANSMITING     -> {
+                service!!.sendIpAtCmd()
+                runOnUiThread {
+                    toast("Ajustando los últimos detalles")
                 }
             }
             else -> {}
