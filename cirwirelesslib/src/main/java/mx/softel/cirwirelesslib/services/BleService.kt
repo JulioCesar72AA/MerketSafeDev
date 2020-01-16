@@ -46,7 +46,7 @@ class BleService: Service() {
     // FLAGS - STATES
     private var correctFirmware         : Boolean                           = false
     var currentState            : StateMachine                      = StateMachine.UNKNOWN
-    private var isDescriptorOn          : Boolean                           = false
+    var isDescriptorOn          : Boolean                           = false
 
     // HANDLERS
     private var connectionObserver      : Handler                           = Handler()
@@ -438,7 +438,6 @@ class BleService: Service() {
         val flag = characteristicWrite!!.setValue(cmd)
         if (flag) {
             bleGatt!!.writeCharacteristic(characteristicWrite)
-            currentState = StateMachine.REFRESH_AP
         }
     }
 
@@ -455,7 +454,6 @@ class BleService: Service() {
         val flag = characteristicWrite!!.setValue(cmd)
         if (flag) {
             bleGatt!!.writeCharacteristic(characteristicWrite)
-            currentState = StateMachine.GET_AP
         }
     }
 
@@ -468,7 +466,6 @@ class BleService: Service() {
         val flag = characteristicWrite!!.setValue(cmd)
         if (flag) {
             bleGatt!!.writeCharacteristic(characteristicWrite)
-            currentState = StateMachine.WIFI_CONFIG
         }
     }
 
@@ -481,7 +478,6 @@ class BleService: Service() {
         val flag = characteristicWrite!!.setValue(cmd)
         if (flag) {
             bleGatt!!.writeCharacteristic(characteristicWrite)
-            currentState = StateMachine.WIFI_CONFIG
         }
     }
 
@@ -494,7 +490,6 @@ class BleService: Service() {
         val flag = characteristicWrite!!.setValue(cmd)
         if (flag) {
             bleGatt!!.writeCharacteristic(characteristicWrite)
-            currentState = StateMachine.WIFI_CONFIG
         }
     }
 

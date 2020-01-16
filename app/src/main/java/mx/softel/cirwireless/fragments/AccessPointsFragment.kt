@@ -68,6 +68,7 @@ class AccessPointsFragment: Fragment(),
 
     override fun onDestroy() {
         super.onDestroy()
+        root.service!!.currentState = StateMachine.POLING
         Log.d(TAG, "onDestroy")
     }
 
@@ -113,10 +114,11 @@ class AccessPointsFragment: Fragment(),
                 if (data.frequency < 3000 && data.SSID.length > 2)
                     if (!apMacList.contains(data.SSID) && !data.SSID.isNullOrEmpty())
                         apMacList.add(data.SSID)
-
-                arrayAdapter.notifyDataSetChanged()
-                root.setStandardUI()
             }
+
+            // Actualizamos la vista con los access poinst encontrados
+            arrayAdapter.notifyDataSetChanged()
+            root.setStandardUI()
         }
 
     }
@@ -195,9 +197,6 @@ class AccessPointsFragment: Fragment(),
         apMacList.clear()
         root.registerReceiver(wifiReceiver, IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
         wifiManager.startScan()
-
-        // Leemos los Access Points del dispositivo
-        root.service!!.getMacListCmd()
     }
 
 

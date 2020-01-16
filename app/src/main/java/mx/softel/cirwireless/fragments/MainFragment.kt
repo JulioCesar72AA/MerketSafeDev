@@ -15,6 +15,7 @@ import mx.softel.cirwireless.activities.RootActivity
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.enums.DisconnectionReason
+import mx.softel.cirwirelesslib.enums.StateMachine
 
 /**
  * A simple [Fragment] subclass.
@@ -111,7 +112,10 @@ class MainFragment : Fragment(), View.OnClickListener {
             clickConfigure()
         else{
             toast("Actualizando datos")
-            root.service!!.sendRefreshApCmd()
+            root.service!!.apply {
+                getMacListCmd()
+                currentState = StateMachine.GET_AP
+            }
         }
     }
 
