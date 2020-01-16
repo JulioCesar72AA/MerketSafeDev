@@ -9,5 +9,6 @@ enum class WifiStatus(code: Int) {
     WIFI_IP_FAILED      (5),
     WIFI_GET_LOCATION   (6),
     WIFI_INTERNET_READY (7),
-    WIFI_TRANSMITING    (8)
+    WIFI_TRANSMITING    (8),
+    UNKNOWN             (-1)
 }

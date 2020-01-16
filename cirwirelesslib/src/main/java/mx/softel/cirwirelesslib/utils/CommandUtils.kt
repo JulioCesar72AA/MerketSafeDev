@@ -67,6 +67,25 @@ object CommandUtils {
         return cmd
     }
 
+    fun configureAccessPointCmd(ssid: String, password: String): ByteArray {
+        Log.d(TAG, "configureAccessPointCmd")
+
+        val atCommand = "AT+CWJAP=\"$ssid\",\"$password\"".toByteArray()
+        val size = atCommand.size + 8
+        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
+        cmd[3] = size.toByte()
+
+        val crc = getCrc16(cmd)
+        cmd += crc
+
+        return cmd
+    }
+
+    fun readAtCmd(): ByteArray {
+        Log.d(TAG, "readAtCmd")
+        return AT_READ + getCrc16(AT_READ)
+    }
+
     /*fun configureAccessPointsCmd(): ByteArray {
         Log.d(TAG, "getAccessPointsCmd")
 
@@ -84,11 +103,7 @@ object CommandUtils {
 
         return cmd
     }
-
-    fun readAtCmd(): ByteArray {
-        Log.d(TAG, "readAtCmd")
-        return AT_READ + getCrc16(AT_READ)
-    }*/
+    */
 
 
 

@@ -7,6 +7,7 @@ enum class ReceivedCmd {
     REFRESH_AP_OK,
     AT_OK,
     AT_NOK,
+    AT_READY,
     WAIT_AP,
     GET_AP,
     WIFI_SSID_OK,

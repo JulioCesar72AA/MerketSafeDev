@@ -363,19 +363,20 @@ class BleService: Service() {
      */
     private fun receivedCommand(response: ByteArray): ReceivedCmd {
         val cmd = when (response[4]) {
-            POLEO           -> ReceivedCmd.POLEO
-            STATUS          -> ReceivedCmd.STATUS
-            REFRESH_AP_OK   -> ReceivedCmd.REFRESH_AP_OK
-            GET_AP          -> ReceivedCmd.GET_AP
-            AT_OK           -> ReceivedCmd.AT_OK
-            AT_NOK          -> ReceivedCmd.AT_NOK
-            WAIT_RESPONSE   -> ReceivedCmd.WAIT_AP
-            WIFI_SSID_OK    -> ReceivedCmd.WIFI_SSID_OK
-            WIFI_SSID_FAIL  -> ReceivedCmd.WIFI_SSID_FAIL
-            WIFI_PASS_OK    -> ReceivedCmd.WIFI_PASS_OK
-            WIFI_PASS_FAIL  -> ReceivedCmd.WIFI_PASS_FAIL
-            WIFI_STATUS     -> ReceivedCmd.WIFI_STATUS
-            else            -> ReceivedCmd.UNKNOWN
+            POLEO               -> ReceivedCmd.POLEO
+            STATUS              -> ReceivedCmd.STATUS
+            REFRESH_AP_OK       -> ReceivedCmd.REFRESH_AP_OK
+            GET_AP              -> ReceivedCmd.GET_AP
+            AT_OK               -> ReceivedCmd.AT_OK
+            AT_NOK              -> ReceivedCmd.AT_NOK
+            AT_RESPONSE_READY   -> ReceivedCmd.AT_READY
+            WAIT_RESPONSE       -> ReceivedCmd.WAIT_AP
+            WIFI_SSID_OK        -> ReceivedCmd.WIFI_SSID_OK
+            WIFI_SSID_FAIL      -> ReceivedCmd.WIFI_SSID_FAIL
+            WIFI_PASS_OK        -> ReceivedCmd.WIFI_PASS_OK
+            WIFI_PASS_FAIL      -> ReceivedCmd.WIFI_PASS_FAIL
+            WIFI_STATUS         -> ReceivedCmd.WIFI_STATUS
+            else                -> ReceivedCmd.UNKNOWN
         }
         Log.d(TAG, "receivedCommand -> $cmd")
         return cmd
@@ -400,15 +401,16 @@ class BleService: Service() {
 
     private fun wifiStatus(response: ByteArray): WifiStatus {
         return when (response[5]) {
-            0.toByte() -> WifiStatus.WIFI_CONFIGURING
-            1.toByte() -> WifiStatus.WIFI_NOT_CONNECTED
-            2.toByte() -> WifiStatus.WIFI_SSID_FAILED
-            3.toByte() -> WifiStatus.WIFI_CONNECTING
-            4.toByte() -> WifiStatus.WIFI_CONNECTED
-            5.toByte() -> WifiStatus.WIFI_IP_FAILED
-            6.toByte() -> WifiStatus.WIFI_GET_LOCATION
-            7.toByte() -> WifiStatus.WIFI_INTERNET_READY
-            else       -> WifiStatus.WIFI_TRANSMITING
+            0.toByte()  -> WifiStatus.WIFI_CONFIGURING
+            1.toByte()  -> WifiStatus.WIFI_NOT_CONNECTED
+            2.toByte()  -> WifiStatus.WIFI_SSID_FAILED
+            3.toByte()  -> WifiStatus.WIFI_CONNECTING
+            4.toByte()  -> WifiStatus.WIFI_CONNECTED
+            5.toByte()  -> WifiStatus.WIFI_IP_FAILED
+            6.toByte()  -> WifiStatus.WIFI_GET_LOCATION
+            7.toByte()  -> WifiStatus.WIFI_INTERNET_READY
+            8.toByte()  -> WifiStatus.WIFI_TRANSMITING
+            else        -> WifiStatus.UNKNOWN
         }
     }
 
@@ -457,7 +459,31 @@ class BleService: Service() {
         }
     }
 
-    fun sendSsidCmd(ssid: String) {
+
+    fun sendConfigureWifiCmd(ssid: String, password: String) {
+        Log.d(TAG, "sendConfigureWifiCmd")
+
+        val cmd = CommandUtils.configureAccessPointCmd(ssid, password)
+
+        val flag = characteristicWrite!!.setValue(cmd)
+        if (flag) {
+            bleGatt!!.writeCharacteristic(characteristicWrite)
+        }
+    }
+
+    fun readAtResponseCmd() {
+        Log.d(TAG, "sendAtResponseCmd")
+
+        val cmd = CommandUtils.readAtCmd()
+
+        val flag = characteristicWrite!!.setValue(cmd)
+        if (flag) {
+            bleGatt!!.writeCharacteristic(characteristicWrite)
+        }
+    }
+
+
+    /*fun sendSsidCmd(ssid: String) {
         Log.d(TAG, "sendSsidCmd")
 
         val cmd = CommandUtils.setSsidCmd(ssid)
@@ -479,7 +505,7 @@ class BleService: Service() {
         if (flag) {
             bleGatt!!.writeCharacteristic(characteristicWrite)
         }
-    }
+    }*/
 
     fun sendStatusWifiCmd() {
         Log.d(TAG, "sendStatusWifiCmd")
@@ -718,6 +744,7 @@ class BleService: Service() {
         private const val WIFI_PASS_OK          = 0x25.toByte()
         private const val WIFI_PASS_FAIL        = 0x26.toByte()
         private const val WIFI_STATUS           = 0x28.toByte()
+        private const val AT_RESPONSE_READY     = 0x35.toByte()
         private const val WAIT_RESPONSE         = 0x36.toByte()
         private const val REFRESH_AP_OK         = 0x48.toByte()
         private const val GET_AP                = 0x4A.toByte()

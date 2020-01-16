@@ -149,9 +149,11 @@ class RootActivity : AppCompatActivity(),
     override fun dialogAccept(password: String) {
 
         toast("Configurando el WIFI del dispositivo", Toast.LENGTH_LONG)
-
-        service!!.sendSsidCmd(ssidSelected)
         passwordTyped = password
+        service!!.apply {
+            sendConfigureWifiCmd(ssidSelected, passwordTyped)
+            currentState = StateMachine.WIFI_CONFIG
+        }
         setScanningUI()
     }
 
@@ -233,9 +235,8 @@ class RootActivity : AppCompatActivity(),
      * @param command Tipo de respuesta recibida
      */
     override fun commandState(state: StateMachine, response: ByteArray, command: ReceivedCmd) {
+
         Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
-
-
 
         when (state) {
 
@@ -259,30 +260,39 @@ class RootActivity : AppCompatActivity(),
                 }
             }
 
-
-
-
-
-
+            // STATUS DE CONFIGURACIÓN WIFI
             StateMachine.WIFI_CONFIG -> {
                 when (command) {
-                    ReceivedCmd.WIFI_SSID_OK    -> service!!.sendPasswordCmd(passwordTyped)
-                    ReceivedCmd.WIFI_SSID_FAIL  -> service!!.sendSsidCmd(ssidSelected)
-                    ReceivedCmd.WIFI_PASS_FAIL  -> service!!.sendPasswordCmd(passwordTyped)
-                    ReceivedCmd.WIFI_PASS_OK    -> {
-                        // Iniciamos la validación de la comunicación Wifi
-                        service!!.sendStatusWifiCmd()
-
-                        runOnUiThread {
-                            toast("Wifi configurado correctamente")
-                            backFragment()
-                        }
-                        Log.d(TAG, "Dispositivo configurado correctamente")
+                    ReceivedCmd.AT_OK, ReceivedCmd.AT_READY -> {
                         service!!.currentState = StateMachine.WIFI_STATUS
+                        statusCountDown = 0
                     }
-                    else -> { /* Ignoramos el resto de las respuestas */ }
+                    ReceivedCmd.AT_NOK  -> {
+                        Log.d(TAG, "Ocurrió un error con el comando AT")
+                    }
+                    ReceivedCmd.POLEO, ReceivedCmd.STATUS   -> {
+                        if(statusCountDown >= 2) {
+                            statusCountDown = 0
+                            service!!.readAtResponseCmd()
+                        } else {
+                            Log.d(TAG, "WIFI_CONFIG -> POLEO/STATUS")
+                            statusCountDown++
+                        }
+                    }
+                    ReceivedCmd.WAIT_AP -> {
+                        if(waitCountDown >= 2) {
+                            waitCountDown = 0
+                            service!!.sendConfigureWifiCmd(ssidSelected, passwordTyped)
+                        } else {
+                            waitCountDown++
+                        }
+                    }
+                    else -> {}
                 }
             }
+
+
+
             else -> Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
         }
     }
@@ -290,26 +300,51 @@ class RootActivity : AppCompatActivity(),
 
     override fun wifiStatus(state: StateMachine, response: ByteArray, wifiStatus: WifiStatus) {
 
-        if (response[4] == 0xC5.toByte()
-            || response[4] == 0xC1.toByte()) {
-            Log.d(TAG, "WIFI STATUS -> POLEO/STATUS")
+        val pole    = response[4] == 0xC5.toByte()
+        val status  = response[4] == 0xC1.toByte()
+
+        if (statusCountDown >= 5) {
+            service!!.sendStatusWifiCmd()
+            statusCountDown = 0
             return
         }
+        if (pole || status) {
+            Log.d(TAG, "WIFI STATUS -> POLEO/STATUS")
+            statusCountDown++
+            return
+        }
+
         Log.e(TAG, "STATE: $state -> RESPONSE: ${response.toHex()} -> WIFI STATUS: $wifiStatus")
         when (wifiStatus) {
-            WifiStatus.WIFI_CONFIGURING     -> updateWifiStatusInfo()
-            WifiStatus.WIFI_NOT_CONNECTED   -> updateWifiStatusInfo()
-            WifiStatus.WIFI_SSID_FAILED     -> runOnUiThread { toast("Error en el SSID") }
-            WifiStatus.WIFI_CONNECTING      -> updateWifiStatusInfo()
-            WifiStatus.WIFI_CONNECTED       -> updateWifiStatusInfo()
-            WifiStatus.WIFI_IP_FAILED       -> updateWifiStatusInfo()
-            WifiStatus.WIFI_GET_LOCATION    -> updateWifiStatusInfo()
-            WifiStatus.WIFI_INTERNET_READY  -> updateWifiStatusInfo()
-            WifiStatus.WIFI_TRANSMITING     -> {
-                updateWifiStatusInfo()
-                service!!.currentState = StateMachine.POLING
-                runOnUiThread { setStandardUI() }
+            WifiStatus.WIFI_CONFIGURING     -> {}
+            WifiStatus.WIFI_NOT_CONNECTED   -> runOnUiThread {
+                if (retryConncection >= 2) {
+                    toast("Wifi no conectado")
+                    statusCountDown = 0
+                    retryConncection = 0
+                    service!!.currentState = StateMachine.POLING
+                    setStandardUI()
+                } else {
+                    retryConncection++
+                }
             }
+            WifiStatus.WIFI_SSID_FAILED     -> {}
+            WifiStatus.WIFI_CONNECTING      -> {}
+            WifiStatus.WIFI_CONNECTED       -> {}
+            WifiStatus.WIFI_IP_FAILED       -> {}
+            WifiStatus.WIFI_GET_LOCATION    -> {}
+            WifiStatus.WIFI_INTERNET_READY  -> {}
+            WifiStatus.WIFI_TRANSMITING     -> runOnUiThread {
+                if (verifyConnection >= 2) {
+                    service!!.currentState = StateMachine.POLING
+                    verifyConnection = 0
+                    setStandardUI()
+                    backFragment()
+                } else {
+                    verifyConnection++
+                }
+            }
+            else -> {}
         }
     }
     // *********************************************************************************************
@@ -362,10 +397,10 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun updateWifiStatusInfo() {
-        handler.apply {
-            postDelayed(serviceRunnable, SERVICE_TIMEOUT)
-            removeCallbacks(serviceRunnable)
-        }
+        //handler.apply {
+            //postDelayed(serviceRunnable, SERVICE_TIMEOUT)
+            //removeCallbacks(serviceRunnable)
+        //}
     }
 
 
@@ -426,9 +461,14 @@ class RootActivity : AppCompatActivity(),
     companion object {
         private val TAG = RootActivity::class.java.simpleName
 
+        private var statusCountDown     = 0
+        private var waitCountDown       = 0
+        private var retryConncection    = 0
+        private var verifyConnection    = 0
+
         // Timeouts de la actividad
         private const val UI_TIMEOUT        = 500L
-        private const val SERVICE_TIMEOUT   = 800L
+        private const val SERVICE_TIMEOUT   = 5000L
         private const val CONFIG_TIMEOUT    = 1500L
     }
 }

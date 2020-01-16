@@ -68,7 +68,6 @@ class AccessPointsFragment: Fragment(),
 
     override fun onDestroy() {
         super.onDestroy()
-        root.service!!.currentState = StateMachine.POLING
         Log.d(TAG, "onDestroy")
     }
 
