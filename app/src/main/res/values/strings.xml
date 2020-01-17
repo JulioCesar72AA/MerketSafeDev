@@ -27,7 +27,7 @@
     <string name="tv_dispositivos_ssid">SSID</string>
     <string name="tv_password_wifi">Infinitum32145</string>
     <string name="tv_redes_access">Softel CMX</string>
-    <string name="tv_sdi_access">SSDI</string>
+    <string name="tv_sdi_access">RSSI</string>
     <string name="tv_ssdi_number_access">-30</string>
     <string name="tv_ap_access">AP</string>
     <string name="tv_internet_access">INTERNET</string>

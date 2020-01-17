@@ -5,5 +5,6 @@ enum class StateMachine {
     POLING,
     WIFI_CONFIG,
     GET_AP,
-    WIFI_STATUS
+    WIFI_STATUS,
+    GET_IP
 }

@@ -23,5 +23,7 @@ const val DEVICE_DISCONNECTED           = 3
 
 
 // Validaciones de WIFI
-val WIFI_VALIDATION_IP   = "+CIFSR:STAIP"
-const val WIFI_VALIDATION_IP_NOT_ASSIGNED = "0.0.0.0"
+const val WIFI_VALIDATION_IP_NOT_ASSIGNED   = "0.0.0.0"
+const val WIFI_NOT_IP_STRING                = "+CIFSR:STAIP,\"0.0.0.0\""
+const val WIFI_SUBSTRING_IP_AFTER           = "+CIFSR:STAIP,"
+const val WIFI_SUBSTRING_IP_BEFORE          = "+CIFSR:STAMAC"

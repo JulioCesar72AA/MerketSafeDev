@@ -13,7 +13,7 @@
 
     <!-- Back Button -->
     <ImageView
-        android:id="@+id/ivBack_dispositivos"
+        android:id="@+id/ivBackDispositivos"
         android:layout_width="@dimen/ic_back_size"
         android:layout_height="@dimen/ic_back_size"
         android:layout_margin="@dimen/ic_back_margin"
@@ -24,7 +24,7 @@
     <!-- Contenido de la vista -->
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent">
 
 
         <!-- Título sección -->
@@ -39,7 +39,7 @@
             android:orientation="horizontal"
             android:weightSum="1" >
 
-
+            <!-- Ícono de la pantalla -->
             <ImageView
                 android:layout_width="@dimen/ic_icon_dispositivo_width"
                 android:layout_height="@dimen/ic_icon_dispositivo_height"
@@ -50,15 +50,15 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_img_chip" />
 
-
+            <!-- Textos titulares -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight=".1"
-                android:orientation="vertical" >
+                android:orientation="vertical">
 
-
+                <!-- Título -->
                 <TextView
                     android:id="@+id/tvTitle_dispositivos"
                     android:layout_width="match_parent"
@@ -70,17 +70,16 @@
                     android:textSize="@dimen/tv_textsize_32" />
 
 
+                <!-- Dispositivo conectado -->
                 <TextView
-                    android:id="@+id/tvMacSelected_dispositivos"
+                    android:id="@+id/tvMacSelectedDispositivos"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:fontFamily="@font/rubik_regular"
-                    android:text="@string/tv_test_mac"
                     android:textColor="@color/colortextwhite"
                     android:textSize="@dimen/tv_textsize_20"
-                    tools:text="00:1B:C5:86:A6:1B"/>/>
+                    tools:text="00:1B:C5:86:A6:1B"/>
             </LinearLayout>
-
 
         </LinearLayout>
 
@@ -133,11 +132,11 @@
                             android:textSize="@dimen/tv_textsize18" />
 
                         <TextView
-                            android:id="@+id/tv_ip_dispositivos"
+                            android:id="@+id/tvIpDispositivos"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight=".45"
-                            android:text="@string/tv_dispositivos_ip"
+                            tools:text="@string/tv_dispositivos_ip"
                             android:textSize="@dimen/tv_textsize18" />
                     </LinearLayout>
 
@@ -150,7 +149,6 @@
                         android:weightSum="1" >
 
                         <TextView
-                            android:id="@+id/tv_ssid_dispositivos"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight=".55"
@@ -160,10 +158,11 @@
                             android:textSize="@dimen/tv_textsize18"  />
 
                         <TextView
+                            android:id="@+id/tvSsidDispositivos"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight=".45"
-                            android:text="@string/tv_redes_access"
+                            tools:text="@string/tv_redes_access"
                             android:textSize="@dimen/tv_textsize18"  />
                     </LinearLayout>
 
@@ -185,10 +184,11 @@
                             android:textSize="@dimen/tv_textsize18"  />
 
                         <TextView
+                            android:id="@+id/tvRssiDispositivos"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight=".45"
-                            android:text="@string/tv_ssdi_number_access"
+                            tools:text="@string/tv_ssdi_number_access"
                             android:textSize="@dimen/tv_textsize18"  />
                     </LinearLayout>
 
@@ -210,12 +210,14 @@
                             android:textSize="@dimen/tv_textsize18"  />
 
                         <ImageView
+                            android:id="@+id/ivCheckAp"
                             android:layout_width="match_parent"
                             android:layout_height="20dp"
                             android:layout_weight=".45"
                             android:scaleType="fitStart"
-                            android:src="@drawable/ic_ok"
-                            android:textSize="@dimen/tv_textsize18"  />
+                            tools:src="@drawable/ic_ok"
+                            android:contentDescription="@string/cd_test_icon" />
+
                     </LinearLayout>
 
                     <!-- Fila 5  -->
@@ -236,11 +238,13 @@
                             android:textSize="@dimen/tv_textsize18"  />
 
                         <ImageView
+                            android:id="@+id/ivCheckInternet"
                             android:layout_width="match_parent"
                             android:layout_height="20dp"
                             android:layout_weight=".45"
                             android:scaleType="fitStart"
-                            android:src="@drawable/ic_nok" />
+                            tools:src="@drawable/ic_nok"
+                            android:contentDescription="@string/cd_test_icon"/>
                     </LinearLayout>
 
                     <!-- Fila 6  -->
@@ -261,11 +265,13 @@
                             android:textSize="@dimen/tv_textsize18"  />
 
                         <ImageView
+                            android:id="@+id/ivCheckData"
                             android:layout_width="match_parent"
                             android:layout_height="20dp"
                             android:layout_weight=".45"
                             android:scaleType="fitStart"
-                            android:src="@drawable/ic_ok" />
+                            tools:src="@drawable/ic_ok"
+                            android:contentDescription="@string/cd_test_icon"/>
                     </LinearLayout>
 
                     <!-- Fila 7  -->
@@ -286,11 +292,13 @@
                             android:textSize="@dimen/tv_textsize18"  />
 
                         <ImageView
+                            android:id="@+id/ivCheckStatus"
                             android:layout_width="match_parent"
                             android:layout_height="@dimen/tv_padding_25"
                             android:layout_weight=".45"
                             android:scaleType="fitStart"
-                            android:src="@drawable/ic_nok" />
+                            tools:src="@drawable/ic_nok"
+                            android:contentDescription="@string/cd_test_icon"/>
                     </LinearLayout>
 
 
@@ -301,4 +309,6 @@
 
 
     </TableLayout>
+
+
 </RelativeLayout>

@@ -16,9 +16,11 @@ import mx.softel.cirwireless.dialogs.PasswordDialog
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.fragments.AccessPointsFragment
 import mx.softel.cirwireless.fragments.MainFragment
+import mx.softel.cirwireless.fragments.TesterFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.*
+import mx.softel.cirwirelesslib.extensions.toCharString
 import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.services.BleService
 
@@ -33,6 +35,8 @@ class RootActivity : AppCompatActivity(),
     internal lateinit var bleMac            : String
     internal lateinit var ssidSelected      : String
     private  lateinit var passwordTyped     : String
+    internal          var ipAssigned        : String                = ""
+    internal          var apAssigned        : Boolean               = false
 
     // SERVICE CONNECTIONS / FLAGS
     internal var service                    : BleService?           = null
@@ -42,11 +46,11 @@ class RootActivity : AppCompatActivity(),
     // FLAGS / EXTRA VARIABLES
     private  var disconnectionReason        : DisconnectionReason   = DisconnectionReason.UNKNOWN
     internal var deviceMacList              : ArrayList<String>?    = null
+    private  var actualFragment             : Fragment?             = null
 
     // HANDLERS / RUNNABLES
     private val handler                 = Handler()
     private val disconnectionRunnable   = Runnable { finishActivity(disconnectionReason) }
-    private val serviceRunnable         = Runnable { service!!.sendStatusWifiCmd() }
 
 
     /************************************************************************************************/
@@ -111,13 +115,14 @@ class RootActivity : AppCompatActivity(),
         Log.d(TAG, "initFragment")
         // Iniciamos el fragmento deseado
         val fragment = MainFragment.getInstance()
+        actualFragment = fragment
         supportFragmentManager
             .beginTransaction()
             .add(R.id.fragmentContainer, fragment)
             .commit()
     }
 
-    private fun backFragment() = supportFragmentManager.popBackStackImmediate()
+    internal fun backFragment() = supportFragmentManager.popBackStackImmediate()
 
     /**
      * ## finishActivity
@@ -169,6 +174,61 @@ class RootActivity : AppCompatActivity(),
 
 
 
+    /************************************************************************************************/
+    /**     CONTROL RESULTS                                                                         */
+    /************************************************************************************************/
+    private fun getIpFromAt(response: ByteArray, command: ReceivedCmd) {
+        Log.d(TAG, "geIpFromAt -> $command, RESPONSE -> ${response.toHex()}")
+
+        when (command) {
+            ReceivedCmd.AT_OK -> {
+                Log.d(TAG, "AT Correctamente leído, esperando respuesta")
+                service!!.readAtResponseCmd()
+            }
+            ReceivedCmd.WAIT_AP -> {
+                service!!.sendIpAtCmd()
+            }
+            ReceivedCmd.POLEO -> {
+                service!!.readAtResponseCmd()
+            }
+            ReceivedCmd.AT_READY -> {
+                parseIpResponse(response.toCharString())
+
+                val fragment = TesterFragment.getInstance()
+                actualFragment = fragment
+
+                runOnUiThread {
+                    navigateTo(fragment, true, null)
+                    setStandardUI()
+                }
+                service!!.currentState = StateMachine.POLING
+            }
+            else -> {  }
+        }
+    }
+
+    private fun parseIpResponse(response: String) {
+        if (response.contains(WIFI_NOT_IP_STRING)){
+            ipAssigned = "0.0.0.0"
+            apAssigned = false
+        } else {
+            var ipRead = response.substringAfter(WIFI_SUBSTRING_IP_AFTER)
+            ipRead = ipRead
+                .substringBefore(WIFI_SUBSTRING_IP_BEFORE)
+                .replace("\"", "")
+                .replace("\n", "")
+                .replace("\r", "")
+            Log.d(TAG, "Resultado IP SUBSTRING: $ipRead")
+
+            ipAssigned = ipRead
+            apAssigned = true
+        }
+    }
+
+
+
+
+
 
 
     /************************************************************************************************/
@@ -206,7 +266,6 @@ class RootActivity : AppCompatActivity(),
         transaction.commit()
     }
 
-    // BLE SERVICE INTERFACES **********************************************************************
     /**
      * ## connectionStatus
      * Se ejecuta cada que el servicio BLE cambia de estatus de conexión
@@ -236,8 +295,6 @@ class RootActivity : AppCompatActivity(),
      */
     override fun commandState(state: StateMachine, response: ByteArray, command: ReceivedCmd) {
 
-        Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
-
         when (state) {
 
             // STATUS DE POLEO
@@ -256,6 +313,7 @@ class RootActivity : AppCompatActivity(),
                     // Casteamos el resultado y navegamos al fragmento de AP's
                     deviceMacList = service!!.fromResponseGetMacList(response)
                     val fragment = AccessPointsFragment.getInstance()
+                    actualFragment = fragment
                     navigateTo(fragment, true, null)
                 }
             }
@@ -280,16 +338,24 @@ class RootActivity : AppCompatActivity(),
                         }
                     }
                     ReceivedCmd.WAIT_AP -> {
-                        if(waitCountDown >= 2) {
-                            waitCountDown = 0
-                            service!!.sendConfigureWifiCmd(ssidSelected, passwordTyped)
-                        } else {
-                            waitCountDown++
+                        if (actualFragment == AccessPointsFragment.getInstance()) {
+                            if(waitCountDown >= 2) {
+                                waitCountDown = 0
+                                service!!.sendConfigureWifiCmd(ssidSelected, passwordTyped)
+                            } else {
+                                waitCountDown++
+                            }
+                        } else if (actualFragment == TesterFragment.getInstance()) {
+                            Log.d(TAG, "Esperando respuesta del AT")
                         }
+
                     }
                     else -> {}
                 }
             }
+
+
+            StateMachine.GET_IP -> { getIpFromAt(response, command) }
 
 
 
@@ -298,6 +364,15 @@ class RootActivity : AppCompatActivity(),
     }
 
 
+    /**
+     * ## wifiStatus
+     * Recibe la respuesta del dispositivo mientras se encuentra
+     * en proceso de configuración de Wifi
+     *
+     * @param state Estado de la máquina de estados
+     * @param response Respuesta del dispositivo
+     * @param wifiStatus Estatus del módulo Wifi
+     */
     override fun wifiStatus(state: StateMachine, response: ByteArray, wifiStatus: WifiStatus) {
 
         val pole            = response[4] == 0xC5.toByte()
@@ -312,7 +387,6 @@ class RootActivity : AppCompatActivity(),
             statusCountDown = 0
             return
         }
-
         if (pole || status) {
             Log.d(TAG, "WIFI STATUS -> POLEO/STATUS")
             statusCountDown++
@@ -345,9 +419,8 @@ class RootActivity : AppCompatActivity(),
 
         Log.e(TAG, "STATE: $state -> RESPONSE: ${response.toHex()} -> WIFI STATUS: $wifiStatus")
         when (wifiStatus) {
-            WifiStatus.WIFI_CONFIGURING     -> {}
-            WifiStatus.WIFI_NOT_CONNECTED   -> {
 
+            WifiStatus.WIFI_NOT_CONNECTED -> {
                 if (retryConnection >= 2) {
                     retryConnection = 0
                     service!!.currentState = StateMachine.POLING
@@ -360,32 +433,31 @@ class RootActivity : AppCompatActivity(),
                     retryConnection++
                 }
             }
-            WifiStatus.WIFI_SSID_FAILED     -> {}
-            WifiStatus.WIFI_CONNECTING      -> {}
-            WifiStatus.WIFI_CONNECTED       -> {
+
+            WifiStatus.WIFI_CONNECTED -> {
                 service!!.sendIpAtCmd()
                 runOnUiThread {
                     toast("Verificando conexión")
                 }
             }
-            WifiStatus.WIFI_IP_FAILED       -> {}
-            WifiStatus.WIFI_GET_LOCATION    -> {}
-            WifiStatus.WIFI_INTERNET_READY  -> {
+
+            WifiStatus.WIFI_INTERNET_READY -> {
                 service!!.sendIpAtCmd()
                 runOnUiThread {
                     toast("Ajustando los últimos detalles")
                 }
             }
-            WifiStatus.WIFI_TRANSMITING     -> {
+
+            WifiStatus.WIFI_TRANSMITING -> {
                 service!!.sendIpAtCmd()
                 runOnUiThread {
-                    toast("Ajustando los últimos detalles")
+                    toast("Validando datos")
                 }
             }
+
             else -> {}
         }
     }
-    // *********************************************************************************************
 
 
     /**
@@ -432,13 +504,6 @@ class RootActivity : AppCompatActivity(),
         Log.d(TAG, "connectedDevice")
         runOnUiThread { toast("Dispositivo conectado") }
         service!!.discoverDeviceServices()
-    }
-
-    private fun updateWifiStatusInfo() {
-        //handler.apply {
-            //postDelayed(serviceRunnable, SERVICE_TIMEOUT)
-            //removeCallbacks(serviceRunnable)
-        //}
     }
 
 
@@ -502,11 +567,8 @@ class RootActivity : AppCompatActivity(),
         private var statusCountDown     = 0
         private var waitCountDown       = 0
         private var retryConnection     = 0
-        private var verifyConnection    = 0
 
         // Timeouts de la actividad
         private const val UI_TIMEOUT        = 500L
-        private const val SERVICE_TIMEOUT   = 5000L
-        private const val CONFIG_TIMEOUT    = 1500L
     }
 }

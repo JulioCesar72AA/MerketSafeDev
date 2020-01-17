@@ -108,7 +108,7 @@ class MainFragment : Fragment(), View.OnClickListener {
         Log.d(TAG, "clickConfigure")
 
         // Actualizamos los AccessPoints que el dispositivo ve
-        if (root.service!!.characteristicWrite == null)
+        if (root.service!!.getCharacteristicWrite() == null)
             clickConfigure()
         else{
             toast("Actualizando datos")
@@ -121,10 +121,20 @@ class MainFragment : Fragment(), View.OnClickListener {
 
 
     private fun clickTest() {
-        Log.d(TAG, "clickTest -> startBleService")
-        toast("Probar")
+        Log.d(TAG, "clickTest")
 
-        // TODO: Implementar el flujo de obtención de datos para el nuevo fragment
+        if (root.service!!.getCharacteristicWrite() == null)
+            clickTest()
+        else {
+            toast("Solicitando los datos del dispositivo")
+            root.apply{
+                setScanningUI()
+                service!!.apply {
+                    sendIpAtCmd()
+                    currentState = StateMachine.GET_IP
+                }
+            }
+        }
     }
 
 

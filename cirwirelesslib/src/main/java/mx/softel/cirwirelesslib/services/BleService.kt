@@ -32,21 +32,21 @@ class BleService: Service() {
     private var firmware                : String?                           = null
 
     // UUID's
-    var uuidService             : UUID?                             = null
-    var characteristicNotify    : BluetoothGattCharacteristic?      = null
-    var characteristicWrite     : BluetoothGattCharacteristic?      = null
-    var characteristicDeviceInfo: BluetoothGattCharacteristic?      = null
-    var notificationDescriptor  : BluetoothGattDescriptor?          = null
+    private var uuidService             : UUID?                             = null
+    private var characteristicNotify    : BluetoothGattCharacteristic?      = null
+    private var characteristicWrite     : BluetoothGattCharacteristic?      = null
+    private var characteristicDeviceInfo: BluetoothGattCharacteristic?      = null
+    private var notificationDescriptor  : BluetoothGattDescriptor?          = null
 
     // GATT
-    var bleGatt                 : BluetoothGatt?                    = null
+    var bleGatt                         : BluetoothGatt?                    = null
     private var bleGattConnections      : ArrayList<BluetoothGatt>          = ArrayList()
     private var bleGattCallbacks        : ArrayList<BluetoothGattCallback>  = ArrayList()
 
     // FLAGS - STATES
     private var correctFirmware         : Boolean                           = false
-    var currentState            : StateMachine                      = StateMachine.UNKNOWN
-    var isDescriptorOn          : Boolean                           = false
+    var currentState                    : StateMachine                      = StateMachine.UNKNOWN
+    var isDescriptorOn                  : Boolean                           = false
 
     // HANDLERS
     private var connectionObserver      : Handler                           = Handler()
@@ -123,6 +123,11 @@ class BleService: Service() {
         activity = act as OnBleConnection
         ctx = act
     }
+
+    /************************************************************************************************/
+    /**     GETTERS-SETTERS                                                                         */
+    /************************************************************************************************/
+    fun getCharacteristicWrite() = characteristicWrite
 
 
     /************************************************************************************************/
@@ -494,7 +499,7 @@ class BleService: Service() {
     }
 
 
-    /*fun sendSsidCmd(ssid: String) {
+    fun sendSsidCmd(ssid: String) {
         Log.d(TAG, "sendSsidCmd")
 
         val cmd = CommandUtils.setSsidCmd(ssid)
@@ -516,7 +521,7 @@ class BleService: Service() {
         if (flag) {
             bleGatt!!.writeCharacteristic(characteristicWrite)
         }
-    }*/
+    }
 
     fun sendStatusWifiCmd() {
         Log.d(TAG, "sendStatusWifiCmd")

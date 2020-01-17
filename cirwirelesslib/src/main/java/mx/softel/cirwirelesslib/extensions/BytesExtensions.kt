@@ -4,6 +4,10 @@ fun ByteArray.toHex(): String {
     return joinToString(" ") { "%02x".format(it) }
 }
 
+fun ByteArray.toCharString(): String {
+    return joinToString ("") { it.toChar().toString() }
+}
+
 
 fun Int.toByteArray(isBigEndian: Boolean = true): ByteArray {
     var bytes = byteArrayOf()

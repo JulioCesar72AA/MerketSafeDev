@@ -100,25 +100,6 @@ object CommandUtils {
         return AT_READ + getCrc16(AT_READ)
     }
 
-    /*fun configureAccessPointsCmd(): ByteArray {
-        Log.d(TAG, "getAccessPointsCmd")
-
-        val atCmd = "AT+CWLAPOPT=1,8".toByteArray()
-        val size = atCmd.size + 1 + 7
-        Log.d(TAG, "AT_COMMAND = ${atCmd.toHex()}")
-
-        var cmd = AT_GENERIC + atCmd + 0x00.toByte()
-        cmd[3] = size.toByte()
-        Log.d(TAG, "COMANDO SIN CRC = ${cmd.toHex()}")
-
-        val crc = getCrc16(cmd)
-        cmd += crc
-        Log.d(TAG, "COMANDO CON CRC = ${cmd.toHex()}")
-
-        return cmd
-    }
-    */
-
 
 
     /************************************************************************************************/
