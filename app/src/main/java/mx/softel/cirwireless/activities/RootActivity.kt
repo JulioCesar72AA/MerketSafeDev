@@ -41,6 +41,7 @@ class RootActivity : AppCompatActivity(),
     internal var apAssigned         : Boolean               = false
     internal var ssidAssigned       : String                = ""
     internal var rssiAssigned       : String                = ""
+    internal var pingAssigned       : Boolean               = false
 
     // SERVICE CONNECTIONS / FLAGS
     internal var service                    : BleService?           = null
@@ -220,6 +221,35 @@ class RootActivity : AppCompatActivity(),
             ReceivedCmd.AT_READY -> {
                 Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
                 parseApResponse(response.toCharString())
+                //val fragment = TesterFragment.getInstance()
+                //actualFragment = fragment
+                //runOnUiThread {
+                //    navigateTo(fragment, true, null)
+                //    setStandardUI()
+                //}
+                service!!.currentState = StateMachine.PING
+            }
+            else -> {  }
+        }
+    }
+
+    private fun getPing(response: ByteArray, command: ReceivedCmd) {
+        Log.d(TAG, "geApStatusFromAt -> $command, RESPONSE -> ${response.toCharString()}")
+
+        when (command) {
+            ReceivedCmd.AT_OK -> {
+                Log.d(TAG, "AT Correctamente leído, esperando respuesta")
+                service!!.readAtResponseCmd()
+            }
+            ReceivedCmd.WAIT_AP -> {
+                service!!.sendPing("www.google.com")
+            }
+            ReceivedCmd.POLEO -> {
+                service!!.readAtResponseCmd()
+            }
+            ReceivedCmd.AT_READY -> {
+                Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
+                parsePingResponse(response.toCharString())
                 val fragment = TesterFragment.getInstance()
                 actualFragment = fragment
                 runOnUiThread {
@@ -270,6 +300,11 @@ class RootActivity : AppCompatActivity(),
             ssidAssigned = "No data"
             rssiAssigned = "No data"
         }
+    }
+
+    private fun parsePingResponse(response: String) {
+        Log.d(TAG, "RESPONSE TO PARSE : $response")
+        pingAssigned = (response.contains(PING_OK) && !response.contains(AT_CMD_ERROR))
     }
 
 
@@ -404,6 +439,7 @@ class RootActivity : AppCompatActivity(),
 
             StateMachine.GET_IP -> { getIpFromAt(response, command) }
             StateMachine.GET_STATUS_AP -> { getApStatusFromAT(response, command) }
+            StateMachine.PING -> { getPing(response, command) }
 
 
 

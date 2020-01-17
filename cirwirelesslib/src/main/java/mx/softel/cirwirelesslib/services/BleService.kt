@@ -331,6 +331,14 @@ class BleService: Service() {
         }
     }
 
+    private fun writeToCharacteristic(cmd: ByteArray) {
+        // Cargamos y escribimos en la característica
+        val flag = characteristicWrite!!.setValue(cmd)
+        if (flag) {
+            bleGatt!!.writeCharacteristic(characteristicWrite)
+        }
+    }
+
     /**
      * ## enableCharacteristicNotification
      * Activa o desactiva la notificación en la característica designada
@@ -342,21 +350,7 @@ class BleService: Service() {
             = bleGatt!!.setCharacteristicNotification(characteristicNotify, enable)
 
 
-    /************************************************************************************************/
-    /**     COMMANDS                                                                                */
-    /************************************************************************************************/
 
-    /**
-     * ## getFirmwareData
-     * Realiza una lectura de [characteristicDeviceInfo] para posteriormente
-     * obtener el Firmware en [BluetoothGattCallback.onCharacteristicRead]
-     */
-    fun getFirmwareData() {
-        Log.d(TAG, "getFirmwareData")
-        if (characteristicDeviceInfo != null) {
-            bleGatt!!.readCharacteristic(characteristicDeviceInfo)
-        }
-    }
 
     /**
      * ## receivedCommand
@@ -386,6 +380,15 @@ class BleService: Service() {
         Log.d(TAG, "receivedCommand -> $cmd")
         return cmd
     }
+
+
+
+
+
+
+    /************************************************************************************************/
+    /**     PARSEADORES                                                                             */
+    /************************************************************************************************/
 
     /**
      * ## actualState
@@ -419,6 +422,28 @@ class BleService: Service() {
         }
     }
 
+
+
+
+
+
+
+    /************************************************************************************************/
+    /**     COMMANDS                                                                                */
+    /************************************************************************************************/
+
+    /**
+     * ## getFirmwareData
+     * Realiza una lectura de [characteristicDeviceInfo] para posteriormente
+     * obtener el Firmware en [BluetoothGattCallback.onCharacteristicRead]
+     */
+    fun getFirmwareData() {
+        Log.d(TAG, "getFirmwareData")
+        if (characteristicDeviceInfo != null) {
+            bleGatt!!.readCharacteristic(characteristicDeviceInfo)
+        }
+    }
+
     /**
      * ## initPoleCmd
      * Habilita la notificación en el dispositivo para permitir
@@ -436,115 +461,90 @@ class BleService: Service() {
      * ## sendRefreshApCmd
      * Ejecuta el comando de actualización de AccesPoints en el dispositivo
      */
-    fun sendRefreshApCmd() {
-        Log.d(TAG, "sendRefreshApCmd")
-
-        val cmd = CommandUtils.refreshAccessPointsCmd()
-
-        // Cargamos y escribimos en la característica
-        val flag = characteristicWrite!!.setValue(cmd)
-        if (flag) {
-            bleGatt!!.writeCharacteristic(characteristicWrite)
-        }
-    }
+    fun sendRefreshApCmd()
+            = writeToCharacteristic(CommandUtils.refreshAccessPointsCmd())
 
     /**
      * ## getMacListCmd
      * Ejecuta el comando para pedir los AccessPoints que el dispositivo almacenó (6)
      */
-    fun getMacListCmd() {
-        Log.d(TAG, "getMacListCmd")
-
-        val cmd = CommandUtils.getAccessPointsCmd()
-
-        // Cargamos y escribimos en la característica
-        val flag = characteristicWrite!!.setValue(cmd)
-        if (flag) {
-            bleGatt!!.writeCharacteristic(characteristicWrite)
-        }
-    }
+    fun getMacListCmd()
+            = writeToCharacteristic(CommandUtils.getAccessPointsCmd())
 
 
-    fun sendConfigureWifiCmd(ssid: String, password: String) {
-        Log.d(TAG, "sendConfigureWifiCmd")
-
-        val cmd = CommandUtils.configureAccessPointCmd(ssid, password)
-
-        val flag = characteristicWrite!!.setValue(cmd)
-        if (flag) {
-            bleGatt!!.writeCharacteristic(characteristicWrite)
-        }
-    }
-
-    fun sendIpAtCmd() {
-        Log.d(TAG, "sendIpAtCmd")
-
-        val cmd = CommandUtils.checkIpAddressCmd()
-
-        val flag = characteristicWrite!!.setValue(cmd)
-        if (flag) {
-            bleGatt!!.writeCharacteristic(characteristicWrite)
-        }
-    }
-
-    fun sendApConnectionCmd() {
-        Log.d(TAG, "sendApConnectionCmd")
-
-        val cmd = CommandUtils.checkApConnectionCmd()
-
-        val flag = characteristicWrite!!.setValue(cmd)
-        if (flag) {
-            bleGatt!!.writeCharacteristic(characteristicWrite)
-        }
-    }
-
-    fun readAtResponseCmd() {
-        Log.d(TAG, "sendAtResponseCmd")
-
-        val cmd = CommandUtils.readAtCmd()
-
-        val flag = characteristicWrite!!.setValue(cmd)
-        if (flag) {
-            bleGatt!!.writeCharacteristic(characteristicWrite)
-        }
-    }
+    /**
+     * ## setConfigureWifiCmd
+     * Ejecuta el comando para configurar el access point seleccionado, por medio
+     * de comando AT
+     *
+     * @param ssid Nombre del Access Point
+     * @param password La contraseña para acceder al Access Point
+     */
+    fun sendConfigureWifiCmd(ssid: String, password: String)
+            = writeToCharacteristic(CommandUtils.configureAccessPointCmd(ssid, password))
 
 
-    fun sendSsidCmd(ssid: String) {
-        Log.d(TAG, "sendSsidCmd")
+    /**
+     * ## sendIpAtCmd
+     * Ejecuta el comando AT que verifica la IP asignada al dispositivo
+     * por el Access Point, si no nos ha asignado, responde "0.0.0.0"
+     */
+    fun sendIpAtCmd()
+            = writeToCharacteristic(CommandUtils.checkIpAddressCmd())
 
-        val cmd = CommandUtils.setSsidCmd(ssid)
+    /**
+     * ## sendApConnectionCmd
+     * Ejecuta el comando AT para verificar cual es el access point al que
+     * se encuentra conectado el dispositivo
+     */
+    fun sendApConnectionCmd()
+            = writeToCharacteristic(CommandUtils.checkApConnectionCmd())
 
-        // Cargamos y escribimos en la característica
-        val flag = characteristicWrite!!.setValue(cmd)
-        if (flag) {
-            bleGatt!!.writeCharacteristic(characteristicWrite)
-        }
-    }
 
-    fun sendPasswordCmd(password: String) {
-        Log.d(TAG, "sendSsidCmd")
+    /**
+     * ## sendPing
+     * Ejecuta el comando de PING al dominio establecido, puede responder
+     * el tiempo de ejecución o un error por TIMEOUT
+     *
+     * @param domain Dominio al cual se desea hacer ping (ejemplo: www.gogle.com)
+     */
+    fun sendPing(domain: String)
+            = writeToCharacteristic(CommandUtils.pingApCmd(domain))
 
-        val cmd = CommandUtils.setPasswordCmd(password)
+    /**
+     * ## readAtResponseCmd
+     * Ejecuta el comando para la lectura de la respuesta del comando AT enviado previamente
+     */
+    fun readAtResponseCmd()
+            = writeToCharacteristic(CommandUtils.readAtCmd())
 
-        // Cargamos y escribimos en la característica
-        val flag = characteristicWrite!!.setValue(cmd)
-        if (flag) {
-            bleGatt!!.writeCharacteristic(characteristicWrite)
-        }
-    }
+    /**
+     * ## sensSsidCmd
+     * Ejecuta el comando para configurar el nombre del access point al que
+     * deseamos conectarnos
+     *
+     * @param ssid Nombre del Acces Point
+     */
+    fun sendSsidCmd(ssid: String)
+            = writeToCharacteristic(CommandUtils.setSsidCmd(ssid))
 
-    fun sendStatusWifiCmd() {
-        Log.d(TAG, "sendStatusWifiCmd")
+    /**
+     * ## sendPasswordCmd
+     * Ejecuta el comando para configurar el password del access point al que
+     * deseamos conectarnos
+     *
+     * @param password Contraseña del Access Point seleccionado
+     */
+    fun sendPasswordCmd(password: String)
+            = writeToCharacteristic(CommandUtils.setPasswordCmd(password))
 
-        val cmd = CommandUtils.getWifiStatusCmd()
+    /**
+     * ## sendStatusWifiCmd
+     * Envía el comando para verificar el estado de la tarea Wifi
+     */
+    fun sendStatusWifiCmd()
+            = writeToCharacteristic(CommandUtils.getWifiStatusCmd())
 
-        // Cargamos y escribimos en la característica
-        val flag = characteristicWrite!!.setValue(cmd)
-        if (flag) {
-            bleGatt!!.writeCharacteristic(characteristicWrite)
-        }
-    }
 
     /**
      * ## fromResponseGetMacList

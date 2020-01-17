@@ -59,16 +59,32 @@ class TesterFragment: Fragment(), View.OnClickListener {
         return view
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        root.apply {
+            ipAssigned = ""
+            ssidAssigned = ""
+            rssiAssigned = ""
+            pingAssigned = false
+            apAssigned = false
+        }
+    }
+
     private fun initUIData() {
         tvMacSelected.text  = root.bleMac
         tvIpResult.text     = root.ipAssigned
         tvSsidResult.text   = root.ssidAssigned
         tvRssiResult.text   = root.rssiAssigned
 
-        val iconAp
-                = if (root.apAssigned) resources.getDrawable(R.drawable.ic_ok, null)
-                else resources.getDrawable(R.drawable.ic_nok, null)
+        val iconAp = if (root.apAssigned)
+                 resources.getDrawable(R.drawable.ic_ok, null)
+            else resources.getDrawable(R.drawable.ic_nok, null)
         apChecked.setImageDrawable(iconAp)
+
+        val iconInternet = if (root.pingAssigned)
+            resources.getDrawable(R.drawable.ic_ok, null)
+        else resources.getDrawable(R.drawable.ic_nok, null)
+        internetChecked.setImageDrawable(iconInternet)
     }
 
     private fun setOnCLickListeners() {

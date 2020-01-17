@@ -28,3 +28,8 @@ const val WIFI_NOT_IP_STRING                = "+CIFSR:STAIP,\"0.0.0.0\""
 const val WIFI_SUBSTRING_IP_AFTER           = "+CIFSR:STAIP,"
 const val WIFI_SUBSTRING_IP_BEFORE          = "+CIFSR:STAMAC"
 const val WIFI_SUBSTRING_AP_AFTER           = "+CWJAP:"
+
+const val PING_OK                           = "+PING:"
+
+const val AT_CMD_OK                         = "OK"
+const val AT_CMD_ERROR                      = "ERROR"
