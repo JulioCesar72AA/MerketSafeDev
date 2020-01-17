@@ -6,5 +6,6 @@ enum class StateMachine {
     WIFI_CONFIG,
     GET_AP,
     WIFI_STATUS,
-    GET_IP
+    GET_IP,
+    GET_STATUS_AP
 }

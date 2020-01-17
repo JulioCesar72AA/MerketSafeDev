@@ -95,6 +95,20 @@ object CommandUtils {
         return cmd
     }
 
+    fun checkApConnectionCmd(): ByteArray {
+        Log.d(TAG, "checkApConnectionCmd")
+
+        val atCommand = "AT+CWJAP?".toByteArray()
+        val size = atCommand.size + 8
+        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
+        cmd[3] = size.toByte()
+
+        val crc = getCrc16(cmd)
+        cmd += crc
+
+        return cmd
+    }
+
     fun readAtCmd(): ByteArray {
         Log.d(TAG, "readAtCmd")
         return AT_READ + getCrc16(AT_READ)

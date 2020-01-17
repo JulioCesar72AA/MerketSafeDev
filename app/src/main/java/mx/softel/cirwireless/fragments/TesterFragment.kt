@@ -62,6 +62,8 @@ class TesterFragment: Fragment(), View.OnClickListener {
     private fun initUIData() {
         tvMacSelected.text  = root.bleMac
         tvIpResult.text     = root.ipAssigned
+        tvSsidResult.text   = root.ssidAssigned
+        tvRssiResult.text   = root.rssiAssigned
 
         val iconAp
                 = if (root.apAssigned) resources.getDrawable(R.drawable.ic_ok, null)

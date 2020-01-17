@@ -35,8 +35,12 @@ class RootActivity : AppCompatActivity(),
     internal lateinit var bleMac            : String
     internal lateinit var ssidSelected      : String
     private  lateinit var passwordTyped     : String
-    internal          var ipAssigned        : String                = ""
-    internal          var apAssigned        : Boolean               = false
+
+    // VALORES PARA FRAGMENT DE TESTER
+    internal var ipAssigned         : String                = ""
+    internal var apAssigned         : Boolean               = false
+    internal var ssidAssigned       : String                = ""
+    internal var rssiAssigned       : String                = ""
 
     // SERVICE CONNECTIONS / FLAGS
     internal var service                    : BleService?           = null
@@ -178,7 +182,7 @@ class RootActivity : AppCompatActivity(),
     /**     CONTROL RESULTS                                                                         */
     /************************************************************************************************/
     private fun getIpFromAt(response: ByteArray, command: ReceivedCmd) {
-        Log.d(TAG, "geIpFromAt -> $command, RESPONSE -> ${response.toHex()}")
+        Log.d(TAG, "geIpFromAt -> $command, RESPONSE -> ${response.toCharString()}")
 
         when (command) {
             ReceivedCmd.AT_OK -> {
@@ -193,10 +197,31 @@ class RootActivity : AppCompatActivity(),
             }
             ReceivedCmd.AT_READY -> {
                 parseIpResponse(response.toCharString())
+                service!!.currentState = StateMachine.GET_STATUS_AP
+            }
+            else -> {  }
+        }
+    }
 
+    private fun getApStatusFromAT(response: ByteArray, command: ReceivedCmd) {
+        Log.d(TAG, "geApStatusFromAt -> $command, RESPONSE -> ${response.toCharString()}")
+
+        when (command) {
+            ReceivedCmd.AT_OK -> {
+                Log.d(TAG, "AT Correctamente leído, esperando respuesta")
+                service!!.readAtResponseCmd()
+            }
+            ReceivedCmd.WAIT_AP -> {
+                service!!.sendApConnectionCmd()
+            }
+            ReceivedCmd.POLEO -> {
+                service!!.readAtResponseCmd()
+            }
+            ReceivedCmd.AT_READY -> {
+                Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
+                parseApResponse(response.toCharString())
                 val fragment = TesterFragment.getInstance()
                 actualFragment = fragment
-
                 runOnUiThread {
                     navigateTo(fragment, true, null)
                     setStandardUI()
@@ -207,7 +232,9 @@ class RootActivity : AppCompatActivity(),
         }
     }
 
+
     private fun parseIpResponse(response: String) {
+        Log.d(TAG, "RESPONSE TO PARSE : $response")
         if (response.contains(WIFI_NOT_IP_STRING)){
             ipAssigned = "0.0.0.0"
             apAssigned = false
@@ -219,9 +246,29 @@ class RootActivity : AppCompatActivity(),
                 .replace("\n", "")
                 .replace("\r", "")
             Log.d(TAG, "Resultado IP SUBSTRING: $ipRead")
-
             ipAssigned = ipRead
             apAssigned = true
+        }
+    }
+
+    private fun parseApResponse(response: String) {
+        Log.d(TAG, "RESPONSE TO PARSE : $response")
+        if (response.contains(WIFI_SUBSTRING_AP_AFTER)) {
+            ssidAssigned = response
+                .substringAfter(WIFI_SUBSTRING_AP_AFTER)
+                .substringBefore(",")
+                .replace("\"", "")
+                .replace("\n", "")
+                .replace("\r", "")
+            rssiAssigned = response
+                .substringAfterLast(",")
+                .substringBefore("OK")
+                .replace("\r", "")
+                .replace("\n", "")
+            Log.e(TAG, "SSID: $ssidAssigned, RSSI: $rssiAssigned")
+        } else {
+            ssidAssigned = "No data"
+            rssiAssigned = "No data"
         }
     }
 
@@ -356,6 +403,7 @@ class RootActivity : AppCompatActivity(),
 
 
             StateMachine.GET_IP -> { getIpFromAt(response, command) }
+            StateMachine.GET_STATUS_AP -> { getApStatusFromAT(response, command) }
 
 
 

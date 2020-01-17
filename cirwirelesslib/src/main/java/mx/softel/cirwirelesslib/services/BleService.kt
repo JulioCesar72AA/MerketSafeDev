@@ -487,6 +487,17 @@ class BleService: Service() {
         }
     }
 
+    fun sendApConnectionCmd() {
+        Log.d(TAG, "sendApConnectionCmd")
+
+        val cmd = CommandUtils.checkApConnectionCmd()
+
+        val flag = characteristicWrite!!.setValue(cmd)
+        if (flag) {
+            bleGatt!!.writeCharacteristic(characteristicWrite)
+        }
+    }
+
     fun readAtResponseCmd() {
         Log.d(TAG, "sendAtResponseCmd")
 
