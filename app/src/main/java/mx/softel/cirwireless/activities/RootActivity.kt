@@ -198,6 +198,44 @@ class RootActivity : AppCompatActivity(),
     /************************************************************************************************/
     /**     CONTROL RESULTS                                                                         */
     /************************************************************************************************/
+    private fun wifiConfigProcess(response: ByteArray, command: ReceivedCmd) {
+        Log.d(TAG, "wifiConfigProcess -> $command, RESPONSE -> ${response.toCharString()}, RESPONSE2 -> ${response.toHex()}")
+
+        when (command) {
+            ReceivedCmd.AT_OK -> {
+                Log.d(TAG, "AT Correctamente leído, esperando respuesta")
+                service!!.readAtResponseCmd()
+            }
+            ReceivedCmd.POLEO -> {
+                service!!.readAtResponseCmd()
+            }
+            ReceivedCmd.AT_READY -> {
+                if (response.toCharString().contains("WIFI GOT IP")) {
+                    service!!.currentState = StateMachine.POLING
+                    Log.e(TAG, "Configuración correcta")
+                    runOnUiThread {
+                        setStandardUI()
+                        backFragment()
+                        toast("Wifi configurado correctamente")
+                    }
+                    return
+                }
+                if (response.toCharString().contains(AT_CMD_ERROR)) {
+                    service!!.currentState = StateMachine.POLING
+                    Log.e(TAG, "Ocurrió un error con el Wi-Fi")
+                    runOnUiThread {
+                        toast("No se pudo configurar el Wifi")
+                        setStandardUI()
+                    }
+                    return
+                }
+                service!!.readAtResponseCmd()
+            }
+            else -> {  }
+        }
+    }
+
+
     private fun getIpFromAt(response: ByteArray, command: ReceivedCmd) {
         Log.d(TAG, "geIpFromAt -> $command, RESPONSE -> ${response.toCharString()}, RESPONSE2 -> ${response.toHex()}")
 
@@ -456,6 +494,7 @@ class RootActivity : AppCompatActivity(),
             // STATUS DE POLEO
             StateMachine.POLING -> {
                 // Actualizamos los access points recién se conecta al dispositivo
+                // TODO: No es necesario actualizar al dispositivo recién se conecta
                 if (!isRefreshed) service!!.sendRefreshApCmd()
                 if (command == ReceivedCmd.REFRESH_AP_OK) {
                     isRefreshed = true
@@ -468,48 +507,14 @@ class RootActivity : AppCompatActivity(),
                 if (command == ReceivedCmd.GET_AP) {
                     // Casteamos el resultado y navegamos al fragmento de AP's
                     deviceMacList = service!!.fromResponseGetMacList(response)
-                    val fragment = AccessPointsFragment.getInstance()
-                    actualFragment = fragment
-                    navigateTo(fragment, true, null)
+                    if (actualFragment != wifiFragment) navigateTo(wifiFragment, true, null)
+                    else wifiFragment.scanWifi()
+                    actualFragment = wifiFragment
                 }
             }
 
             // STATUS DE CONFIGURACIÓN WIFI
-            StateMachine.WIFI_CONFIG -> {
-                when (command) {
-                    ReceivedCmd.AT_OK, ReceivedCmd.AT_READY -> {
-                        service!!.currentState = StateMachine.WIFI_STATUS
-                        statusCountDown = 0
-                    }
-                    ReceivedCmd.AT_NOK  -> {
-                        Log.d(TAG, "Ocurrió un error con el comando AT")
-                    }
-                    ReceivedCmd.POLEO, ReceivedCmd.STATUS   -> {
-                        if(statusCountDown >= 2) {
-                            statusCountDown = 0
-                            service!!.readAtResponseCmd()
-                        } else {
-                            Log.d(TAG, "WIFI_CONFIG -> POLEO/STATUS")
-                            statusCountDown++
-                        }
-                    }
-                    ReceivedCmd.WAIT_AP -> {
-                        if (actualFragment == AccessPointsFragment.getInstance()) {
-                            if(waitCountDown >= 2) {
-                                waitCountDown = 0
-                                service!!.sendConfigureWifiCmd(ssidSelected, passwordTyped)
-                            } else {
-                                waitCountDown++
-                            }
-                        } else if (actualFragment == TesterFragment.getInstance()) {
-                            Log.d(TAG, "Esperando respuesta del AT")
-                        }
-
-                    }
-                    else -> {}
-                }
-            }
-
+            StateMachine.WIFI_CONFIG        -> { wifiConfigProcess(response, command) }
 
             // TESTING CONNECTION MACHINE *************************************************************
             StateMachine.GET_IP             -> { getIpFromAt(response, command) }
@@ -526,100 +531,7 @@ class RootActivity : AppCompatActivity(),
     }
 
 
-    /**
-     * ## wifiStatus
-     * Recibe la respuesta del dispositivo mientras se encuentra
-     * en proceso de configuración de Wifi
-     *
-     * @param state Estado de la máquina de estados
-     * @param response Respuesta del dispositivo
-     * @param wifiStatus Estatus del módulo Wifi
-     */
-    override fun wifiStatus(state: StateMachine, response: ByteArray, wifiStatus: WifiStatus) {
 
-        val pole            = response[4] == 0xC5.toByte()
-        val status          = response[4] == 0xC1.toByte()
-        val atOk            = response[4] == 0x4C.toByte()
-        val atResponseFail  = response[4] == 0x36.toByte()
-        val atResponse      = response[4] == 0x35.toByte()
-
-        // Validamos el status cada 5 poleos
-        if (statusCountDown >= 8) {
-            service!!.sendStatusWifiCmd()
-            statusCountDown = 0
-            return
-        }
-        if (pole || status) {
-            Log.d(TAG, "WIFI STATUS -> POLEO/STATUS")
-            statusCountDown++
-            return
-        }
-
-        if (atResponseFail) {
-            service!!.sendIpAtCmd()
-            return
-        }
-
-        // Enviamos lectura AT con comando AT
-        if (atOk) {
-            service!!.readAtResponseCmd()
-            return
-        }
-
-        // Validamos la lectura AT
-        if (atResponse
-            //&& response.toString().contains(WIFI_VALIDATION_IP)
-            && !response.toString().contains(WIFI_VALIDATION_IP_NOT_ASSIGNED)) {
-            service!!.currentState = StateMachine.POLING
-            runOnUiThread {
-                setStandardUI()
-                backFragment()
-                toast("Wifi configurado correctamente")
-            }
-            return
-        }
-
-        Log.e(TAG, "STATE: $state -> RESPONSE: ${response.toHex()} -> WIFI STATUS: $wifiStatus")
-        when (wifiStatus) {
-
-            WifiStatus.WIFI_NOT_CONNECTED -> {
-                if (retryConnection >= 2) {
-                    retryConnection = 0
-                    service!!.currentState = StateMachine.POLING
-                    runOnUiThread {
-                        toast("No se pudo configurar el Wifi")
-                        setStandardUI()
-                    }
-                } else {
-                    service!!.sendIpAtCmd()
-                    retryConnection++
-                }
-            }
-
-            WifiStatus.WIFI_CONNECTED -> {
-                service!!.sendIpAtCmd()
-                runOnUiThread {
-                    toast("Verificando conexión")
-                }
-            }
-
-            WifiStatus.WIFI_INTERNET_READY -> {
-                service!!.sendIpAtCmd()
-                runOnUiThread {
-                    toast("Ajustando los últimos detalles")
-                }
-            }
-
-            WifiStatus.WIFI_TRANSMITING -> {
-                service!!.sendIpAtCmd()
-                runOnUiThread {
-                    toast("Validando datos")
-                }
-            }
-
-            else -> {}
-        }
-    }
 
 
     /**

@@ -386,21 +386,6 @@ class BleService: Service() {
         }
     }
 
-    private fun wifiStatus(response: ByteArray): WifiStatus {
-        return when (response[5]) {
-            0.toByte()  -> WifiStatus.WIFI_CONFIGURING
-            1.toByte()  -> WifiStatus.WIFI_NOT_CONNECTED
-            2.toByte()  -> WifiStatus.WIFI_SSID_FAILED
-            3.toByte()  -> WifiStatus.WIFI_CONNECTING
-            4.toByte()  -> WifiStatus.WIFI_CONNECTED
-            5.toByte()  -> WifiStatus.WIFI_IP_FAILED
-            6.toByte()  -> WifiStatus.WIFI_GET_LOCATION
-            7.toByte()  -> WifiStatus.WIFI_INTERNET_READY
-            8.toByte()  -> WifiStatus.WIFI_TRANSMITING
-            else        -> WifiStatus.UNKNOWN
-        }
-    }
-
 
 
 
@@ -660,15 +645,11 @@ class BleService: Service() {
             //super.onCharacteristicChanged(gatt, characteristic)
             if (characteristic == null) return
 
-            if (currentState == StateMachine.WIFI_STATUS) {
-                activity.wifiStatus(currentState,
-                                    characteristic.value,
-                                    wifiStatus(characteristic.value))
-            } else {
-                activity.commandState(currentState,
-                                      characteristic.value,
-                                      receivedCommand(characteristic.value))
-            }
+            Log.e(TAG, "RESPUESTA: ${characteristic.value.toHex()} -> StateMachine: $currentState")
+            activity.commandState(currentState,
+                                  characteristic.value,
+                                  receivedCommand(characteristic.value))
+
 
         }
 
@@ -716,9 +697,6 @@ class BleService: Service() {
         fun commandState(state: StateMachine,
                          response: ByteArray,
                          command: ReceivedCmd)
-        fun wifiStatus(state: StateMachine,
-                       response: ByteArray,
-                       wifiStatus: WifiStatus)
     }
 
 
