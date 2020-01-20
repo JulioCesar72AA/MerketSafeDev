@@ -132,6 +132,13 @@ class MainFragment : Fragment(), View.OnClickListener {
                 service!!.apply {
                     sendIpAtCmd()
                     currentState = StateMachine.GET_IP
+                    if (actualFragment != testerFragment) {
+                        actualFragment = testerFragment
+                        runOnUiThread {
+                            navigateTo(testerFragment, true, null)
+                            setScanningUI()
+                        }
+                    }
                 }
             }
         }

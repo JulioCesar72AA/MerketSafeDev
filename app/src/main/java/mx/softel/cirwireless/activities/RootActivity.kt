@@ -54,8 +54,10 @@ class RootActivity : AppCompatActivity(),
     // FLAGS / EXTRA VARIABLES
     private  var disconnectionReason        : DisconnectionReason   = DisconnectionReason.UNKNOWN
     internal var deviceMacList              : ArrayList<String>?    = null
-    private  var actualFragment             : Fragment?             = null
-    private  var testerFragment             : TesterFragment        = TesterFragment.getInstance()
+    internal var actualFragment             : Fragment?             = null
+    internal val mainFragment               : MainFragment          = MainFragment.getInstance()
+    internal val testerFragment             : TesterFragment        = TesterFragment.getInstance()
+    internal val wifiFragment               : AccessPointsFragment  = AccessPointsFragment.getInstance()
 
     // HANDLERS / RUNNABLES
     private val handler                 = Handler()
@@ -131,7 +133,11 @@ class RootActivity : AppCompatActivity(),
             .commit()
     }
 
-    internal fun backFragment() = supportFragmentManager.popBackStackImmediate()
+    internal fun backFragment() {
+        if (actualFragment == testerFragment) actualFragment = mainFragment
+        if (actualFragment == wifiFragment) actualFragment = mainFragment
+        supportFragmentManager.popBackStackImmediate()
+    }
 
     /**
      * ## finishActivity
@@ -256,7 +262,6 @@ class RootActivity : AppCompatActivity(),
 
     private fun getDataConnection(response: ByteArray, command: ReceivedCmd, step: Int) {
         Log.d(TAG, "getDataConnection -> $command, RESPONSE -> ${response.toCharString()}, STEP: $step")
-        val restring = response.toCharString()
 
         when (command) {
             ReceivedCmd.AT_OK -> {
@@ -510,11 +515,7 @@ class RootActivity : AppCompatActivity(),
 
             StateMachine.GET_IP -> {
                 if (actualFragment != testerFragment) {
-                    actualFragment = testerFragment
-                    runOnUiThread {
-                        navigateTo(testerFragment, true, null)
-                        setScanningUI()
-                    }
+
                 }
                 getIpFromAt(response, command)
             }
