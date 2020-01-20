@@ -105,9 +105,10 @@
                 app:cardUseCompatPadding="true"
                 app:cardBackgroundColor="@color/cardScanBackground" >
 
-                <!--androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                    android:id="@+id/srlScanAp"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"-->
+                    android:layout_height="match_parent">
 
                     <ListView
                         android:id="@+id/lvAccessPoints"
@@ -116,8 +117,7 @@
                         tools:listitem="@layout/support_simple_spinner_dropdown_item"
                         android:padding="@dimen/cv_margin_access_point" />
 
-
-                <!--/androidx.swiperefreshlayout.widget.SwipeRefreshLayout-->
+                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
     </TableLayout>

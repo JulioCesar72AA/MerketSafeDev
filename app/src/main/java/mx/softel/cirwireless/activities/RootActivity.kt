@@ -468,9 +468,9 @@ class RootActivity : AppCompatActivity(),
                 if (command == ReceivedCmd.GET_AP) {
                     // Casteamos el resultado y navegamos al fragmento de AP's
                     deviceMacList = service!!.fromResponseGetMacList(response)
-                    val fragment = AccessPointsFragment.getInstance()
-                    actualFragment = fragment
-                    navigateTo(fragment, true, null)
+                    if (actualFragment != wifiFragment) navigateTo(wifiFragment, true, null)
+                    else wifiFragment.scanWifi()
+                    actualFragment = wifiFragment
                 }
             }
 

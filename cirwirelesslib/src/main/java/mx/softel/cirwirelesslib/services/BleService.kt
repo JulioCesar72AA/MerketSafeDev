@@ -660,6 +660,7 @@ class BleService: Service() {
             //super.onCharacteristicChanged(gatt, characteristic)
             if (characteristic == null) return
 
+            Log.e(TAG, "RESPUESTA: ${characteristic.value.toHex()} -> StateMachine: $currentState")
             if (currentState == StateMachine.WIFI_STATUS) {
                 activity.wifiStatus(currentState,
                                     characteristic.value,

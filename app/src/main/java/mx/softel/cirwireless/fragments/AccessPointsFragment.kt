@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.activities.RootActivity
 import mx.softel.cirwireless.dialogs.PasswordDialog
@@ -21,11 +22,15 @@ import mx.softel.cirwirelesslib.enums.StateMachine
 
 class AccessPointsFragment: Fragment(),
     AdapterView.OnItemClickListener,
+    SwipeRefreshLayout.OnRefreshListener,
     View.OnClickListener {
 
     // ROOT MANAGERS
     private lateinit var root           : RootActivity
     private lateinit var wifiManager    : WifiManager
+
+    // FLAGS
+    private var isScanning              = false
 
     // LIST DATA
     private lateinit var wifiResults    : MutableList<ScanResult>
@@ -35,6 +40,7 @@ class AccessPointsFragment: Fragment(),
     // VIEWS
     private lateinit var lvAccessPoints : ListView
     private lateinit var backBtn        : ImageView
+    private lateinit var srlScanAp      : SwipeRefreshLayout
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -55,6 +61,14 @@ class AccessPointsFragment: Fragment(),
         view.apply {
             lvAccessPoints  = findViewById(R.id.lvAccessPoints)
             backBtn         = findViewById(R.id.ivBackAccess)
+            srlScanAp       = findViewById(R.id.srlScanAp)
+        }
+
+        srlScanAp.apply {
+            setOnRefreshListener(this@AccessPointsFragment)
+            setColorSchemeColors(resources.getColor(R.color.colorAccent, null),
+                resources.getColor(R.color.colorIconBlue, null),
+                resources.getColor(R.color.colorPrimary, null))
         }
 
         setOnClickListeners()
@@ -68,6 +82,14 @@ class AccessPointsFragment: Fragment(),
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy")
+    }
+
+    override fun onRefresh() {
+        root.setScanningUI()
+        root.service!!.apply {
+            getMacListCmd()
+            currentState = StateMachine.GET_AP
+        }
     }
 
     /**
@@ -117,6 +139,7 @@ class AccessPointsFragment: Fragment(),
             // Actualizamos la vista con los access poinst encontrados
             arrayAdapter.notifyDataSetChanged()
             root.setStandardUI()
+            srlScanAp.isRefreshing = false
         }
 
     }
@@ -185,7 +208,7 @@ class AccessPointsFragment: Fragment(),
      * ## scanWifi
      * Realiza el escaneo de los AccessPoints que el teléfono puede ver
      */
-    private fun scanWifi() {
+    internal fun scanWifi() {
         // Leemos los Access Points del celular
         apMacList.clear()
         root.registerReceiver(wifiReceiver, IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
