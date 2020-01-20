@@ -39,6 +39,7 @@ class AccessPointsFragment: Fragment(),
 
     // VIEWS
     private lateinit var lvAccessPoints : ListView
+    private lateinit var tvMacSelected  : TextView
     private lateinit var backBtn        : ImageView
     private lateinit var srlScanAp      : SwipeRefreshLayout
 
@@ -60,10 +61,12 @@ class AccessPointsFragment: Fragment(),
 
         view.apply {
             lvAccessPoints  = findViewById(R.id.lvAccessPoints)
+            tvMacSelected   = findViewById(R.id.tvMacSelectedAccess)
             backBtn         = findViewById(R.id.ivBackAccess)
             srlScanAp       = findViewById(R.id.srlScanAp)
         }
 
+        tvMacSelected.text = root.bleMac
         srlScanAp.apply {
             setOnRefreshListener(this@AccessPointsFragment)
             setColorSchemeColors(resources.getColor(R.color.colorAccent, null),

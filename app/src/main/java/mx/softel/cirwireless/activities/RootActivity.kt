@@ -213,11 +213,20 @@ class RootActivity : AppCompatActivity(),
                 if (response.toCharString().contains("WIFI GOT IP")) {
                     service!!.currentState = StateMachine.POLING
                     Log.e(TAG, "Configuración correcta")
+                    runOnUiThread {
+                        setStandardUI()
+                        backFragment()
+                        toast("Wifi configurado correctamente")
+                    }
                     return
                 }
                 if (response.toCharString().contains(AT_CMD_ERROR)) {
                     service!!.currentState = StateMachine.POLING
                     Log.e(TAG, "Ocurrió un error con el Wi-Fi")
+                    runOnUiThread {
+                        toast("No se pudo configurar el Wifi")
+                        setStandardUI()
+                    }
                     return
                 }
                 service!!.readAtResponseCmd()
@@ -522,100 +531,7 @@ class RootActivity : AppCompatActivity(),
     }
 
 
-    /**
-     * ## wifiStatus
-     * Recibe la respuesta del dispositivo mientras se encuentra
-     * en proceso de configuración de Wifi
-     *
-     * @param state Estado de la máquina de estados
-     * @param response Respuesta del dispositivo
-     * @param wifiStatus Estatus del módulo Wifi
-     */
-    override fun wifiStatus(state: StateMachine, response: ByteArray, wifiStatus: WifiStatus) {
 
-        val pole            = response[4] == 0xC5.toByte()
-        val status          = response[4] == 0xC1.toByte()
-        val atOk            = response[4] == 0x4C.toByte()
-        val atResponseFail  = response[4] == 0x36.toByte()
-        val atResponse      = response[4] == 0x35.toByte()
-
-        // Validamos el status cada 5 poleos
-        if (statusCountDown >= 8) {
-            service!!.sendStatusWifiCmd()
-            statusCountDown = 0
-            return
-        }
-        if (pole || status) {
-            Log.d(TAG, "WIFI STATUS -> POLEO/STATUS")
-            statusCountDown++
-            return
-        }
-
-        if (atResponseFail) {
-            service!!.sendIpAtCmd()
-            return
-        }
-
-        // Enviamos lectura AT con comando AT
-        if (atOk) {
-            service!!.readAtResponseCmd()
-            return
-        }
-
-        // Validamos la lectura AT
-        if (atResponse
-            //&& response.toString().contains(WIFI_VALIDATION_IP)
-            && !response.toString().contains(WIFI_VALIDATION_IP_NOT_ASSIGNED)) {
-            service!!.currentState = StateMachine.POLING
-            runOnUiThread {
-                setStandardUI()
-                backFragment()
-                toast("Wifi configurado correctamente")
-            }
-            return
-        }
-
-        Log.e(TAG, "STATE: $state -> RESPONSE: ${response.toHex()} -> WIFI STATUS: $wifiStatus")
-        when (wifiStatus) {
-
-            WifiStatus.WIFI_NOT_CONNECTED -> {
-                if (retryConnection >= 2) {
-                    retryConnection = 0
-                    service!!.currentState = StateMachine.POLING
-                    runOnUiThread {
-                        toast("No se pudo configurar el Wifi")
-                        setStandardUI()
-                    }
-                } else {
-                    service!!.sendIpAtCmd()
-                    retryConnection++
-                }
-            }
-
-            WifiStatus.WIFI_CONNECTED -> {
-                service!!.sendIpAtCmd()
-                runOnUiThread {
-                    toast("Verificando conexión")
-                }
-            }
-
-            WifiStatus.WIFI_INTERNET_READY -> {
-                service!!.sendIpAtCmd()
-                runOnUiThread {
-                    toast("Ajustando los últimos detalles")
-                }
-            }
-
-            WifiStatus.WIFI_TRANSMITING -> {
-                service!!.sendIpAtCmd()
-                runOnUiThread {
-                    toast("Validando datos")
-                }
-            }
-
-            else -> {}
-        }
-    }
 
 
     /**

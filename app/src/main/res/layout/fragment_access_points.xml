@@ -70,7 +70,7 @@
 
 
                 <TextView
-                    android:id="@+id/tvMacSelected_Access"
+                    android:id="@+id/tvMacSelectedAccess"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:fontFamily="@font/rubik_regular"
