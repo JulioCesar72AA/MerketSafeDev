@@ -50,7 +50,6 @@ class AccessPointsFragment: Fragment(),
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        Log.d(TAG, "onCreateView")
         val view = inflater.inflate(R.layout.fragment_access_points, container, false)
 
         view.apply {
@@ -154,12 +153,7 @@ class AccessPointsFragment: Fragment(),
     override fun onClick(v: View?) {
         when(v!!.id) {
             R.id.scanMask       -> toast("Espera un momento, escaneando Access Points")
-            R.id.ivBackAccess   -> {
-                root.apply {
-                    service!!.currentState = StateMachine.POLING
-                    supportFragmentManager.popBackStackImmediate()
-                }
-            }
+            R.id.ivBackAccess   -> root.backFragment()
         }
     }
 
