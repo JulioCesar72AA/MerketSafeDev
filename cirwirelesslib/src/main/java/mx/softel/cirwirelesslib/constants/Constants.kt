@@ -19,3 +19,19 @@ const val SERVICE_INIT_FAILED           = 0
 const val SERVICE_INIT_OK               = 1
 const val DEVICE_CONNECTED              = 2
 const val DEVICE_DISCONNECTED           = 3
+
+
+
+// Validaciones de WIFI
+const val WIFI_VALIDATION_IP_NOT_ASSIGNED   = "0.0.0.0"
+const val WIFI_NOT_IP_STRING                = "+CIFSR:STAIP,\"0.0.0.0\""
+const val WIFI_SUBSTRING_IP_AFTER           = "+CIFSR:STAIP,"
+const val WIFI_SUBSTRING_IP_BEFORE          = "+CIFSR:STAMAC"
+const val WIFI_SUBSTRING_AP_AFTER           = "+CWJAP:"
+
+const val PING_OK                           = "+PING:"
+
+const val AT_CMD_OK                         = "OK"
+const val AT_CMD_CLOSED                     = "CLOSED"
+const val AT_CMD_ERROR                      = "ERROR"
+const val AT_CMD_CONNECT                    = "CONNECT"

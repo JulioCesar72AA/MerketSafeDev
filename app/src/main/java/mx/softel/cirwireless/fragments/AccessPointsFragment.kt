@@ -50,7 +50,6 @@ class AccessPointsFragment: Fragment(),
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        Log.d(TAG, "onCreateView")
         val view = inflater.inflate(R.layout.fragment_access_points, container, false)
 
         view.apply {
@@ -113,10 +112,11 @@ class AccessPointsFragment: Fragment(),
                 if (data.frequency < 3000 && data.SSID.length > 2)
                     if (!apMacList.contains(data.SSID) && !data.SSID.isNullOrEmpty())
                         apMacList.add(data.SSID)
-
-                arrayAdapter.notifyDataSetChanged()
-                root.setStandardUI()
             }
+
+            // Actualizamos la vista con los access poinst encontrados
+            arrayAdapter.notifyDataSetChanged()
+            root.setStandardUI()
         }
 
     }
@@ -153,12 +153,7 @@ class AccessPointsFragment: Fragment(),
     override fun onClick(v: View?) {
         when(v!!.id) {
             R.id.scanMask       -> toast("Espera un momento, escaneando Access Points")
-            R.id.ivBackAccess   -> {
-                root.apply {
-                    service!!.currentState = StateMachine.POLING
-                    supportFragmentManager.popBackStackImmediate()
-                }
-            }
+            R.id.ivBackAccess   -> root.backFragment()
         }
     }
 
@@ -195,9 +190,6 @@ class AccessPointsFragment: Fragment(),
         apMacList.clear()
         root.registerReceiver(wifiReceiver, IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
         wifiManager.startScan()
-
-        // Leemos los Access Points del dispositivo
-        root.service!!.getMacListCmd()
     }
 
 

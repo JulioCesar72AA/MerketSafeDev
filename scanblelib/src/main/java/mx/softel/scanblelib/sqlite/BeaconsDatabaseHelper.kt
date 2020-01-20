@@ -3,7 +3,6 @@ package mx.softel.scanblelib.sqlite
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.util.Log
 import java.util.HashMap
 
 class BeaconsDatabaseHelper(ctx: Context,
@@ -21,8 +20,6 @@ class BeaconsDatabaseHelper(ctx: Context,
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        Log.w(TAG, "Actualización de la versión $oldVersion a la $newVersion")
-        Log.w(TAG, "Destruyendo la información anterior...")
         db?.execSQL(Catalog.DATABASE_DROP_TABLE_MACS_CONECTION_TABLE)
         onCreate(db)
     }
@@ -43,8 +40,6 @@ class BeaconsDatabaseHelper(ctx: Context,
                 "|" + cursor.getString(cursor.getColumnIndex(Catalog.BEACON_TYPE))
             } while (cursor.moveToNext())
             cursor.close()
-
-            Log.i(TAG, "beaconTypes: $beaconTypes")
         }
         return beaconTypes
     }

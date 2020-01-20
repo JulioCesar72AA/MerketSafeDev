@@ -1,9 +1,6 @@
 package mx.softel.cirwirelesslib.utils
 
-import android.util.Log
 import mx.softel.cirwirelesslib.extensions.toByteArray
-import mx.softel.cirwirelesslib.extensions.toHex
-
 
 object CommandUtils {
 
@@ -19,23 +16,18 @@ object CommandUtils {
 
 
     fun refreshAccessPointsCmd(): ByteArray {
-        Log.d(TAG, "refreshAccessPointCmd")
         return REFRESH_AP + getCrc16(REFRESH_AP)
     }
 
     fun getAccessPointsCmd(): ByteArray {
-        Log.d(TAG, "getAccessPointsCmd")
         return GET_AP_MAC_LIST + getCrc16(GET_AP_MAC_LIST)
     }
 
     fun getWifiStatusCmd(): ByteArray {
-        Log.d(TAG, "getWifiStatusCmd")
         return WIFI_STATUS + getCrc16(WIFI_STATUS)
     }
 
     fun setSsidCmd(ssid: String): ByteArray {
-        Log.d(TAG, "setSsidCmd")
-
         // Iniciamos el cálculo del tamaño, así como la conversión a bytes del SSID
         val nameBytes = ssid.toByteArray()
         val size = SET_SSID.size + nameBytes.size + 2
@@ -51,8 +43,6 @@ object CommandUtils {
     }
 
     fun setPasswordCmd(password: String): ByteArray {
-        Log.d(TAG, "setPasswordCmd")
-
         // Iniciamos el cálculo del tamaño, así como la conversión a bytes del password
         val passBytes = password.toByteArray()
         val size = SET_PASSWORD.size + passBytes.size + 2
@@ -67,28 +57,81 @@ object CommandUtils {
         return cmd
     }
 
-    /*fun configureAccessPointsCmd(): ByteArray {
-        Log.d(TAG, "getAccessPointsCmd")
-
-        val atCmd = "AT+CWLAPOPT=1,8".toByteArray()
-        val size = atCmd.size + 1 + 7
-        Log.d(TAG, "AT_COMMAND = ${atCmd.toHex()}")
-
-        var cmd = AT_GENERIC + atCmd + 0x00.toByte()
+    fun configureAccessPointCmd(ssid: String, password: String): ByteArray {
+        val atCommand = "AT+CWJAP=\"$ssid\",\"$password\"".toByteArray()
+        val size = atCommand.size + 8
+        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
         cmd[3] = size.toByte()
-        Log.d(TAG, "COMANDO SIN CRC = ${cmd.toHex()}")
 
         val crc = getCrc16(cmd)
         cmd += crc
-        Log.d(TAG, "COMANDO CON CRC = ${cmd.toHex()}")
+
+        return cmd
+    }
+
+    fun checkIpAddressCmd(): ByteArray {
+        val atCommand = "AT+CIFSR".toByteArray()
+        val size = atCommand.size + 8
+        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
+        cmd[3] = size.toByte()
+
+        val crc = getCrc16(cmd)
+        cmd += crc
+
+        return cmd
+    }
+
+    fun checkApConnectionCmd(): ByteArray {
+        val atCommand = "AT+CWJAP?".toByteArray()
+        val size = atCommand.size + 8
+        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
+        cmd[3] = size.toByte()
+
+        val crc = getCrc16(cmd)
+        cmd += crc
+
+        return cmd
+    }
+
+    fun pingApCmd(domain: String): ByteArray {
+        val atCommand = "AT+PING=\"$domain\"".toByteArray()
+        val size = atCommand.size + 8
+        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
+        cmd[3] = size.toByte()
+
+        val crc = getCrc16(cmd)
+        cmd += crc
+
+        return cmd
+    }
+
+    fun closeSocketCmd(): ByteArray {
+        val atCommand = "AT+CIPCLOSE".toByteArray()
+        val size = atCommand.size + 8
+        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
+        cmd[3] = size.toByte()
+
+        val crc = getCrc16(cmd)
+        cmd += crc
+
+        return cmd
+    }
+
+    fun openSocketCmd(server: String, port: String): ByteArray {
+        val atCommand = "AT+CIPSTART=\"TCP\",\"$server\",$port".toByteArray()
+        val size = atCommand.size + 8
+        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
+        cmd[3] = size.toByte()
+
+        val crc = getCrc16(cmd)
+        cmd += crc
 
         return cmd
     }
 
     fun readAtCmd(): ByteArray {
-        Log.d(TAG, "readAtCmd")
         return AT_READ + getCrc16(AT_READ)
-    }*/
+    }
 
 
 
@@ -96,8 +139,6 @@ object CommandUtils {
     /**      CRC                                                                                    */
     /************************************************************************************************/
     private fun getCrc16(buffer: ByteArray): ByteArray {
-        Log.d(TAG, "getCrc16")
-
         var crc = 0
         for (element in buffer) {
             crc = crc.ushr(8) or (crc shl 8) and 0xffff
@@ -109,9 +150,7 @@ object CommandUtils {
 
         crc = crc and 0xffff
         val data = crc.toByteArray()
-        val byteArray = byteArrayOf(data[2], data[3])
-        //Log.d("BleService", "${POLEO.toHex()} ${byteArray.toHex()}")
-        return byteArray
+        return byteArrayOf(data[2], data[3])
     }
 
 }

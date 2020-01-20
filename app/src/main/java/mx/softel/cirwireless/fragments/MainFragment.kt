@@ -15,6 +15,7 @@ import mx.softel.cirwireless.activities.RootActivity
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.enums.DisconnectionReason
+import mx.softel.cirwirelesslib.enums.StateMachine
 
 /**
  * A simple [Fragment] subclass.
@@ -107,20 +108,40 @@ class MainFragment : Fragment(), View.OnClickListener {
         Log.d(TAG, "clickConfigure")
 
         // Actualizamos los AccessPoints que el dispositivo ve
-        if (root.service!!.characteristicWrite == null)
+        if (root.service!!.getCharacteristicWrite() == null)
             clickConfigure()
         else{
             toast("Actualizando datos")
-            root.service!!.sendRefreshApCmd()
+            root.service!!.apply {
+                getMacListCmd()
+                currentState = StateMachine.GET_AP
+            }
         }
     }
 
 
     private fun clickTest() {
-        Log.d(TAG, "clickTest -> startBleService")
-        toast("Probar")
+        Log.d(TAG, "clickTest")
 
-        // TODO: Implementar el flujo de obtención de datos para el nuevo fragment
+        if (root.service!!.getCharacteristicWrite() == null)
+            clickTest()
+        else {
+            toast("Solicitando los datos del dispositivo")
+            root.apply{
+                setScanningUI()
+                service!!.apply {
+                    sendIpAtCmd()
+                    currentState = StateMachine.GET_IP
+                    if (actualFragment != testerFragment) {
+                        actualFragment = testerFragment
+                        runOnUiThread {
+                            navigateTo(testerFragment, true, null)
+                            setScanningUI()
+                        }
+                    }
+                }
+            }
+        }
     }
 
 
