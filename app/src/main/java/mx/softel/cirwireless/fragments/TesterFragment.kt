@@ -1,6 +1,5 @@
 package mx.softel.cirwireless.fragments
 
-import android.media.Image
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,8 +9,9 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.activities.RootActivity
+import mx.softel.cirwireless.interfaces.FragmentUiUpdate
 
-class TesterFragment: Fragment(), View.OnClickListener {
+class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
 
     // ROOT MANAGERS
     private lateinit var root           : RootActivity
@@ -70,21 +70,29 @@ class TesterFragment: Fragment(), View.OnClickListener {
         }
     }
 
-    private fun initUIData() {
-        tvMacSelected.text  = root.bleMac
+
+    internal fun setIpAddressUI() {
         tvIpResult.text     = root.ipAssigned
+        val iconAp = if (root.apAssigned)
+            resources.getDrawable(R.drawable.ic_ok, null)
+        else resources.getDrawable(R.drawable.ic_nok, null)
+        apChecked.setImageDrawable(iconAp)
+    }
+
+    internal fun setAccessPointUI() {
         tvSsidResult.text   = root.ssidAssigned
         tvRssiResult.text   = root.rssiAssigned
+    }
 
-        val iconAp = if (root.apAssigned)
-                 resources.getDrawable(R.drawable.ic_ok, null)
-            else resources.getDrawable(R.drawable.ic_nok, null)
-        apChecked.setImageDrawable(iconAp)
-
+    internal fun setPingUI() {
         val iconInternet = if (root.pingAssigned)
             resources.getDrawable(R.drawable.ic_ok, null)
         else resources.getDrawable(R.drawable.ic_nok, null)
         internetChecked.setImageDrawable(iconInternet)
+    }
+
+    private fun initUIData() {
+        tvMacSelected.text  = root.bleMac
     }
 
     private fun setOnCLickListeners() {
@@ -106,6 +114,16 @@ class TesterFragment: Fragment(), View.OnClickListener {
     }
 
 
+
+
+    override fun fragmentUiUpdate(state: Int) {
+        when (state) {
+            0 -> initUIData()
+            1 -> setIpAddressUI()
+            2 -> setAccessPointUI()
+            3 -> setPingUI()
+        }
+    }
 
 
 

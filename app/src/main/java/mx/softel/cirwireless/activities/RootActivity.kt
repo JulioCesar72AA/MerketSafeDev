@@ -37,11 +37,12 @@ class RootActivity : AppCompatActivity(),
     private  lateinit var passwordTyped     : String
 
     // VALORES PARA FRAGMENT DE TESTER
-    internal var ipAssigned         : String                = ""
-    internal var apAssigned         : Boolean               = false
-    internal var ssidAssigned       : String                = ""
-    internal var rssiAssigned       : String                = ""
-    internal var pingAssigned       : Boolean               = false
+    internal var ipAssigned         : String            = ""
+    internal var apAssigned         : Boolean           = false
+    internal var ssidAssigned       : String            = ""
+    internal var rssiAssigned       : String            = ""
+    internal var pingAssigned       : Boolean           = false
+    internal var dataAssigned       : Boolean           = false
 
     // SERVICE CONNECTIONS / FLAGS
     internal var service                    : BleService?           = null
@@ -52,6 +53,7 @@ class RootActivity : AppCompatActivity(),
     private  var disconnectionReason        : DisconnectionReason   = DisconnectionReason.UNKNOWN
     internal var deviceMacList              : ArrayList<String>?    = null
     private  var actualFragment             : Fragment?             = null
+    private  var testerFragment             : TesterFragment        = TesterFragment.getInstance()
 
     // HANDLERS / RUNNABLES
     private val handler                 = Handler()
@@ -205,7 +207,7 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun getApStatusFromAT(response: ByteArray, command: ReceivedCmd) {
-        Log.d(TAG, "geApStatusFromAt -> $command, RESPONSE -> ${response.toCharString()}")
+        Log.d(TAG, "getApStatusFromAt -> $command, RESPONSE -> ${response.toCharString()}")
 
         when (command) {
             ReceivedCmd.AT_OK -> {
@@ -221,12 +223,6 @@ class RootActivity : AppCompatActivity(),
             ReceivedCmd.AT_READY -> {
                 Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
                 parseApResponse(response.toCharString())
-                //val fragment = TesterFragment.getInstance()
-                //actualFragment = fragment
-                //runOnUiThread {
-                //    navigateTo(fragment, true, null)
-                //    setStandardUI()
-                //}
                 service!!.currentState = StateMachine.PING
             }
             else -> {  }
@@ -234,7 +230,7 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun getPing(response: ByteArray, command: ReceivedCmd) {
-        Log.d(TAG, "geApStatusFromAt -> $command, RESPONSE -> ${response.toCharString()}")
+        Log.d(TAG, "getPing -> $command, RESPONSE -> ${response.toCharString()}")
 
         when (command) {
             ReceivedCmd.AT_OK -> {
@@ -250,13 +246,60 @@ class RootActivity : AppCompatActivity(),
             ReceivedCmd.AT_READY -> {
                 Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
                 parsePingResponse(response.toCharString())
-                val fragment = TesterFragment.getInstance()
+                /*val fragment = TesterFragment.getInstance()
                 actualFragment = fragment
                 runOnUiThread {
                     navigateTo(fragment, true, null)
                     setStandardUI()
+                }*/
+                service!!.currentState = StateMachine.DATA_CONNECTION
+            }
+            else -> {  }
+        }
+    }
+
+    private fun getDataConnection(response: ByteArray, command: ReceivedCmd, step: Int) {
+        Log.d(TAG, "getDataConnection -> $command, RESPONSE -> ${response.toCharString()}, STEP: $step")
+        val restring = response.toCharString()
+
+        when (command) {
+            ReceivedCmd.AT_OK -> {
+                Log.d(TAG, "AT Correctamente leído, esperando respuesta")
+                service!!.readAtResponseCmd()
+            }
+            ReceivedCmd.WAIT_AP -> {
+                when (step) {
+                    0 -> service!!.closeAtSocketCmd()
                 }
-                service!!.currentState = StateMachine.POLING
+            }
+            ReceivedCmd.POLEO -> {
+                service!!.readAtResponseCmd()
+            }
+            ReceivedCmd.AT_READY -> {
+                Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
+                when (step) {
+                    0 -> {
+                        service!!.openAtSocketCmd("foodservices.otus.com.mx", "8030")
+                        serviceStep = 1
+                    }
+                    1 -> {
+                        if (restring.contains(AT_CMD_CONNECT)) {
+                            Log.d(TAG, "Ejecutar el comando AT+CIPCLOSE=...")
+                            service!!.closeAtSocketCmd()
+                            serviceStep = 2
+                            dataAssigned = true
+                        } else if (restring.contains(AT_CMD_CLOSED)) {
+                            Log.d(TAG, "El socket está cerrado")
+                            service!!.currentState = StateMachine.POLING
+                        }
+                    }
+                    2 -> {
+                        if (restring.contains(AT_CMD_CLOSED)) {
+                            Log.d(TAG, "Validación de datos con el servidor")
+                            service!!.currentState = StateMachine.POLING
+                        }
+                    }
+                }
             }
             else -> {  }
         }
@@ -279,6 +322,7 @@ class RootActivity : AppCompatActivity(),
             ipAssigned = ipRead
             apAssigned = true
         }
+        runOnUiThread { testerFragment.fragmentUiUpdate(1) }
     }
 
     private fun parseApResponse(response: String) {
@@ -300,11 +344,13 @@ class RootActivity : AppCompatActivity(),
             ssidAssigned = "No data"
             rssiAssigned = "No data"
         }
+        runOnUiThread { testerFragment.fragmentUiUpdate(2) }
     }
 
     private fun parsePingResponse(response: String) {
         Log.d(TAG, "RESPONSE TO PARSE : $response")
         pingAssigned = (response.contains(PING_OK) && !response.contains(AT_CMD_ERROR))
+        runOnUiThread { testerFragment.fragmentUiUpdate(3) }
     }
 
 
@@ -347,6 +393,8 @@ class RootActivity : AppCompatActivity(),
 
         transaction.commit()
     }
+
+
 
     /**
      * ## connectionStatus
@@ -437,9 +485,20 @@ class RootActivity : AppCompatActivity(),
             }
 
 
-            StateMachine.GET_IP -> { getIpFromAt(response, command) }
+            StateMachine.GET_IP -> {
+                if (actualFragment != testerFragment) {
+                    actualFragment = testerFragment
+                    runOnUiThread {
+                        navigateTo(testerFragment, true, null)
+                        setScanningUI()
+                    }
+                }
+                getIpFromAt(response, command)
+            }
             StateMachine.GET_STATUS_AP -> { getApStatusFromAT(response, command) }
             StateMachine.PING -> { getPing(response, command) }
+            StateMachine.DATA_CONNECTION -> { getDataConnection(response, command, serviceStep) }
+
 
 
 
@@ -651,6 +710,7 @@ class RootActivity : AppCompatActivity(),
         private var statusCountDown     = 0
         private var waitCountDown       = 0
         private var retryConnection     = 0
+        private var serviceStep         = 0
 
         // Timeouts de la actividad
         private const val UI_TIMEOUT        = 500L

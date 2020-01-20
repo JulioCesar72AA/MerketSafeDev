@@ -8,5 +8,6 @@ enum class StateMachine {
     WIFI_STATUS,
     GET_IP,
     GET_STATUS_AP,
-    PING
+    PING,
+    DATA_CONNECTION
 }

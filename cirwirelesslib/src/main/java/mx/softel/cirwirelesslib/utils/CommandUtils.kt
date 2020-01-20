@@ -123,6 +123,34 @@ object CommandUtils {
         return cmd
     }
 
+    fun closeSocketCmd(): ByteArray {
+        Log.d(TAG, "closeSocketCmd")
+
+        val atCommand = "AT+CIPCLOSE".toByteArray()
+        val size = atCommand.size + 8
+        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
+        cmd[3] = size.toByte()
+
+        val crc = getCrc16(cmd)
+        cmd += crc
+
+        return cmd
+    }
+
+    fun openSocketCmd(server: String, port: String): ByteArray {
+        Log.d(TAG, "openSocketCmd")
+
+        val atCommand = "AT+CIPSTART=\"TCP\",\"$server\",$port".toByteArray()
+        val size = atCommand.size + 8
+        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
+        cmd[3] = size.toByte()
+
+        val crc = getCrc16(cmd)
+        cmd += crc
+
+        return cmd
+    }
+
     fun readAtCmd(): ByteArray {
         Log.d(TAG, "readAtCmd")
         return AT_READ + getCrc16(AT_READ)

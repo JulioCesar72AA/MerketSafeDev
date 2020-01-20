@@ -519,6 +519,22 @@ class BleService: Service() {
             = writeToCharacteristic(CommandUtils.readAtCmd())
 
     /**
+     * TODO
+     *
+     */
+    fun closeAtSocketCmd()
+            = writeToCharacteristic(CommandUtils.closeSocketCmd())
+
+    /**
+     * TODO
+     *
+     * @param server
+     * @param port
+     */
+    fun openAtSocketCmd(server: String, port: String)
+            = writeToCharacteristic(CommandUtils.openSocketCmd(server, port))
+
+    /**
      * ## sensSsidCmd
      * Ejecuta el comando para configurar el nombre del access point al que
      * deseamos conectarnos

@@ -32,4 +32,6 @@ const val WIFI_SUBSTRING_AP_AFTER           = "+CWJAP:"
 const val PING_OK                           = "+PING:"
 
 const val AT_CMD_OK                         = "OK"
+const val AT_CMD_CLOSED                     = "CLOSED"
 const val AT_CMD_ERROR                      = "ERROR"
+const val AT_CMD_CONNECT                    = "CONNECT"
