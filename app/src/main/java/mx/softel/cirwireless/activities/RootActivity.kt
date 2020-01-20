@@ -23,6 +23,7 @@ import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.toCharString
 import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.services.BleService
+import java.lang.StringBuilder
 
 
 class RootActivity : AppCompatActivity(),
@@ -43,6 +44,7 @@ class RootActivity : AppCompatActivity(),
     internal var rssiAssigned       : String            = ""
     internal var pingAssigned       : Boolean           = false
     internal var dataAssigned       : Boolean           = false
+    internal var statusAssigned     : Boolean           = false
 
     // SERVICE CONNECTIONS / FLAGS
     internal var service                    : BleService?           = null
@@ -246,12 +248,6 @@ class RootActivity : AppCompatActivity(),
             ReceivedCmd.AT_READY -> {
                 Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
                 parsePingResponse(response.toCharString())
-                /*val fragment = TesterFragment.getInstance()
-                actualFragment = fragment
-                runOnUiThread {
-                    navigateTo(fragment, true, null)
-                    setStandardUI()
-                }*/
                 service!!.currentState = StateMachine.DATA_CONNECTION
             }
             else -> {  }
@@ -270,35 +266,30 @@ class RootActivity : AppCompatActivity(),
             ReceivedCmd.WAIT_AP -> {
                 when (step) {
                     0 -> service!!.closeAtSocketCmd()
+                    3 -> service!!.sendStatusWifiCmd()
                 }
             }
             ReceivedCmd.POLEO -> {
-                service!!.readAtResponseCmd()
+                when (step) {
+                    3 -> service!!.sendStatusWifiCmd()
+                    else -> service!!.readAtResponseCmd()
+                }
             }
             ReceivedCmd.AT_READY -> {
                 Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
-                when (step) {
-                    0 -> {
-                        service!!.openAtSocketCmd("foodservices.otus.com.mx", "8030")
-                        serviceStep = 1
+                parseDataResponse(response, step)
+            }
+            ReceivedCmd.WIFI_STATUS -> {
+                if (response[4] == 0x28.toByte()) {
+                    statusAssigned = response[5] == 0x07.toByte() || response[5] == 0x08.toByte()
+                    service!!.currentState = StateMachine.POLING
+                    runOnUiThread {
+                        testerFragment.fragmentUiUpdate(5)
+                        setStandardUI()
                     }
-                    1 -> {
-                        if (restring.contains(AT_CMD_CONNECT)) {
-                            Log.d(TAG, "Ejecutar el comando AT+CIPCLOSE=...")
-                            service!!.closeAtSocketCmd()
-                            serviceStep = 2
-                            dataAssigned = true
-                        } else if (restring.contains(AT_CMD_CLOSED)) {
-                            Log.d(TAG, "El socket está cerrado")
-                            service!!.currentState = StateMachine.POLING
-                        }
-                    }
-                    2 -> {
-                        if (restring.contains(AT_CMD_CLOSED)) {
-                            Log.d(TAG, "Validación de datos con el servidor")
-                            service!!.currentState = StateMachine.POLING
-                        }
-                    }
+                } else {
+                    Log.e(TAG, "Enviando comando de WIFI STATUS")
+                    service!!.sendStatusWifiCmd()
                 }
             }
             else -> {  }
@@ -351,6 +342,38 @@ class RootActivity : AppCompatActivity(),
         Log.d(TAG, "RESPONSE TO PARSE : $response")
         pingAssigned = (response.contains(PING_OK) && !response.contains(AT_CMD_ERROR))
         runOnUiThread { testerFragment.fragmentUiUpdate(3) }
+    }
+
+    private fun parseDataResponse(response: ByteArray, step: Int) {
+        Log.d(TAG, "RESPONSE: ${response.toHex()}")
+        val restring = response.toCharString()
+        when (step) {
+            0 -> {
+                service!!.openAtSocketCmd("foodservices.otus.com.mx", "8030")
+                serviceStep = 1
+            }
+            1 -> {
+                if (restring.contains(AT_CMD_CONNECT)) {
+                    Log.d(TAG, "Ejecutar el comando AT+CIPCLOSE=...")
+                    service!!.closeAtSocketCmd()
+                    serviceStep = 2
+                    dataAssigned = true
+                } else if (restring.contains(AT_CMD_CLOSED)) {
+                    Log.d(TAG, "El socket está cerrado")
+                    dataAssigned = false
+                }
+                runOnUiThread { testerFragment.fragmentUiUpdate(4) }
+            }
+            2 -> {
+                if (restring.contains(AT_CMD_CLOSED)) {
+                    Log.d(TAG, "Cerrando con éxito el socket")
+                    service!!.sendStatusWifiCmd()
+                    serviceStep = 3
+                } else {
+                    service!!.closeAtSocketCmd()
+                }
+            }
+        }
     }
 
 

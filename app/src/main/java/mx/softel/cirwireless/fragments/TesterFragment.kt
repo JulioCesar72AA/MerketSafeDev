@@ -71,7 +71,7 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
     }
 
 
-    internal fun setIpAddressUI() {
+    private fun setIpAddressUI() {
         tvIpResult.text     = root.ipAssigned
         val iconAp = if (root.apAssigned)
             resources.getDrawable(R.drawable.ic_ok, null)
@@ -79,16 +79,30 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
         apChecked.setImageDrawable(iconAp)
     }
 
-    internal fun setAccessPointUI() {
+    private fun setAccessPointUI() {
         tvSsidResult.text   = root.ssidAssigned
         tvRssiResult.text   = root.rssiAssigned
     }
 
-    internal fun setPingUI() {
+    private fun setPingUI() {
         val iconInternet = if (root.pingAssigned)
             resources.getDrawable(R.drawable.ic_ok, null)
         else resources.getDrawable(R.drawable.ic_nok, null)
         internetChecked.setImageDrawable(iconInternet)
+    }
+
+    private fun setDataUI() {
+        val iconData = if (root.dataAssigned)
+            resources.getDrawable(R.drawable.ic_ok, null)
+        else resources.getDrawable(R.drawable.ic_nok, null)
+        dataChecked.setImageDrawable(iconData)
+    }
+
+    private fun setStatusUI() {
+        val iconData = if (root.statusAssigned)
+            resources.getDrawable(R.drawable.ic_ok, null)
+        else resources.getDrawable(R.drawable.ic_nok, null)
+        statusChecked.setImageDrawable(iconData)
     }
 
     private fun initUIData() {
@@ -122,6 +136,8 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
             1 -> setIpAddressUI()
             2 -> setAccessPointUI()
             3 -> setPingUI()
+            4 -> setDataUI()
+            5 -> setStatusUI()
         }
     }
 
