@@ -86,6 +86,11 @@ class RootActivity : AppCompatActivity(),
         doUnbindService()
     }
 
+    override fun onBackPressed() {
+        backFragment()
+        //super.onBackPressed()
+    }
+
     internal fun setScanningUI() {
         scanMask.apply {
             visibility = View.VISIBLE
@@ -121,7 +126,7 @@ class RootActivity : AppCompatActivity(),
      */
     private fun initFragment() {
         // Iniciamos el fragmento deseado
-        val fragment = MainFragment.getInstance()
+        val fragment = mainFragment
         actualFragment = fragment
         supportFragmentManager
             .beginTransaction()
@@ -130,6 +135,10 @@ class RootActivity : AppCompatActivity(),
     }
 
     internal fun backFragment() {
+        if (actualFragment == mainFragment) {
+            finishActivity(DisconnectionReason.NORMAL_DISCONNECTION)
+            return
+        }
         if (actualFragment == testerFragment) actualFragment = mainFragment
         if (actualFragment == wifiFragment) actualFragment = mainFragment
         supportFragmentManager.popBackStackImmediate()
@@ -143,6 +152,7 @@ class RootActivity : AppCompatActivity(),
     internal fun finishActivity(disconnectionReason: DisconnectionReason) {
         service!!.disconnectBleDevice(disconnectionReason)
         handler.removeCallbacks(disconnectionRunnable)
+        actualFragment = null
         finish()
     }
 
