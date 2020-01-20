@@ -15,7 +15,6 @@ import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.utils.CommandUtils
 import java.lang.Exception
-import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -63,25 +62,22 @@ class BleService: Service() {
     /**     CICLO DE VIDA                                                                           */
     /************************************************************************************************/
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(TAG, "onStartCommand")
         return START_STICKY
     }
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "onCreate")
 
         // Iniciamos el servicio
         if (initBleService()) {
-            Log.d(TAG, "Se inició correctamente el servicio BLE")
+            Log.i(TAG, "Se inició correctamente el servicio BLE")
         } else {
-            Log.w(TAG, "Ocurrió un problema al iniciar el servicio BLE")
+            Log.i(TAG, "Ocurrió un problema al iniciar el servicio BLE")
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(TAG, "onDestroy")
         unregisterRunnableTimeoutTask()
         stopBleService()
     }
@@ -94,8 +90,6 @@ class BleService: Service() {
      * @return Estatus del servicio (iniciado o no)
      */
     private fun initBleService(): Boolean {
-        Log.d(TAG, "initBleService")
-
         // Inicializamos el manager y el adaptador BLE
         bleManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         if (bleManager != null) bleAdapter = bleManager!!.adapter
@@ -141,8 +135,6 @@ class BleService: Service() {
      * @param device
      */
     fun connectBleDevice(device: BluetoothDevice) {
-        Log.d(TAG, "connectBleDevice")
-
         // Realizamos la conexión utilizando la instancia de la actividad registrada
         bleGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             device.connectGatt(ctx, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
@@ -167,8 +159,6 @@ class BleService: Service() {
      * @param disconnectionReason Código de desconexión para manejo de errores
      */
     fun disconnectBleDevice(disconnectionReason: DisconnectionReason) {
-        Log.d(TAG, "disconnectBleDevice -> Reason($disconnectionReason)")
-
         try {
             // Limpiamos las conexiones creadas
             activity.connectionStatus(ActualState.DISCONNECTING,
@@ -186,7 +176,6 @@ class BleService: Service() {
      * de comunicación con el dispositivo
      */
     fun discoverDeviceServices() {
-        Log.d(TAG, "discoverDeviceServices")
         bleGatt?.discoverServices()
     }
 
@@ -202,7 +191,6 @@ class BleService: Service() {
      * servicios y descriptores
      */
     private fun cleanBleConnections() {
-        Log.d(TAG, "cleanBleConnections")
         if (!bleGattConnections.isNullOrEmpty()) {
             for (gatt in bleGattConnections) {
                 // Cerramos las conexiones una a una
@@ -227,7 +215,6 @@ class BleService: Service() {
      * Elimina los callbacks asociados al timeout del servicio
      */
     private fun unregisterRunnableTimeoutTask() {
-        Log.d(TAG, "unregisterRunnableTimeoutTask")
         for (runnable in runnableTimeoutTaskList) {
             connectionObserver.removeCallbacks(runnable)
         }
@@ -260,24 +247,20 @@ class BleService: Service() {
      * @param service Servicio Bluetooth del dispositivo conectado
      */
     private fun getCommCharacteristics(service: BluetoothGattService) {
-        Log.d(TAG, "getCommCharacteristics")
         val uuid = service.uuid.toString()
 
         if (uuid == BleConstants.CIR_NAMA_SERVICE_UUID) {
             uuidService = service.uuid
-            Log.e(TAG, "Sevicio de comunicación encontrado $uuidService")
 
             // Solicitamos e inicializamos las características de COMUNICACIÓN
             val characteristics = service.characteristics
             for (char in characteristics) {
                 when (char.uuid.toString()) {
                     BleConstants.CIR_NAMA_NOTIFY_UUID -> {
-                        Log.e(TAG, "NOTIFICACIÓN ${char.uuid}")
                         characteristicNotify = char
 
                         // Obtenemos los descriptores de la notificación
                         for (desc in char.descriptors) {
-                            Log.e(TAG, "DESCRIPTOR: ${desc.uuid}")
                             if (desc.uuid.toString() == BleConstants.NOTIFICATION_DESCRIPTOR) {
                                 notificationDescriptor = desc
                             }
@@ -285,7 +268,6 @@ class BleService: Service() {
 
                     }
                     BleConstants.CIR_NAMA_WRITE_UUID -> {
-                        Log.e(TAG, "ESCRITURA ${char.uuid}")
                         characteristicWrite = char
                     }
                 }
@@ -302,7 +284,6 @@ class BleService: Service() {
      * @param service Servicio Bluetooth del dispositivo conectado
      */
     private fun getInfoCharacteristics(service: BluetoothGattService) {
-        Log.d(TAG, "getInfoCharacteristics")
         val uuid = service.uuid.toString()
 
         if (uuid == BleConstants.DEVICE_INFO_SERVICE_UUID) {
@@ -310,7 +291,6 @@ class BleService: Service() {
             val characteristics = service.characteristics
             for (char in characteristics) {
                 if (char.uuid.toString() == BleConstants.DEVICE_INFO_UUID) {
-                    Log.e(TAG, "DEVICE_INFO ${char.uuid}")
                     characteristicDeviceInfo = char
                 }
             }
@@ -377,7 +357,6 @@ class BleService: Service() {
             WIFI_STATUS         -> ReceivedCmd.WIFI_STATUS
             else                -> ReceivedCmd.UNKNOWN
         }
-        Log.d(TAG, "receivedCommand -> $cmd")
         return cmd
     }
 
@@ -438,7 +417,6 @@ class BleService: Service() {
      * obtener el Firmware en [BluetoothGattCallback.onCharacteristicRead]
      */
     fun getFirmwareData() {
-        Log.d(TAG, "getFirmwareData")
         if (characteristicDeviceInfo != null) {
             bleGatt!!.readCharacteristic(characteristicDeviceInfo)
         }
@@ -450,8 +428,6 @@ class BleService: Service() {
      * la comunicación por poleo
      */
     fun initPoleCmd() {
-        Log.d(TAG, "initPoleCmd")
-
         enableCharacteristicNotification(true)
         writeToDescriptor(DISABLE_NOTIFICATION)
         currentState = StateMachine.POLING
@@ -572,11 +548,8 @@ class BleService: Service() {
      * @return Lista de MAC's visibles para el dispositivo
      */
     fun fromResponseGetMacList(response: ByteArray): ArrayList<String>? {
-        Log.d(TAG, "fromResponseGetMacList")
-
         // Validamos que el tamaño de la respuesta sea correcto para parsear los datos
         if (response[3] != SIX_ACCESS_POINTS) {
-            Log.e(TAG, "El tamaño de bytes de la respuesta es incompatible")
             return null
         }
 
@@ -591,7 +564,6 @@ class BleService: Service() {
             }
             // Casteamos el ByteArray en un String para el array final
             macString = byteElement.toHex().replace(" ", ":")
-            Log.d(TAG, "macString: $macString")
             list.add(macString)
         }
         return list
@@ -610,7 +582,6 @@ class BleService: Service() {
 
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
-            Log.i(TAG, "onConnectionStateChange -> Status($status) -> NewState($newState)")
 
             // Si ocurre el error 133 o el error 257...
             if (status == DisconnectionReason.ERROR_133.code
@@ -634,7 +605,6 @@ class BleService: Service() {
 
         override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
             super.onMtuChanged(gatt, mtu, status)
-            Log.i(TAG, "onMTuChanged")
 
             // Solicitando la versión de Firmware de la tarjeta
             getFirmwareData()
@@ -642,7 +612,6 @@ class BleService: Service() {
 
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
-            Log.i(TAG, "onServicesDiscovered -> Status($status)")
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 // Analizando los servicios encontrados
@@ -661,14 +630,11 @@ class BleService: Service() {
                                            characteristic: BluetoothGattCharacteristic?,
                                            status: Int) {
             //super.onCharacteristicWrite(gatt, characteristic, status)
-            Log.i(TAG, "onCharacteristicWrite -> ${characteristic!!.value.toHex()}")
         }
 
         override fun onCharacteristicRead(gatt: BluetoothGatt?,
                                           characteristic: BluetoothGattCharacteristic?,
                                           status: Int) {
-            Log.i(TAG, "onCharacteristicRead -> ${characteristic?.uuid}")
-
             // Si se leyó correctamente la característica...
             if (status == BluetoothGatt.GATT_SUCCESS) {
 
@@ -680,7 +646,6 @@ class BleService: Service() {
                     firmware = "$one.$two.$three"
 
                     correctFirmware = (firmware == BleConstants.FIRMWARE_346)
-                    Log.e(TAG, "FIRMWARE $firmware -> CORRECT $correctFirmware")
 
                     if (!correctFirmware)
                         disconnectBleDevice(DisconnectionReason.FIRMWARE_UNSOPPORTED)
@@ -694,7 +659,6 @@ class BleService: Service() {
                                              characteristic: BluetoothGattCharacteristic?) {
             //super.onCharacteristicChanged(gatt, characteristic)
             if (characteristic == null) return
-            Log.e(TAG, "RESPUESTA -> ${characteristic.value.toHex()}")
 
             if (currentState == StateMachine.WIFI_STATUS) {
                 activity.wifiStatus(currentState,
@@ -706,36 +670,21 @@ class BleService: Service() {
                                       receivedCommand(characteristic.value))
             }
 
-
-            // STATE MACHINE ACCESS POINTS *********************************************************
-            /*when (currentState) {
-                StateMachine.POLING             -> sendRefreshApCmd()
-                StateMachine.REFRESH_AP_OK      -> refreshingWifi(characteristic)
-                StateMachine.WIFI_CONFIG        -> refreshingWifi(characteristic)
-                StateMachine.AT_WAIT_RESPONSE   -> refreshingWifi(characteristic)
-                StateMachine.STANDBY            -> Log.d(TAG, "STANDBY (Poling) ${characteristic.value.toHex()}")
-                else                            -> Log.d(TAG, "Status desconocido")
-            }*/
-            // *************************************************************************************
-
         }
 
         override fun onDescriptorRead(gatt: BluetoothGatt?,
                                       descriptor: BluetoothGattDescriptor?,
                                       status: Int) {
             super.onDescriptorRead(gatt, descriptor, status)
-            Log.i(TAG, "onDescriptorRead")
         }
 
         override fun onDescriptorWrite(gatt: BluetoothGatt?,
                                        descriptor: BluetoothGattDescriptor?,
                                        status: Int) {
             super.onDescriptorWrite(gatt, descriptor, status)
-            Log.i(TAG, "onDescriptorWrite")
 
             // Si aún no está poleando, se levanta el descriptor
             if (!isDescriptorOn) {
-                Log.e(TAG, "HABILITANDO DESCRIPTOR")
                 writeToDescriptor(ENABLE_NOTIFICATION)
                 isDescriptorOn = true
             }
@@ -770,8 +719,6 @@ class BleService: Service() {
         fun wifiStatus(state: StateMachine,
                        response: ByteArray,
                        wifiStatus: WifiStatus)
-        //fun sendCommand(data: ByteArray)
-        //fun onBleResponse(data: ByteArray)
     }
 
 

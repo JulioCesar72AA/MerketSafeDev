@@ -3,12 +3,10 @@ package mx.softel.cirwireless.activities
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.cirwireless.R
@@ -17,6 +15,7 @@ import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
+
 
 class MainActivity: AppCompatActivity(),
                     SwipeRefreshLayout.OnRefreshListener,
@@ -32,7 +31,6 @@ class MainActivity: AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.d(TAG, "onCreate")
         srlScan.apply {
             setOnRefreshListener(this@MainActivity)
             setColorSchemeColors(getColor(R.color.colorAccent),
@@ -45,7 +43,6 @@ class MainActivity: AppCompatActivity(),
 
     override fun onResume() {
         super.onResume()
-        Log.d(TAG, "onResume")
 
         /**
          * Se añade el escaneo en el [onResume] porque solicita los permisos
@@ -57,8 +54,6 @@ class MainActivity: AppCompatActivity(),
     }
 
     override fun onRefresh() {
-        Log.d(TAG, "onRefresh")
-
         scanMask.visibility = View.VISIBLE
         scanDevices()
 
@@ -90,8 +85,6 @@ class MainActivity: AppCompatActivity(),
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
     override fun onScanClickListener(position: Int) {
-        Log.d(TAG, "onScanClickListener")
-
         val intent = Intent(this, RootActivity::class.java)
         intent.apply {
             val dev = bleDevices[position]
@@ -111,24 +104,18 @@ class MainActivity: AppCompatActivity(),
     /**     VISTA                                                                                   */
     /************************************************************************************************/
     private fun initUI() {
-        Log.d(TAG, "initUI")
-
         pbScanning.visibility   = View.GONE
         scanMask.visibility     = View.GONE
         tvNoDevices.visibility  = View.GONE
     }
 
     private fun setScanningUI() {
-        Log.d(TAG, "setScanningUI")
-
         pbScanning.visibility   = View.VISIBLE
         scanMask.visibility     = View.VISIBLE
         tvNoDevices.visibility  = View.GONE
     }
 
     private fun setRecyclerUI() {
-        Log.d(TAG, "setRecyclerUI")
-
         rvBleList.apply {
             val manager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
             layoutManager = manager
@@ -139,8 +126,6 @@ class MainActivity: AppCompatActivity(),
     }
 
     private fun setNoDataUI() {
-        Log.d(TAG, "setNoDataUI")
-
         pbScanning.visibility   = View.GONE
         scanMask.visibility     = View.GONE
         tvNoDevices.visibility  = View.VISIBLE
@@ -151,12 +136,9 @@ class MainActivity: AppCompatActivity(),
     /**     AUXILIARES                                                                              */
     /************************************************************************************************/
     private fun scanDevices() {
-        Log.d(TAG, "scanDevices")
-
         isScanning = true
         val bleManager = BleManager(this, TIMEOUT)
         bleManager.scanBleDevices {
-            Log.d(TAG, "scanBleDevices")
             bleDevices = it
             if (bleDevices.isEmpty()) {
                 isScanning = false
@@ -164,7 +146,6 @@ class MainActivity: AppCompatActivity(),
             } else {
                 isScanning = false
                 for (dev in it) {
-                    Log.d(TAG, "Dispositivo: ${dev.getBleDevice()}")
                     setRecyclerUI()
                 }
             }

@@ -23,7 +23,6 @@ import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.toCharString
 import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.services.BleService
-import java.lang.StringBuilder
 
 
 class RootActivity : AppCompatActivity(),
@@ -97,9 +96,9 @@ class RootActivity : AppCompatActivity(),
     }
 
     internal fun setStandardUI() {
-        Log.e(TAG, "setStandardUI")
         scanMask.visibility = View.GONE
         pbScanning.visibility = View.GONE
+        serviceStep = 0
     }
 
     /**
@@ -109,8 +108,6 @@ class RootActivity : AppCompatActivity(),
      * del dispositivo con el cual se va a interactuar
      */
     private fun getAndSetIntentData() {
-        Log.d(TAG, "getIntent")
-
         // Obtenemos la información del intent
         val data = intent.extras!!
         bleDevice        = data[EXTRA_DEVICE] as BluetoothDevice
@@ -123,7 +120,6 @@ class RootActivity : AppCompatActivity(),
      * la instancia principal de conexión
      */
     private fun initFragment() {
-        Log.d(TAG, "initFragment")
         // Iniciamos el fragmento deseado
         val fragment = MainFragment.getInstance()
         actualFragment = fragment
@@ -193,7 +189,7 @@ class RootActivity : AppCompatActivity(),
     /**     CONTROL RESULTS                                                                         */
     /************************************************************************************************/
     private fun getIpFromAt(response: ByteArray, command: ReceivedCmd) {
-        Log.d(TAG, "geIpFromAt -> $command, RESPONSE -> ${response.toCharString()}")
+        Log.d(TAG, "geIpFromAt -> $command, RESPONSE -> ${response.toCharString()}, RESPONSE2 -> ${response.toHex()}")
 
         when (command) {
             ReceivedCmd.AT_OK -> {
@@ -215,7 +211,7 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun getApStatusFromAT(response: ByteArray, command: ReceivedCmd) {
-        Log.d(TAG, "getApStatusFromAt -> $command, RESPONSE -> ${response.toCharString()}")
+        Log.d(TAG, "getApStatusFromAT -> $command, RESPONSE -> ${response.toCharString()}, RESPONSE2 -> ${response.toHex()}")
 
         when (command) {
             ReceivedCmd.AT_OK -> {
@@ -261,7 +257,7 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun getDataConnection(response: ByteArray, command: ReceivedCmd, step: Int) {
-        Log.d(TAG, "getDataConnection -> $command, RESPONSE -> ${response.toCharString()}, STEP: $step")
+        Log.d(TAG, "getDataConnection -> $command, RESPONSE -> ${response.toCharString()}, STEP: $step, RESPONSE2 -> ${response.toHex()}")
 
         when (command) {
             ReceivedCmd.AT_OK -> {
@@ -303,7 +299,6 @@ class RootActivity : AppCompatActivity(),
 
 
     private fun parseIpResponse(response: String) {
-        Log.d(TAG, "RESPONSE TO PARSE : $response")
         if (response.contains(WIFI_NOT_IP_STRING)){
             ipAssigned = "0.0.0.0"
             apAssigned = false
@@ -314,7 +309,6 @@ class RootActivity : AppCompatActivity(),
                 .replace("\"", "")
                 .replace("\n", "")
                 .replace("\r", "")
-            Log.d(TAG, "Resultado IP SUBSTRING: $ipRead")
             ipAssigned = ipRead
             apAssigned = true
         }
@@ -322,7 +316,6 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun parseApResponse(response: String) {
-        Log.d(TAG, "RESPONSE TO PARSE : $response")
         if (response.contains(WIFI_SUBSTRING_AP_AFTER)) {
             ssidAssigned = response
                 .substringAfter(WIFI_SUBSTRING_AP_AFTER)
@@ -344,13 +337,11 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun parsePingResponse(response: String) {
-        Log.d(TAG, "RESPONSE TO PARSE : $response")
         pingAssigned = (response.contains(PING_OK) && !response.contains(AT_CMD_ERROR))
         runOnUiThread { testerFragment.fragmentUiUpdate(3) }
     }
 
     private fun parseDataResponse(response: ByteArray, step: Int) {
-        Log.d(TAG, "RESPONSE: ${response.toHex()}")
         val restring = response.toCharString()
         when (step) {
             0 -> {
@@ -359,7 +350,6 @@ class RootActivity : AppCompatActivity(),
             }
             1 -> {
                 if (restring.contains(AT_CMD_CONNECT)) {
-                    Log.d(TAG, "Ejecutar el comando AT+CIPCLOSE=...")
                     service!!.closeAtSocketCmd()
                     serviceStep = 2
                     dataAssigned = true
@@ -406,8 +396,6 @@ class RootActivity : AppCompatActivity(),
                             args: Bundle?,
                             animIn: Int,
                             animOut: Int) {
-        Log.d(TAG, "navigateTo")
-
         if (args != null) {
             fragment.arguments = args
         }
@@ -513,15 +501,12 @@ class RootActivity : AppCompatActivity(),
             }
 
 
-            StateMachine.GET_IP -> {
-                if (actualFragment != testerFragment) {
-
-                }
-                getIpFromAt(response, command)
-            }
-            StateMachine.GET_STATUS_AP -> { getApStatusFromAT(response, command) }
-            StateMachine.PING -> { getPing(response, command) }
-            StateMachine.DATA_CONNECTION -> { getDataConnection(response, command, serviceStep) }
+            // TESTING CONNECTION MACHINE *************************************************************
+            StateMachine.GET_IP             -> { getIpFromAt(response, command) }
+            StateMachine.GET_STATUS_AP      -> { getApStatusFromAT(response, command) }
+            StateMachine.PING               -> { getPing(response, command) }
+            StateMachine.DATA_CONNECTION    -> { getDataConnection(response, command, serviceStep) }
+            // ****************************************************************************************
 
 
 

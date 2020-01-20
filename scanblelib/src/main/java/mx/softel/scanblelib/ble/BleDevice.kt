@@ -3,9 +3,6 @@ package mx.softel.scanblelib.ble
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanRecord
 import android.bluetooth.le.ScanResult
-import android.content.Context
-import android.util.Log
-import mx.softel.scanblelib.BLE_DEVICE_DEBUG_MODE
 import mx.softel.scanblelib.extensions.toHexValue
 
 class BleDevice(scanResult: ScanResult,
@@ -35,7 +32,6 @@ class BleDevice(scanResult: ScanResult,
     /**     CONSTRUCTORES                                                                           */
     /************************************************************************************************/
     init {
-        if (BLE_DEVICE_DEBUG_MODE) Log.d(TAG, "init")
         analizeBeacon()
     }
 
@@ -57,7 +53,6 @@ class BleDevice(scanResult: ScanResult,
     /**     METODOS                                                                                 */
     /************************************************************************************************/
     private fun analizeBeacon() {
-        if (BLE_DEVICE_DEBUG_MODE) Log.d(TAG, "analizeBeacon")
         try {
             isEncrypted = BLE_DEVICE_NOT_ENCRYPTED
 
@@ -98,14 +93,6 @@ class BleDevice(scanResult: ScanResult,
             deviceBeaconIsEncrypted =
                 if (isEncrypted == BLE_DEVICE_ENCRYPTED) BEACON_IS_ENCRYPTED
                 else BEACON_IS_NOT_ENCRYPTED
-
-
-            // --------------------------------------------------
-            if (BLE_DEVICE_DEBUG_MODE) {
-                Log.d(TAG, "OLD BEACON: $oldBeaconType | NEW BEACON: $newBeaconType | BEACON ENCRYPTED: $deviceBeaconIsEncrypted")
-                for (data in beaconValues) { Log.d(TAG, "BEACON VALUES: $data") }
-            }
-            // --------------------------------------------------
 
         } catch (ex: Exception) {
             ex.stackTrace

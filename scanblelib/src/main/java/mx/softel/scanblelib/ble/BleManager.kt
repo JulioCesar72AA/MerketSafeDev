@@ -7,8 +7,6 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.os.Handler
-import android.util.Log
-import mx.softel.scanblelib.BLE_MANAGER_DEBUG_MODE
 import mx.softel.scanblelib.extensions.isLocationPermissionGranted
 import mx.softel.scanblelib.extensions.requestLocationPermission
 import mx.softel.scanblelib.sqlite.BeaconsDatabaseHelper
@@ -30,8 +28,6 @@ class BleManager(private var appContext: Context,
     /**     CONSTRUCTORES                                                                           */
     /************************************************************************************************/
     init {
-        Log.d(TAG, "init")
-        if (BLE_MANAGER_DEBUG_MODE) Log.d(TAG, "init")
         val manager = appContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bleAdapter          = manager.adapter
         bleScanner          = bleAdapter.bluetoothLeScanner
@@ -79,25 +75,16 @@ class BleManager(private var appContext: Context,
 
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
             val mac = result?.device!!.address
-
-            // --------------------------------------------------
-            if (BLE_MANAGER_DEBUG_MODE) {
-                Log.d(TAG, "onScanResult: $mac | isImberaDevice: ${isImberaDevice(mac)}")
-            }
-            // --------------------------------------------------
             val check = isImberaDevice(mac) && newDeviceScanned(mac)
 
             if (check) {
                 val scannedBleDevice = BleDevice(result, availableBeacons)
                 if (filterBeaconList.isEmpty()) {
                     bleDevices.add(scannedBleDevice)
-                    Log.d(TAG, "Añadiendo $mac a bleDevices")
                 } else {
                     val type = filterBeaconList.contains(scannedBleDevice.deviceBeaconType)
-                    Log.d(TAG, "TYPE: $type")
                     if (type) {
                         bleDevices.add(scannedBleDevice)
-                        Log.d(TAG, "Añadiendo $mac a bleDevices")
                     }
                 }
             }
