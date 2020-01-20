@@ -198,6 +198,35 @@ class RootActivity : AppCompatActivity(),
     /************************************************************************************************/
     /**     CONTROL RESULTS                                                                         */
     /************************************************************************************************/
+    private fun wifiConfigProcess(response: ByteArray, command: ReceivedCmd) {
+        Log.d(TAG, "wifiConfigProcess -> $command, RESPONSE -> ${response.toCharString()}, RESPONSE2 -> ${response.toHex()}")
+
+        when (command) {
+            ReceivedCmd.AT_OK -> {
+                Log.d(TAG, "AT Correctamente leído, esperando respuesta")
+                service!!.readAtResponseCmd()
+            }
+            ReceivedCmd.POLEO -> {
+                service!!.readAtResponseCmd()
+            }
+            ReceivedCmd.AT_READY -> {
+                if (response.toCharString().contains("WIFI GOT IP")) {
+                    service!!.currentState = StateMachine.POLING
+                    Log.e(TAG, "Configuración correcta")
+                    return
+                }
+                if (response.toCharString().contains(AT_CMD_ERROR)) {
+                    service!!.currentState = StateMachine.POLING
+                    Log.e(TAG, "Ocurrió un error con el Wi-Fi")
+                    return
+                }
+                service!!.readAtResponseCmd()
+            }
+            else -> {  }
+        }
+    }
+
+
     private fun getIpFromAt(response: ByteArray, command: ReceivedCmd) {
         Log.d(TAG, "geIpFromAt -> $command, RESPONSE -> ${response.toCharString()}, RESPONSE2 -> ${response.toHex()}")
 
@@ -456,6 +485,7 @@ class RootActivity : AppCompatActivity(),
             // STATUS DE POLEO
             StateMachine.POLING -> {
                 // Actualizamos los access points recién se conecta al dispositivo
+                // TODO: No es necesario actualizar al dispositivo recién se conecta
                 if (!isRefreshed) service!!.sendRefreshApCmd()
                 if (command == ReceivedCmd.REFRESH_AP_OK) {
                     isRefreshed = true
@@ -475,41 +505,7 @@ class RootActivity : AppCompatActivity(),
             }
 
             // STATUS DE CONFIGURACIÓN WIFI
-            StateMachine.WIFI_CONFIG -> {
-                when (command) {
-                    ReceivedCmd.AT_OK, ReceivedCmd.AT_READY -> {
-                        service!!.currentState = StateMachine.WIFI_STATUS
-                        statusCountDown = 0
-                    }
-                    ReceivedCmd.AT_NOK  -> {
-                        Log.d(TAG, "Ocurrió un error con el comando AT")
-                    }
-                    ReceivedCmd.POLEO, ReceivedCmd.STATUS   -> {
-                        if(statusCountDown >= 2) {
-                            statusCountDown = 0
-                            service!!.readAtResponseCmd()
-                        } else {
-                            Log.d(TAG, "WIFI_CONFIG -> POLEO/STATUS")
-                            statusCountDown++
-                        }
-                    }
-                    ReceivedCmd.WAIT_AP -> {
-                        if (actualFragment == AccessPointsFragment.getInstance()) {
-                            if(waitCountDown >= 2) {
-                                waitCountDown = 0
-                                service!!.sendConfigureWifiCmd(ssidSelected, passwordTyped)
-                            } else {
-                                waitCountDown++
-                            }
-                        } else if (actualFragment == TesterFragment.getInstance()) {
-                            Log.d(TAG, "Esperando respuesta del AT")
-                        }
-
-                    }
-                    else -> {}
-                }
-            }
-
+            StateMachine.WIFI_CONFIG        -> { wifiConfigProcess(response, command) }
 
             // TESTING CONNECTION MACHINE *************************************************************
             StateMachine.GET_IP             -> { getIpFromAt(response, command) }

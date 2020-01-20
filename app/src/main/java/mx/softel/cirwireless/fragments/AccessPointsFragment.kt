@@ -136,7 +136,7 @@ class AccessPointsFragment: Fragment(),
                         apMacList.add(data.SSID)
             }
 
-            // Actualizamos la vista con los access poinst encontrados
+            // Actualizamos la vista con los access points encontrados
             arrayAdapter.notifyDataSetChanged()
             root.setStandardUI()
             srlScanAp.isRefreshing = false
