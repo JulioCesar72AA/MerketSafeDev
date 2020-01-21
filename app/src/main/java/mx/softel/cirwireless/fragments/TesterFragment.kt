@@ -25,7 +25,6 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
     private lateinit var apChecked          : ImageView
     private lateinit var internetChecked    : ImageView
     private lateinit var dataChecked        : ImageView
-    private lateinit var statusChecked      : ImageView
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -50,7 +49,6 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
             apChecked       = findViewById(R.id.ivCheckAp)
             internetChecked = findViewById(R.id.ivCheckInternet)
             dataChecked     = findViewById(R.id.ivCheckData)
-            statusChecked   = findViewById(R.id.ivCheckStatus)
         }
 
         initUIData()
@@ -67,6 +65,7 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
             rssiAssigned = ""
             pingAssigned = false
             apAssigned = false
+            dataAssigned = false
         }
     }
 
@@ -96,13 +95,6 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
             resources.getDrawable(R.drawable.ic_ok, null)
         else resources.getDrawable(R.drawable.ic_nok, null)
         dataChecked.setImageDrawable(iconData)
-    }
-
-    private fun setStatusUI() {
-        val iconData = if (root.statusAssigned)
-            resources.getDrawable(R.drawable.ic_ok, null)
-        else resources.getDrawable(R.drawable.ic_nok, null)
-        statusChecked.setImageDrawable(iconData)
     }
 
     private fun initUIData() {
@@ -137,7 +129,6 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
             2 -> setAccessPointUI()
             3 -> setPingUI()
             4 -> setDataUI()
-            5 -> setStatusUI()
         }
     }
 

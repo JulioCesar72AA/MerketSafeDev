@@ -8,8 +8,6 @@
     tools:context=".activities.MainActivity"
     android:background="@drawable/gradient_bg_azul">
 
-
-
     <!-- Contenido de la vista -->
     <TableLayout
         android:layout_width="match_parent"

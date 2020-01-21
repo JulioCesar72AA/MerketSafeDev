@@ -341,23 +341,22 @@ class BleService: Service() {
      * @return Elemento [ReceivedCmd] con la descripción de la respuesta
      */
     private fun receivedCommand(response: ByteArray): ReceivedCmd {
-        val cmd = when (response[4]) {
-            POLEO               -> ReceivedCmd.POLEO
-            STATUS              -> ReceivedCmd.STATUS
-            REFRESH_AP_OK       -> ReceivedCmd.REFRESH_AP_OK
-            GET_AP              -> ReceivedCmd.GET_AP
-            AT_OK               -> ReceivedCmd.AT_OK
-            AT_NOK              -> ReceivedCmd.AT_NOK
-            AT_RESPONSE_READY   -> ReceivedCmd.AT_READY
-            WAIT_RESPONSE       -> ReceivedCmd.WAIT_AP
-            WIFI_SSID_OK        -> ReceivedCmd.WIFI_SSID_OK
-            WIFI_SSID_FAIL      -> ReceivedCmd.WIFI_SSID_FAIL
-            WIFI_PASS_OK        -> ReceivedCmd.WIFI_PASS_OK
-            WIFI_PASS_FAIL      -> ReceivedCmd.WIFI_PASS_FAIL
-            WIFI_STATUS         -> ReceivedCmd.WIFI_STATUS
+        return when (response[4]) {
+            POLEO -> ReceivedCmd.POLEO
+            STATUS -> ReceivedCmd.STATUS
+            REFRESH_AP_OK -> ReceivedCmd.REFRESH_AP_OK
+            GET_AP -> ReceivedCmd.GET_AP
+            AT_OK -> ReceivedCmd.AT_OK
+            AT_NOK -> ReceivedCmd.AT_NOK
+            AT_RESPONSE_READY -> ReceivedCmd.AT_READY
+            WAIT_RESPONSE -> ReceivedCmd.WAIT_AP
+            WIFI_SSID_OK -> ReceivedCmd.WIFI_SSID_OK
+            WIFI_SSID_FAIL -> ReceivedCmd.WIFI_SSID_FAIL
+            WIFI_PASS_OK -> ReceivedCmd.WIFI_PASS_OK
+            WIFI_PASS_FAIL -> ReceivedCmd.WIFI_PASS_FAIL
+            WIFI_STATUS -> ReceivedCmd.WIFI_STATUS
             else                -> ReceivedCmd.UNKNOWN
         }
-        return cmd
     }
 
 
@@ -480,17 +479,18 @@ class BleService: Service() {
             = writeToCharacteristic(CommandUtils.readAtCmd())
 
     /**
-     * TODO
-     *
+     * ## closeAtSocketCmd
+     * Ejecuta el comando para cerrar el socket con el servidor
      */
     fun closeAtSocketCmd()
             = writeToCharacteristic(CommandUtils.closeSocketCmd())
 
     /**
-     * TODO
+     * ## openAtSocketCmd
+     * Ejecuta el comando para abrir el socket con el servidor
      *
-     * @param server
-     * @param port
+     * @param server Servidor con el que se desea comunicar
+     * @param port Puerto de acceso al servidor
      */
     fun openAtSocketCmd(server: String, port: String)
             = writeToCharacteristic(CommandUtils.openSocketCmd(server, port))
@@ -570,16 +570,7 @@ class BleService: Service() {
 
             Log.e(TAG, "CONNECTION: $status -> $newState")
 
-            // Si ocurre el error 133 o el error 257...
-            /*if (status == DisconnectionReason.ERROR_133.code
-                || status == DisconnectionReason.ERROR_257.code
-                || status == DisconnectionReason.CONNECTION_FAILED.code) {
-                val reason = disconnectionReasonCode(status)
-                disconnectBleDevice(reason)
-                activity.connectionStatus(actualState(status),
-                                          actualState(newState),
-                                          reason)
-            }*/
+            // Si existe desconexión...
             if (newState == 0) {
                 val reason = disconnectionReasonCode(status)
                 disconnectBleDevice(reason)

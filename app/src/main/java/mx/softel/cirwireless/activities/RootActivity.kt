@@ -335,19 +335,6 @@ class RootActivity : AppCompatActivity(),
                 Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
                 parseDataResponse(response, step)
             }
-            ReceivedCmd.WIFI_STATUS -> {
-                if (response[4] == 0x28.toByte()) {
-                    statusAssigned = response[5] == 0x07.toByte() || response[5] == 0x08.toByte()
-                    service!!.currentState = StateMachine.POLING
-                    runOnUiThread {
-                        testerFragment.fragmentUiUpdate(5)
-                        setStandardUI()
-                    }
-                } else {
-                    Log.e(TAG, "Enviando comando de WIFI STATUS")
-                    service!!.sendStatusWifiCmd()
-                }
-            }
             else -> {  }
         }
     }
@@ -355,7 +342,7 @@ class RootActivity : AppCompatActivity(),
 
     private fun parseIpResponse(response: String) {
         if (response.contains(WIFI_NOT_IP_STRING)){
-            ipAssigned = "0.0.0.0"
+            ipAssigned = "IP No asignada"
             apAssigned = false
         } else {
             var ipRead = response.substringAfter(WIFI_SUBSTRING_IP_AFTER)
@@ -385,8 +372,8 @@ class RootActivity : AppCompatActivity(),
                 .replace("\n", "")
             Log.e(TAG, "SSID: $ssidAssigned, RSSI: $rssiAssigned")
         } else {
-            ssidAssigned = "No data"
-            rssiAssigned = "No data"
+            ssidAssigned = "No conectado"
+            rssiAssigned = "No conectado"
         }
         runOnUiThread { testerFragment.fragmentUiUpdate(2) }
     }
@@ -397,6 +384,7 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun parseDataResponse(response: ByteArray, step: Int) {
+        Log.d(TAG, "parseDataResponse $step")
         val restring = response.toCharString()
         when (step) {
             0 -> {
@@ -406,19 +394,25 @@ class RootActivity : AppCompatActivity(),
             1 -> {
                 if (restring.contains(AT_CMD_CONNECT)) {
                     service!!.closeAtSocketCmd()
-                    serviceStep = 2
                     dataAssigned = true
-                } else if (restring.contains(AT_CMD_CLOSED)) {
-                    Log.d(TAG, "El socket está cerrado")
+                } else if (restring.contains(AT_CMD_CLOSED) || restring.contains(AT_CMD_ERROR)) {
+                    Log.d(TAG, "El socket está cerrado/error")
                     dataAssigned = false
                 }
-                runOnUiThread { testerFragment.fragmentUiUpdate(4) }
+                serviceStep = 2
+                //service!!.currentState = StateMachine.POLING
+                runOnUiThread {
+                    testerFragment.fragmentUiUpdate(4)
+                }
             }
             2 -> {
-                if (restring.contains(AT_CMD_CLOSED)) {
-                    Log.d(TAG, "Cerrando con éxito el socket")
-                    service!!.sendStatusWifiCmd()
-                    serviceStep = 3
+                if (restring.contains(AT_CMD_CLOSED) || restring.contains(AT_CMD_ERROR)) {
+                    Log.d(TAG, "Cerrando el socket")
+                    service!!.currentState = StateMachine.POLING
+                    serviceStep = 0
+                    runOnUiThread {
+                        setStandardUI()
+                    }
                 } else {
                     service!!.closeAtSocketCmd()
                 }
