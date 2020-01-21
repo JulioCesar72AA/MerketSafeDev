@@ -259,7 +259,6 @@ class RootActivity : AppCompatActivity(),
             }
             ReceivedCmd.AT_READY -> {
                 parseIpResponse(response.toCharString())
-                service!!.currentState = StateMachine.GET_STATUS_AP
             }
             else -> {  }
         }
@@ -341,10 +340,23 @@ class RootActivity : AppCompatActivity(),
 
 
     private fun parseIpResponse(response: String) {
+        Log.d(TAG, "")
+        Log.d(TAG, "-----*****----- IP ASIGNADA: $ipAssigned -> REINTENTO: $retryConnection -----*****-----\n")
         if (response.contains(WIFI_NOT_IP_STRING)){
-            ipAssigned = "IP No asignada"
-            apAssigned = false
+
+            if (retryConnection >= MAX_AT_RETRY) {
+                retryConnection = 0
+                ipAssigned = "IP No asignada"
+                apAssigned = false
+                runOnUiThread { testerFragment.fragmentUiUpdate(1) }
+                service!!.currentState = StateMachine.GET_STATUS_AP
+            } else {
+                retryConnection++
+                service!!.sendIpAtCmd()
+            }
+            return
         } else {
+            retryConnection = 0
             var ipRead = response.substringAfter(WIFI_SUBSTRING_IP_AFTER)
             ipRead = ipRead
                 .substringBefore(WIFI_SUBSTRING_IP_BEFORE)
@@ -353,8 +365,9 @@ class RootActivity : AppCompatActivity(),
                 .replace("\r", "")
             ipAssigned = ipRead
             apAssigned = true
+            service!!.currentState = StateMachine.GET_STATUS_AP
+            runOnUiThread { testerFragment.fragmentUiUpdate(1) }
         }
-        runOnUiThread { testerFragment.fragmentUiUpdate(1) }
     }
 
     private fun parseApResponse(response: String) {
@@ -398,16 +411,21 @@ class RootActivity : AppCompatActivity(),
                 } else if (restring.contains(AT_CMD_CLOSED) || restring.contains(AT_CMD_ERROR)) {
                     Log.d(TAG, "El socket está cerrado/error")
                     dataAssigned = false
+                    service!!.currentState = StateMachine.POLING
+                    runOnUiThread {
+                        testerFragment.fragmentUiUpdate(4)
+                        setStandardUI()
+                    }
+                    return
                 }
                 serviceStep = 2
-                //service!!.currentState = StateMachine.POLING
                 runOnUiThread {
                     testerFragment.fragmentUiUpdate(4)
                 }
             }
             2 -> {
+                Log.d(TAG, "Cerrando el socket")
                 if (restring.contains(AT_CMD_CLOSED) || restring.contains(AT_CMD_ERROR)) {
-                    Log.d(TAG, "Cerrando el socket")
                     service!!.currentState = StateMachine.POLING
                     serviceStep = 0
                     runOnUiThread {
@@ -642,9 +660,12 @@ class RootActivity : AppCompatActivity(),
         private var statusCountDown     = 0
         private var waitCountDown       = 0
         private var retryConnection     = 0
+
+        private var retryAtResponse     = 0
         private var serviceStep         = 0
 
         // Timeouts de la actividad
         private const val UI_TIMEOUT        = 500L
+        private const val MAX_AT_RETRY      = 2
     }
 }
