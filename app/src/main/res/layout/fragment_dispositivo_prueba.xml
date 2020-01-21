@@ -141,7 +141,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
                                 android:layout_weight=".45"
-                                android:scaleType="fitStart"
+                                android:scaleType="fitCenter"
                                 tools:src="@drawable/ic_ok"
                                 android:contentDescription="@string/cd_test_icon" />
 
@@ -171,6 +171,7 @@
                                 android:layout_height="match_parent"
                                 android:layout_weight=".45"
                                 tools:text="@string/tv_dispositivos_ip"
+                                android:gravity="center"
                                 android:textSize="@dimen/tv_textsize18" />
                         </LinearLayout>
 
@@ -198,6 +199,7 @@
                                 android:layout_height="match_parent"
                                 android:layout_weight=".45"
                                 tools:text="@string/tv_redes_access"
+                                android:gravity="center"
                                 android:textSize="@dimen/tv_textsize18"  />
                         </LinearLayout>
 
@@ -225,6 +227,7 @@
                                 android:layout_height="match_parent"
                                 android:layout_weight=".45"
                                 tools:text="@string/tv_ssdi_number_access"
+                                android:gravity="center"
                                 android:textSize="@dimen/tv_textsize18"  />
                         </LinearLayout>
 
@@ -251,7 +254,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
                                 android:layout_weight=".45"
-                                android:scaleType="fitStart"
+                                android:scaleType="fitCenter"
                                 tools:src="@drawable/ic_nok"
                                 android:contentDescription="@string/cd_test_icon"/>
                         </LinearLayout>
@@ -279,7 +282,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
                                 android:layout_weight=".45"
-                                android:scaleType="fitStart"
+                                android:scaleType="fitCenter"
                                 tools:src="@drawable/ic_ok"
                                 android:contentDescription="@string/cd_test_icon"/>
                         </LinearLayout>
@@ -307,7 +310,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="@dimen/tv_padding_25"
                                 android:layout_weight=".45"
-                                android:scaleType="fitStart"
+                                android:scaleType="fitCenter"
                                 tools:src="@drawable/ic_nok"
                                 android:contentDescription="@string/cd_test_icon"/>
                         </LinearLayout>

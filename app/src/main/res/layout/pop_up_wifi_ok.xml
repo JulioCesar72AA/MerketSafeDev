@@ -30,15 +30,14 @@
         android:textAlignment="center"
         android:lines="2"
         android:fontFamily="@font/rubik_regular"
-        android:textSize="@dimen/tv_textsize18"
-        android:layout_marginBottom="@dimen/padding17"/>
+        android:textSize="@dimen/tv_textsize18" />
+
 
         <!-- Aceptar -->
         <Button
             android:id="@+id/btnAcceptWifiOk"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:text="@string/tv_aceptar"
             android:padding="@dimen/tv_padding_25"
             android:clickable="true"
