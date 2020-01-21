@@ -2,33 +2,112 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.MainActivity">
 
-    <!-- Lista actualizable de dispositivos -->
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/srlScan"
+    <include layout="@layout/double_background"/>
+
+    <!-- Contenido de la vista -->
+    <TableLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Lista de dispositivos escaneados -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvBleList"
+        <!-- Título sección -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:listitem="@layout/ble_scan_list_prototype"/>
+            android:layout_weight=".5"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginStart="@dimen/cv_margin_access_point"
+            android:layout_marginEnd="@dimen/cv_margin_access_point"
+            android:layout_marginTop="@dimen/cv_margin_access_point_top">
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <!-- Texto de NoData -->
-    <TextView
-        android:id="@+id/tvNoDevices"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="@string/tv_no_devices"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/cd_icon_router"
+                android:scaleType="centerInside"
+                android:paddingStart="@dimen/cv_access_margin_start"
+                android:paddingEnd="@dimen/cv_access_margin_end"
+                android:src="@drawable/ic_bluetooth"
+                android:tint="@android:color/white"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:fontFamily="@font/rubik_bold"
+                android:text="@string/tv_scan"
+                android:lineHeight="@dimen/tv_lineheight_30"
+                android:textColor="@color/colortextwhite"
+                android:textSize="@dimen/tv_textsize_32"
+                tools:ignore="UnusedAttribute" />
+
+        </LinearLayout>
+
+        <!-- List -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight=".2"
+            android:orientation="vertical"
+            android:layout_marginStart="@dimen/cv_margin_access_point"
+            android:layout_marginEnd="@dimen/cv_margin_access_point"
+            android:layout_marginBottom="@dimen/cv_margin_access_point">
+
+
+            <!-- CardView Configurar -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvAccessPoints"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                app:cardElevation="@dimen/cv_elevation_access"
+                app:cardCornerRadius="@dimen/cv_corner_radius"
+                app:cardUseCompatPadding="true"
+                app:cardBackgroundColor="@android:color/white" >
+
+                <!-- Lista actualizable de dispositivos -->
+                <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                    android:id="@+id/srlScan"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <!-- Lista de dispositivos escaneados -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvBleList"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="12dp"
+                        tools:listitem="@layout/scan_devices_prototype"/>
+
+                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+                <!-- Texto de NoData -->
+                <TextView
+                    android:id="@+id/tvNoDevices"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/tv_no_devices"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </TableLayout>
+
+
+
+
+
+
+
+
 
     <include layout="@layout/scanning_mask"/>
 

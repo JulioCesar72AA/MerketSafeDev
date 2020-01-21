@@ -4,6 +4,9 @@
     <color name="colorPrimary">#005EF4</color>
     <color name="colorAccent">#36c1d8</color>
 
+    <color name="colorOk">#24C424</color>
+    <color name="colorNok">#B40000</color>
+
     <color name="cardScanBackground">#F3F3F3</color>
     <color name="colorBackShadow">#dbdcdd</color>
     <color name="colortextwhite">#ffffff</color>

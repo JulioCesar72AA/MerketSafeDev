@@ -1,5 +1,6 @@
 package mx.softel.cirwireless.activities
 
+import android.app.Dialog
 import android.bluetooth.BluetoothDevice
 import android.content.*
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,8 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.dialogs.PasswordDialog
+import mx.softel.cirwireless.dialogs.WifiNokDialog
+import mx.softel.cirwireless.dialogs.WifiOkDialog
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.fragments.AccessPointsFragment
 import mx.softel.cirwireless.fragments.MainFragment
@@ -28,6 +31,7 @@ import mx.softel.cirwirelesslib.services.BleService
 class RootActivity : AppCompatActivity(),
     FragmentNavigation,
     PasswordDialog.OnDialogClickListener,
+    WifiOkDialog.OnWifiDialogListener,
     BleService.OnBleConnection {
 
     // BLUETOOTH DEVICE
@@ -191,6 +195,10 @@ class RootActivity : AppCompatActivity(),
         toast("Cancelado")
     }
 
+    override fun dialogOk() {
+        backFragment()
+    }
+
 
 
 
@@ -213,19 +221,18 @@ class RootActivity : AppCompatActivity(),
                 if (response.toCharString().contains("WIFI GOT IP")) {
                     service!!.currentState = StateMachine.POLING
                     Log.e(TAG, "Configuración correcta")
-                    runOnUiThread {
-                        setStandardUI()
-                        backFragment()
-                        toast("Wifi configurado correctamente")
-                    }
+                    runOnUiThread { setStandardUI() }
+                    val dialog = WifiOkDialog.getInstance()
+                    dialog.show(supportFragmentManager, null)
                     return
                 }
                 if (response.toCharString().contains(AT_CMD_ERROR)) {
                     service!!.currentState = StateMachine.POLING
                     Log.e(TAG, "Ocurrió un error con el Wi-Fi")
-                    runOnUiThread {
-                        toast("No se pudo configurar el Wifi")
-                        setStandardUI()
+                    runOnUiThread { setStandardUI() }
+                    val dialog = WifiNokDialog.getInstance()
+                    dialog.apply {
+                        show(supportFragmentManager, null)
                     }
                     return
                 }
