@@ -16,6 +16,8 @@
     <!-- TEXT VIEW's -->
     <string name="tv_selected_device">Dispositivo BLE</string>
     <string name="tv_no_devices">No se encontraron dispositivos cercanos, desliza para volver a intentar</string>
+    <string name="tv_scan">Escaneo</string>
+    <string name="tv_cir_wireless">CIR Wireless</string>
     <string name="tv_title_access">Access Points</string>
     <string name="tv_title_dispositivos">Dispositivo</string>
     <string name="tv_test_mac">00:1B:C5:00:08:11</string>
@@ -43,5 +45,6 @@
     <string name="cd_icon_dispositivos">Dispositivo</string>
     <string name="cd_back_icon">Volver</string>
     <string name="cd_password_icon">Password</string>
+
 
 </resources>
