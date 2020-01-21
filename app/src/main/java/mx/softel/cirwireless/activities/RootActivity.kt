@@ -340,23 +340,20 @@ class RootActivity : AppCompatActivity(),
 
 
     private fun parseIpResponse(response: String) {
-        Log.d(TAG, "")
-        Log.d(TAG, "-----*****----- IP ASIGNADA: $ipAssigned -> REINTENTO: $retryConnection -----*****-----\n")
         if (response.contains(WIFI_NOT_IP_STRING)){
-
-            if (retryConnection >= MAX_AT_RETRY) {
-                retryConnection = 0
+            if (retryAtResponse >= MAX_AT_RETRY) {
+                retryAtResponse = 0
                 ipAssigned = "IP No asignada"
                 apAssigned = false
                 runOnUiThread { testerFragment.fragmentUiUpdate(1) }
                 service!!.currentState = StateMachine.GET_STATUS_AP
             } else {
-                retryConnection++
+                retryAtResponse++
                 service!!.sendIpAtCmd()
             }
             return
         } else {
-            retryConnection = 0
+            retryAtResponse = 0
             var ipRead = response.substringAfter(WIFI_SUBSTRING_IP_AFTER)
             ipRead = ipRead
                 .substringBefore(WIFI_SUBSTRING_IP_BEFORE)
@@ -384,11 +381,20 @@ class RootActivity : AppCompatActivity(),
                 .replace("\r", "")
                 .replace("\n", "")
             Log.e(TAG, "SSID: $ssidAssigned, RSSI: $rssiAssigned")
+            runOnUiThread { testerFragment.fragmentUiUpdate(2) }
         } else {
-            ssidAssigned = "No conectado"
-            rssiAssigned = "No conectado"
+            if (retryAtResponse >= 2) {
+                retryAtResponse = 0
+                ssidAssigned = "No conectado"
+                rssiAssigned = "No conectado"
+                runOnUiThread { testerFragment.fragmentUiUpdate(2) }
+            } else {
+                retryAtResponse++
+                service!!.sendApConnectionCmd()
+            }
+
         }
-        runOnUiThread { testerFragment.fragmentUiUpdate(2) }
+
     }
 
     private fun parsePingResponse(response: String) {
@@ -659,7 +665,7 @@ class RootActivity : AppCompatActivity(),
 
         private var statusCountDown     = 0
         private var waitCountDown       = 0
-        private var retryConnection     = 0
+        //private var retryConnection     = 0
 
         private var retryAtResponse     = 0
         private var serviceStep         = 0
