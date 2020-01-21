@@ -231,7 +231,9 @@ class RootActivity : AppCompatActivity(),
                     Log.e(TAG, "Ocurrió un error con el Wi-Fi")
                     runOnUiThread { setStandardUI() }
                     val dialog = WifiNokDialog.getInstance()
-                    dialog.show(supportFragmentManager, null)
+                    dialog.apply {
+                        show(supportFragmentManager, null)
+                    }
                     return
                 }
                 service!!.readAtResponseCmd()

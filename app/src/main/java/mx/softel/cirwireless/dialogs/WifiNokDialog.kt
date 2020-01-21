@@ -26,7 +26,7 @@ class WifiNokDialog: DialogFragment(), View.OnClickListener {
             btnOk = findViewById(R.id.btnAcceptWifiNok)
         }
         btnOk.setOnClickListener(this)
-
+        isCancelable = false
         return view
     }
 
@@ -34,7 +34,6 @@ class WifiNokDialog: DialogFragment(), View.OnClickListener {
         val dialog = Dialog(context!!)
         dialog.apply{
             window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            setCancelable(false)
         }
         return dialog
     }
