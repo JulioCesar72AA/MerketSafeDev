@@ -568,8 +568,10 @@ class BleService: Service() {
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
 
+            Log.e(TAG, "CONNECTION: $status -> $newState")
+
             // Si ocurre el error 133 o el error 257...
-            if (status == DisconnectionReason.ERROR_133.code
+            /*if (status == DisconnectionReason.ERROR_133.code
                 || status == DisconnectionReason.ERROR_257.code
                 || status == DisconnectionReason.CONNECTION_FAILED.code) {
                 val reason = disconnectionReasonCode(status)
@@ -577,6 +579,13 @@ class BleService: Service() {
                 activity.connectionStatus(actualState(status),
                                           actualState(newState),
                                           reason)
+            }*/
+            if (newState == 0) {
+                val reason = disconnectionReasonCode(status)
+                disconnectBleDevice(reason)
+                activity.connectionStatus(actualState(status),
+                    actualState(newState),
+                    reason)
             }
 
             // Si ya se encuentra conectado...
