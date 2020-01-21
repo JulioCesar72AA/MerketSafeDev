@@ -35,6 +35,8 @@
     <string name="tv_internet_access">INTERNET</string>
     <string name="tv_data_access">DATA</string>
     <string name="tv_status_access">STATUS</string>
+    <string name="tv_wifi_nok">No se pudo configurar el Wifi, intente nuevamente</string>
+    <string name="tv_wifi_ok">El Wifi se configuró correctamente</string>
 
     <!-- CONTENT DESCRIPTION's -->
     <string name="cd_bluetooth_icon">Bluetooth</string>
