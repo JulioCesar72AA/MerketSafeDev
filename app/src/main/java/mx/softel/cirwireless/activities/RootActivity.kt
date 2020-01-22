@@ -372,7 +372,12 @@ class RootActivity : AppCompatActivity(),
     /************************************************************************************************/
     /**     PARSER                                                                                  */
     /************************************************************************************************/
-
+    /**
+     * ## parseWifiConfigured
+     * Extrae el estatus de conexión obtenido por el dispositivo
+     *
+     * @param response Cadena de respuesta del comando AT
+     */
     private fun parseWifiConfigured(response: String) {
         if (response.contains("WIFI GOT IP")) {
             wifiStep = 3
@@ -386,6 +391,14 @@ class RootActivity : AppCompatActivity(),
         service!!.readAtResponseCmd()
     }
 
+    /**
+     * ## parseOkWifiConfigured
+     * Establece la siguiente acción partiendo de la máquina de estados de
+     * conexión Wifi, validando a cada paso que la respuesta sea un OK
+     *
+     * @param response Cadena de respuesta del comando AT
+     * @param nextStep Estado siguiente de la máquina de estados
+     */
     private fun parseOkWifiConfigured(response: String, nextStep: Int) {
         if (response.contains(AT_CMD_OK)) {
             when (nextStep) {
@@ -401,7 +414,6 @@ class RootActivity : AppCompatActivity(),
                 2 -> service!!.sendConfigureWifiCmd(ssidSelected, passwordTyped)
             }
             wifiStep = nextStep
-
         } else {
             wifiStep = 2
             Log.e(TAG, "Ocurrió un error con AT+CWMODE=$nextStep")
