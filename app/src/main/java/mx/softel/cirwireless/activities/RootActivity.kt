@@ -268,6 +268,37 @@ class RootActivity : AppCompatActivity(),
     }
 
     /**
+     * ## checkModeSetted
+     * Espera confirmación del dispositivo recién configurado
+     *
+     * @param response Respuesta en Bytes
+     * @param command Tipo de respuesta recibida
+     */
+    private fun checkModeSetted(response: ByteArray, command: ReceivedCmd) {
+        when (command) {
+            ReceivedCmd.AT_READY -> {
+                Log.e(TAG, "Se configuró el modo 3: ${response.toCharString()}")
+                service!!.apply {
+                    currentState = StateMachine.GET_CONFIG_AP
+                    getInternalWifiCmd()
+                }
+            }
+            else -> { service!!.readAtResponseCmd() }
+        }
+    }
+
+    private fun getSsidFromResponse(response: ByteArray, command: ReceivedCmd) {
+        when (command) {
+            ReceivedCmd.AT_READY -> {
+                Log.e(TAG, "Obteniendo AP configurado: ${response.toCharString()}")
+                // TODO: Parsear respuesta y obtener SSID
+                service!!.currentState = StateMachine.POLING
+            }
+            else -> { service!!.readAtResponseCmd() }
+        }
+    }
+
+    /**
      * ## getIpFromAt
      * Obtiene la IP asignada al dispositivo en el Access Point
      *
@@ -367,6 +398,12 @@ class RootActivity : AppCompatActivity(),
             } }
         }
     }
+
+
+
+
+
+
 
 
     /************************************************************************************************/
@@ -562,6 +599,9 @@ class RootActivity : AppCompatActivity(),
 
 
 
+
+
+
     /************************************************************************************************/
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
@@ -654,6 +694,8 @@ class RootActivity : AppCompatActivity(),
             StateMachine.WIFI_CONFIG        -> { wifiConfigProcess(response, command, wifiStep) }
 
             // TESTING CONNECTION MACHINE *************************************************************
+            StateMachine.SET_MODE           -> { checkModeSetted(response, command) }
+            StateMachine.GET_CONFIG_AP      -> { getSsidFromResponse(response, command) }
             StateMachine.GET_IP             -> { getIpFromAt(response, command) }
             StateMachine.GET_STATUS_AP      -> { getApStatusFromAT(response, command) }
             StateMachine.PING               -> { getPing(response, command) }

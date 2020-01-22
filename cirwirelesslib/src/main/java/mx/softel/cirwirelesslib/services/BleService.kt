@@ -434,6 +434,9 @@ class BleService: Service() {
     fun setInternalWifiCmd(ssid: String, password: String, flag: Int)
             = writeToCharacteristic(CommandUtils.setInternalNameAPCmd(ssid, password, flag))
 
+    fun getInternalWifiCmd()
+            = writeToCharacteristic(CommandUtils.getInternalNameAPCmd())
+
     /**
      * ## setConfigureWifiCmd
      * Ejecuta el comando para configurar el access point seleccionado, por medio

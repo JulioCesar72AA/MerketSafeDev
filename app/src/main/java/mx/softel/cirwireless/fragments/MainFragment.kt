@@ -14,6 +14,7 @@ import mx.softel.cirwireless.R
 import mx.softel.cirwireless.activities.RootActivity
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.interfaces.FragmentNavigation
+import mx.softel.cirwirelesslib.constants.AT_MODE_MASTER_SLAVE
 import mx.softel.cirwirelesslib.enums.DisconnectionReason
 import mx.softel.cirwirelesslib.enums.StateMachine
 
@@ -105,8 +106,6 @@ class MainFragment : Fragment(), View.OnClickListener {
      * realiza el manejo de eventos por respuesta recibida del comando
      */
     private fun clickConfigure() {
-        Log.d(TAG, "clickConfigure")
-
         // Actualizamos los AccessPoints que el dispositivo ve
         if (root.service!!.getCharacteristicWrite() == null)
             clickConfigure()
@@ -121,8 +120,6 @@ class MainFragment : Fragment(), View.OnClickListener {
 
 
     private fun clickTest() {
-        Log.d(TAG, "clickTest")
-
         if (root.service!!.getCharacteristicWrite() == null)
             clickTest()
         else {
@@ -130,8 +127,13 @@ class MainFragment : Fragment(), View.OnClickListener {
             root.apply{
                 setScanningUI()
                 service!!.apply {
-                    sendIpAtCmd()
-                    currentState = StateMachine.GET_IP
+
+                    // TODO: Corregir comando SSID y Estatus de currentState
+                    setDeviceModeCmd(AT_MODE_MASTER_SLAVE)
+                    currentState = StateMachine.SET_MODE
+                    //sendIpAtCmd()
+                    //currentState = StateMachine.GET_IP
+
                     if (actualFragment != testerFragment) {
                         actualFragment = testerFragment
                         runOnUiThread {

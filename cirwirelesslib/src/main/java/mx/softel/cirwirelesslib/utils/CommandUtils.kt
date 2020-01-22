@@ -74,6 +74,11 @@ object CommandUtils {
         return getCompleteCommand(AT_GENERIC, atCommand)
     }
 
+    fun getInternalNameAPCmd(): ByteArray {
+        val atCommand = "AT+CWSAP?".toByteArray()
+        return getCompleteCommand(AT_GENERIC, atCommand)
+    }
+
     fun readAtCmd(): ByteArray {
         return AT_READ + getCrc16(AT_READ)
     }
