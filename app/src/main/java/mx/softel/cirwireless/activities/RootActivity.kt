@@ -9,6 +9,7 @@ import android.os.IBinder
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.cirwireless.R
@@ -25,6 +26,7 @@ import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.toCharString
 import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.services.BleService
+import java.lang.StringBuilder
 
 
 class RootActivity : AppCompatActivity(),
@@ -52,6 +54,7 @@ class RootActivity : AppCompatActivity(),
     private  var isServiceConnected : Boolean       = false
     private  var isRefreshed        : Boolean       = false
     private  var isScanning         : Boolean       = false
+    private  var isWifiConnected    : Boolean       = false
 
     // VARIABLES DE FLUJO
     private  var disconnectionReason: DisconnectionReason   = DisconnectionReason.UNKNOWN
@@ -203,7 +206,8 @@ class RootActivity : AppCompatActivity(),
         toast("Configurando el WIFI del dispositivo", Toast.LENGTH_LONG)
         passwordTyped = password
         service!!.apply {
-            sendConfigureWifiCmd(ssidSelected, passwordTyped)
+            //sendConfigureWifiCmd(ssidSelected, passwordTyped)
+            setDeviceModeCmd(AT_MODE_MASTER_SLAVE)
             currentState = StateMachine.WIFI_CONFIG
         }
         setScanningUI()
@@ -248,27 +252,16 @@ class RootActivity : AppCompatActivity(),
      * @param response Respuesta en Bytes
      * @param command Tipo de respuesta recibida
      */
-    private fun wifiConfigProcess(response: ByteArray, command: ReceivedCmd) {
-        Log.e(TAG, "wifiConfigProcess $command -> ${response.toCharString()}")
+    private fun wifiConfigProcess(response: ByteArray, command: ReceivedCmd, step: Int) {
+        Log.e(TAG, "wifiConfigProcess $command -> ${response.toHex()} -> $step -> ${response.toCharString()}")
         when (command) {
             ReceivedCmd.AT_READY -> {
-                if (response.toCharString().contains("WIFI GOT IP")) {
-                    service!!.currentState = StateMachine.POLING
-                    runOnUiThread { setStandardUI() }
-                    val dialog = WifiOkDialog.getInstance()
-                    dialog.show(supportFragmentManager, null)
-                    return
+                when (step) {
+                    0 -> parseOkWifiConfigured(response.toCharString(), 1)
+                    1 -> parseOkWifiConfigured(response.toCharString(), 2)
+                    2 -> parseWifiConfigured(response.toCharString())
+                    3 -> parseOkWifiConfigured(response.toCharString(), 0)
                 }
-                if (response.toCharString().contains(AT_CMD_ERROR)) {
-                    service!!.currentState = StateMachine.POLING
-                    runOnUiThread { setStandardUI() }
-                    val dialog = WifiNokDialog.getInstance()
-                    dialog.apply {
-                        show(supportFragmentManager, null)
-                    }
-                    return
-                }
-                service!!.readAtResponseCmd()
             }
             else -> { service!!.readAtResponseCmd() }
         }
@@ -379,6 +372,42 @@ class RootActivity : AppCompatActivity(),
     /************************************************************************************************/
     /**     PARSER                                                                                  */
     /************************************************************************************************/
+
+    private fun parseWifiConfigured(response: String) {
+        if (response.contains("WIFI GOT IP")) {
+            wifiStep = 3
+            isWifiConnected = true
+            service!!.setDeviceModeCmd(AT_MODE_SLAVE)
+        } else if (response.contains(AT_CMD_ERROR)) {
+            wifiStep = 3
+            isWifiConnected = false
+            service!!.setDeviceModeCmd(AT_MODE_SLAVE)
+        }
+        service!!.readAtResponseCmd()
+    }
+
+    private fun parseOkWifiConfigured(response: String, nextStep: Int) {
+        if (response.contains(AT_CMD_OK)) {
+            when (nextStep) {
+                0 -> {
+                    service!!.currentState = StateMachine.POLING
+                    runOnUiThread { setStandardUI() }
+                    val dialog: DialogFragment
+                            = if (isWifiConnected) WifiOkDialog.getInstance()
+                              else WifiNokDialog.getInstance()
+                    dialog.show(supportFragmentManager, null)
+                }
+                1 -> service!!.setInternalWifiCmd(ssidSelected, passwordTyped, AT_NO_SEND_SSID)
+                2 -> service!!.sendConfigureWifiCmd(ssidSelected, passwordTyped)
+            }
+            wifiStep = nextStep
+
+        } else {
+            wifiStep = 2
+            Log.e(TAG, "Ocurrió un error con AT+CWMODE=$nextStep")
+        }
+    }
+
     /**
      * ## parseIpResponse
      * Extrae de la respuesta en formato Char la dirección IP que el
@@ -610,7 +639,7 @@ class RootActivity : AppCompatActivity(),
             }
 
             // STATUS DE CONFIGURACIÓN WIFI
-            StateMachine.WIFI_CONFIG        -> { wifiConfigProcess(response, command) }
+            StateMachine.WIFI_CONFIG        -> { wifiConfigProcess(response, command, wifiStep) }
 
             // TESTING CONNECTION MACHINE *************************************************************
             StateMachine.GET_IP             -> { getIpFromAt(response, command) }
@@ -729,6 +758,7 @@ class RootActivity : AppCompatActivity(),
 
         private var retryAtResponse         = 0
         private var serviceStep             = 0
+        private var wifiStep                = 0
 
         // Timeouts de la actividad
         private const val UI_TIMEOUT        = 500L

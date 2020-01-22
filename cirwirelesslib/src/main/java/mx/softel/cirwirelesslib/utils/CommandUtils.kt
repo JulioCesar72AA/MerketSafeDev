@@ -15,17 +15,14 @@ object CommandUtils {
     private val AT_READ             = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x34)
 
 
-    fun refreshAccessPointsCmd(): ByteArray {
-        return REFRESH_AP + getCrc16(REFRESH_AP)
-    }
+    fun refreshAccessPointsCmd(): ByteArray
+            = REFRESH_AP + getCrc16(REFRESH_AP)
 
-    fun getAccessPointsCmd(): ByteArray {
-        return GET_AP_MAC_LIST + getCrc16(GET_AP_MAC_LIST)
-    }
+    fun getAccessPointsCmd(): ByteArray
+            = GET_AP_MAC_LIST + getCrc16(GET_AP_MAC_LIST)
 
-    fun getWifiStatusCmd(): ByteArray {
-        return WIFI_STATUS + getCrc16(WIFI_STATUS)
-    }
+    fun getWifiStatusCmd(): ByteArray
+            = WIFI_STATUS + getCrc16(WIFI_STATUS)
 
     fun setSsidCmd(ssid: String): ByteArray {
         // Iniciamos el cálculo del tamaño, así como la conversión a bytes del SSID
@@ -119,6 +116,30 @@ object CommandUtils {
 
     fun openSocketCmd(server: String, port: String): ByteArray {
         val atCommand = "AT+CIPSTART=\"TCP\",\"$server\",$port".toByteArray()
+        val size = atCommand.size + 8
+        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
+        cmd[3] = size.toByte()
+
+        val crc = getCrc16(cmd)
+        cmd += crc
+
+        return cmd
+    }
+
+    fun setDeviceWifiModeCmd(mode: Int): ByteArray {
+        val atCommand = "AT+CWMODE=$mode".toByteArray()
+        val size = atCommand.size + 8
+        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
+        cmd[3] = size.toByte()
+
+        val crc = getCrc16(cmd)
+        cmd += crc
+
+        return cmd
+    }
+
+    fun setInternalNameAPCmd(ssid: String, password: String, flag: Int): ByteArray {
+        val atCommand = "AT+CWSAP=\"ID_$ssid\",\"$password\",6,0,4,$flag".toByteArray()
         val size = atCommand.size + 8
         var cmd = AT_GENERIC + atCommand + 0x00.toByte()
         cmd[3] = size.toByte()

@@ -127,7 +127,6 @@ class BleService: Service() {
     /************************************************************************************************/
     /**     BLUETOOTH                                                                               */
     /************************************************************************************************/
-
     /**
      * ## connectBleDevice
      * Realiza la conexión con el dispositivo
@@ -367,7 +366,6 @@ class BleService: Service() {
     /************************************************************************************************/
     /**     PARSEADORES                                                                             */
     /************************************************************************************************/
-
     /**
      * ## actualState
      * Castea el status de [Int] a [ActualState]
@@ -394,7 +392,6 @@ class BleService: Service() {
     /************************************************************************************************/
     /**     COMMANDS                                                                                */
     /************************************************************************************************/
-
     /**
      * ## getFirmwareData
      * Realiza una lectura de [characteristicDeviceInfo] para posteriormente
@@ -431,6 +428,11 @@ class BleService: Service() {
     fun getMacListCmd()
             = writeToCharacteristic(CommandUtils.getAccessPointsCmd())
 
+    fun setDeviceModeCmd(mode: Int)
+            = writeToCharacteristic(CommandUtils.setDeviceWifiModeCmd(mode))
+
+    fun setInternalWifiCmd(ssid: String, password: String, flag: Int)
+            = writeToCharacteristic(CommandUtils.setInternalNameAPCmd(ssid, password, flag))
 
     /**
      * ## setConfigureWifiCmd
