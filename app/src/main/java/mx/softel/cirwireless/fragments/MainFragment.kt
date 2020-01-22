@@ -127,12 +127,8 @@ class MainFragment : Fragment(), View.OnClickListener {
             root.apply{
                 setScanningUI()
                 service!!.apply {
-
-                    // TODO: Corregir comando SSID y Estatus de currentState
                     setDeviceModeCmd(AT_MODE_MASTER_SLAVE)
                     currentState = StateMachine.SET_MODE
-                    //sendIpAtCmd()
-                    //currentState = StateMachine.GET_IP
 
                     if (actualFragment != testerFragment) {
                         actualFragment = testerFragment

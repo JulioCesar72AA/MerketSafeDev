@@ -69,6 +69,10 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
         }
     }
 
+    private fun setAccessPointUI() {
+        tvSsidResult.text   = root.ssidAssigned
+        tvRssiResult.text   = root.rssiAssigned
+    }
 
     private fun setIpAddressUI() {
         tvIpResult.text     = root.ipAssigned
@@ -76,11 +80,6 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
             resources.getDrawable(R.drawable.ic_ok, null)
         else resources.getDrawable(R.drawable.ic_nok, null)
         apChecked.setImageDrawable(iconAp)
-    }
-
-    private fun setAccessPointUI() {
-        tvSsidResult.text   = root.ssidAssigned
-        tvRssiResult.text   = root.rssiAssigned
     }
 
     private fun setPingUI() {
@@ -125,10 +124,11 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
     override fun fragmentUiUpdate(state: Int) {
         when (state) {
             0 -> initUIData()
-            1 -> setIpAddressUI()
-            2 -> setAccessPointUI()
-            3 -> setPingUI()
-            4 -> setDataUI()
+            1 -> tvSsidResult.text = root.ssidAssigned
+            2 -> tvRssiResult.text = root.rssiAssigned
+            3 -> setIpAddressUI()
+            4 -> setPingUI()
+            5 -> setDataUI()
         }
     }
 

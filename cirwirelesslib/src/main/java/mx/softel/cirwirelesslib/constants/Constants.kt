@@ -28,6 +28,7 @@ const val WIFI_NOT_IP_STRING                = "+CIFSR:STAIP,\"0.0.0.0\""
 const val WIFI_SUBSTRING_IP_AFTER           = "+CIFSR:STAIP,"
 const val WIFI_SUBSTRING_IP_BEFORE          = "+CIFSR:STAMAC"
 const val WIFI_SUBSTRING_AP_AFTER           = "+CWJAP:"
+const val SSID_SUBSTRING_AFTER              = "+CWSAP:\"ID_"
 
 const val PING_OK                           = "+PING:"
 

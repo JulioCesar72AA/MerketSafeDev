@@ -276,6 +276,9 @@ class RootActivity : AppCompatActivity(),
      */
     private fun checkModeSetted(response: ByteArray, command: ReceivedCmd) {
         when (command) {
+            ReceivedCmd.WAIT_AP -> {
+                service!!.setDeviceModeCmd(AT_MODE_MASTER_SLAVE)
+            }
             ReceivedCmd.AT_READY -> {
                 Log.e(TAG, "Se configuró el modo 3: ${response.toCharString()}")
                 service!!.apply {
@@ -288,11 +291,15 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun getSsidFromResponse(response: ByteArray, command: ReceivedCmd) {
+        Log.e(TAG, "${service!!.currentState} RESPUESTA -> ${response.toCharString()}")
         when (command) {
+            ReceivedCmd.WAIT_AP -> {
+                service!!.getInternalWifiCmd()
+            }
             ReceivedCmd.AT_READY -> {
                 Log.e(TAG, "Obteniendo AP configurado: ${response.toCharString()}")
-                // TODO: Parsear respuesta y obtener SSID
-                service!!.currentState = StateMachine.POLING
+                parseSsidResponse(response.toCharString())
+                //service!!.currentState = StateMachine.POLING
             }
             else -> { service!!.readAtResponseCmd() }
         }
@@ -306,6 +313,7 @@ class RootActivity : AppCompatActivity(),
      * @param command Tipo de respuesta recibida
      */
     private fun getIpFromAt(response: ByteArray, command: ReceivedCmd) {
+        Log.e(TAG, "${service!!.currentState} RESPUESTA -> ${response.toCharString()}")
         when (command) {
             ReceivedCmd.WAIT_AP -> {
                 service!!.sendIpAtCmd()
@@ -326,13 +334,14 @@ class RootActivity : AppCompatActivity(),
      * @param command Tipo de respuesta recibida
      */
     private fun getApStatusFromAT(response: ByteArray, command: ReceivedCmd) {
+        Log.e(TAG, "${service!!.currentState} RESPUESTA -> ${response.toCharString()}")
         when (command) {
             ReceivedCmd.WAIT_AP -> {
                 service!!.sendApConnectionCmd()
             }
             ReceivedCmd.AT_READY -> {
                 parseApResponse(response.toCharString())
-                service!!.currentState = StateMachine.PING
+                service!!.currentState = StateMachine.GET_IP
             }
             else -> { service!!.readAtResponseCmd() }
         }
@@ -347,23 +356,17 @@ class RootActivity : AppCompatActivity(),
      * @param command Tipo de respuesta recibida
      */
     private fun getPing(response: ByteArray, command: ReceivedCmd) {
+        Log.e(TAG, "${service!!.currentState} RESPUESTA -> ${response.toCharString()}")
         when (command) {
-            ReceivedCmd.AT_OK -> {
-                Log.d(TAG, "AT Correctamente leído, esperando respuesta")
-                service!!.readAtResponseCmd()
-            }
             ReceivedCmd.WAIT_AP -> {
                 service!!.sendPing("www.google.com")
-            }
-            ReceivedCmd.POLEO -> {
-                service!!.readAtResponseCmd()
             }
             ReceivedCmd.AT_READY -> {
                 Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
                 parsePingResponse(response.toCharString())
                 service!!.currentState = StateMachine.DATA_CONNECTION
             }
-            else -> {  }
+            else -> { service!!.readAtResponseCmd() }
         }
     }
 
@@ -377,6 +380,7 @@ class RootActivity : AppCompatActivity(),
      * @param step Paso de la máquina de estados, según avanza en comandos
      */
     private fun getDataConnection(response: ByteArray, command: ReceivedCmd, step: Int) {
+        Log.e(TAG, "${service!!.currentState} RESPUESTA -> ${response.toCharString()}")
         when (command) {
             ReceivedCmd.AT_OK -> {
                 Log.d(TAG, "AT Correctamente leído, esperando respuesta")
@@ -458,6 +462,26 @@ class RootActivity : AppCompatActivity(),
     }
 
     /**
+     * ## parseSsidResponse
+     * Obtiene de la respuesta el access point que vive internamente en
+     * el dispositivo y lo actualiza en la pantalla
+     *
+     * @param response Cadena de respuesta del comando AT
+     */
+    private fun parseSsidResponse(response: String) {
+        Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
+        if (response.contains(AT_CMD_OK)) {
+            ssidAssigned = response.substringAfter(SSID_SUBSTRING_AFTER)
+                .substringBefore("\",")
+            runOnUiThread { testerFragment.fragmentUiUpdate(1) }
+            service!!.apply{
+                currentState = StateMachine.GET_STATUS_AP
+                sendApConnectionCmd()
+            }
+        }
+    }
+
+    /**
      * ## parseIpResponse
      * Extrae de la respuesta en formato Char la dirección IP que el
      * Access Point asignó al dispositivo. Ejecuta 3 reintentos en caso
@@ -466,13 +490,14 @@ class RootActivity : AppCompatActivity(),
      * @param response Cadena de respuesta del comando AT
      */
     private fun parseIpResponse(response: String) {
+        Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
         if (response.contains(WIFI_NOT_IP_STRING)){
             if (retryAtResponse >= MAX_AT_RETRY) {
                 retryAtResponse = 0
                 ipAssigned = "IP No asignada"
                 apAssigned = false
-                runOnUiThread { testerFragment.fragmentUiUpdate(1) }
-                service!!.currentState = StateMachine.GET_STATUS_AP
+                runOnUiThread { testerFragment.fragmentUiUpdate(3) }
+                service!!.currentState = StateMachine.PING
             } else {
                 retryAtResponse++
                 service!!.sendIpAtCmd()
@@ -488,8 +513,8 @@ class RootActivity : AppCompatActivity(),
                 .replace("\r", "")
             ipAssigned = ipRead
             apAssigned = true
-            service!!.currentState = StateMachine.GET_STATUS_AP
-            runOnUiThread { testerFragment.fragmentUiUpdate(1) }
+            service!!.currentState = StateMachine.PING
+            runOnUiThread { testerFragment.fragmentUiUpdate(3) }
         }
     }
 
@@ -503,13 +528,14 @@ class RootActivity : AppCompatActivity(),
      * @param response Cadena de respuesta del comando AT
      */
     private fun parseApResponse(response: String) {
+        Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
         if (response.contains(WIFI_SUBSTRING_AP_AFTER)) {
-            ssidAssigned = response
+            /*ssidAssigned = response
                 .substringAfter(WIFI_SUBSTRING_AP_AFTER)
                 .substringBefore(",")
                 .replace("\"", "")
                 .replace("\n", "")
-                .replace("\r", "")
+                .replace("\r", "")*/
             rssiAssigned = response
                 .substringAfterLast(",")
                 .substringBefore("OK")
@@ -520,7 +546,6 @@ class RootActivity : AppCompatActivity(),
         } else {
             if (retryAtResponse >= 2) {
                 retryAtResponse = 0
-                ssidAssigned = "No conectado"
                 rssiAssigned = "No conectado"
                 runOnUiThread { testerFragment.fragmentUiUpdate(2) }
             } else {
@@ -538,8 +563,9 @@ class RootActivity : AppCompatActivity(),
      * @param response Cadena de respuesta del comando AT
      */
     private fun parsePingResponse(response: String) {
+        Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
         pingAssigned = (response.contains(PING_OK) && !response.contains(AT_CMD_ERROR))
-        runOnUiThread { testerFragment.fragmentUiUpdate(3) }
+        runOnUiThread { testerFragment.fragmentUiUpdate(4) }
     }
 
     /**
@@ -552,6 +578,7 @@ class RootActivity : AppCompatActivity(),
      * @param step Estado actual de la máquina de estados
      */
     private fun parseDataResponse(response: ByteArray, step: Int) {
+        Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
         val restring = response.toCharString()
         when (step) {
             0 -> {
@@ -567,21 +594,23 @@ class RootActivity : AppCompatActivity(),
                     Log.d(TAG, "El socket está cerrado/error")
                     dataAssigned = false
                     service!!.currentState = StateMachine.POLING
+                    service!!.setDeviceModeCmd(AT_MODE_SLAVE)
                     runOnUiThread {
-                        testerFragment.fragmentUiUpdate(4)
+                        testerFragment.fragmentUiUpdate(5)
                         setStandardUI()
                     }
                     return
                 }
                 serviceStep = 2
                 runOnUiThread {
-                    testerFragment.fragmentUiUpdate(4)
+                    testerFragment.fragmentUiUpdate(5)
                 }
             }
             2 -> {
                 Log.d(TAG, "Cerrando el socket")
                 if (restring.contains(AT_CMD_CLOSED) || restring.contains(AT_CMD_ERROR)) {
                     service!!.currentState = StateMachine.POLING
+                    service!!.setDeviceModeCmd(AT_MODE_SLAVE)
                     serviceStep = 0
                     runOnUiThread {
                         setStandardUI()
@@ -696,8 +725,8 @@ class RootActivity : AppCompatActivity(),
             // TESTING CONNECTION MACHINE *************************************************************
             StateMachine.SET_MODE           -> { checkModeSetted(response, command) }
             StateMachine.GET_CONFIG_AP      -> { getSsidFromResponse(response, command) }
-            StateMachine.GET_IP             -> { getIpFromAt(response, command) }
             StateMachine.GET_STATUS_AP      -> { getApStatusFromAT(response, command) }
+            StateMachine.GET_IP             -> { getIpFromAt(response, command) }
             StateMachine.PING               -> { getPing(response, command) }
             StateMachine.DATA_CONNECTION    -> { getDataConnection(response, command, serviceStep) }
             // ****************************************************************************************
