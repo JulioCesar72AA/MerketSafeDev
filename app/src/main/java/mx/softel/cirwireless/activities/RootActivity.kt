@@ -455,8 +455,9 @@ class RootActivity : AppCompatActivity(),
             }
             wifiStep = nextStep
         } else {
-            wifiStep = 2
-            Log.e(TAG, "Ocurrió un error con AT+CWMODE=$nextStep")
+            wifiStep = 0
+            parseOkWifiConfigured(response, wifiStep)
+            Log.e(TAG, "Ocurrió un error con $nextStep")
         }
     }
 
