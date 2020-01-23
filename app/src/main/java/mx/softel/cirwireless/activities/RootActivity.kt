@@ -9,10 +9,12 @@ import android.os.IBinder
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.cirwireless.R
+import mx.softel.cirwireless.dialogs.ConfigInfoDialog
 import mx.softel.cirwireless.dialogs.PasswordDialog
 import mx.softel.cirwireless.dialogs.WifiNokDialog
 import mx.softel.cirwireless.dialogs.WifiOkDialog
@@ -299,7 +301,6 @@ class RootActivity : AppCompatActivity(),
             ReceivedCmd.AT_READY -> {
                 Log.e(TAG, "Obteniendo AP configurado: ${response.toCharString()}")
                 parseSsidResponse(response.toCharString())
-                //service!!.currentState = StateMachine.POLING
             }
             else -> { service!!.readAtResponseCmd() }
         }
@@ -341,7 +342,6 @@ class RootActivity : AppCompatActivity(),
             }
             ReceivedCmd.AT_READY -> {
                 parseApResponse(response.toCharString())
-                service!!.currentState = StateMachine.GET_IP
             }
             else -> { service!!.readAtResponseCmd() }
         }
@@ -364,7 +364,6 @@ class RootActivity : AppCompatActivity(),
             ReceivedCmd.AT_READY -> {
                 Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
                 parsePingResponse(response.toCharString())
-                service!!.currentState = StateMachine.DATA_CONNECTION
             }
             else -> { service!!.readAtResponseCmd() }
         }
@@ -478,6 +477,48 @@ class RootActivity : AppCompatActivity(),
                 currentState = StateMachine.GET_STATUS_AP
                 sendApConnectionCmd()
             }
+        } else if (response.contains(AT_CMD_ERROR)) {
+            val dialog = ConfigInfoDialog(0)
+            dialog.show(supportFragmentManager, null)
+            service!!.currentState = StateMachine.POLING
+        }
+    }
+
+    /**
+     * ## parseApResponse
+     * Extrae de la respuesta AT el SSID y el RSSI del Access
+     * Point actualmente conectado. Realiza 3 reintentos en caso
+     * de que no entregue los datos, al tercer intento fallido,
+     * se considera fallido
+     *
+     * @param response Cadena de respuesta del comando AT
+     */
+    private fun parseApResponse(response: String) {
+        Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
+        if (response.contains(WIFI_SUBSTRING_AP_AFTER)) {
+            rssiAssigned = response
+                .substringAfterLast(",")
+                .substringBefore("OK")
+                .replace("\r", "")
+                .replace("\n", "")
+            Log.e(TAG, "SSID: $ssidAssigned, RSSI: $rssiAssigned")
+            runOnUiThread { testerFragment.fragmentUiUpdate(2) }
+            service!!.currentState = StateMachine.GET_IP
+        } else {
+            if (retryAtResponse >= 2) {
+                retryAtResponse = 0
+                rssiAssigned = "No conectado"
+                runOnUiThread {
+                    testerFragment.fragmentUiUpdate(2)
+                    setStandardUI()
+                }
+                val dialog = ConfigInfoDialog(1)
+                dialog.show(supportFragmentManager, null)
+                service!!.currentState = StateMachine.POLING
+            } else {
+                retryAtResponse++
+                service!!.sendApConnectionCmd()
+            }
         }
     }
 
@@ -496,8 +537,13 @@ class RootActivity : AppCompatActivity(),
                 retryAtResponse = 0
                 ipAssigned = "IP No asignada"
                 apAssigned = false
-                runOnUiThread { testerFragment.fragmentUiUpdate(3) }
-                service!!.currentState = StateMachine.PING
+                runOnUiThread {
+                    testerFragment.fragmentUiUpdate(3)
+                    setStandardUI()
+                }
+                val dialog = ConfigInfoDialog(2)
+                dialog.show(supportFragmentManager, null)
+                service!!.currentState = StateMachine.POLING
             } else {
                 retryAtResponse++
                 service!!.sendIpAtCmd()
@@ -519,43 +565,6 @@ class RootActivity : AppCompatActivity(),
     }
 
     /**
-     * ## parseApResponse
-     * Extrae de la respuesta AT el SSID y el RSSI del Access
-     * Point actualmente conectado. Realiza 3 reintentos en caso
-     * de que no entregue los datos, al tercer intento fallido,
-     * se considera fallido
-     *
-     * @param response Cadena de respuesta del comando AT
-     */
-    private fun parseApResponse(response: String) {
-        Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
-        if (response.contains(WIFI_SUBSTRING_AP_AFTER)) {
-            /*ssidAssigned = response
-                .substringAfter(WIFI_SUBSTRING_AP_AFTER)
-                .substringBefore(",")
-                .replace("\"", "")
-                .replace("\n", "")
-                .replace("\r", "")*/
-            rssiAssigned = response
-                .substringAfterLast(",")
-                .substringBefore("OK")
-                .replace("\r", "")
-                .replace("\n", "")
-            Log.e(TAG, "SSID: $ssidAssigned, RSSI: $rssiAssigned")
-            runOnUiThread { testerFragment.fragmentUiUpdate(2) }
-        } else {
-            if (retryAtResponse >= 2) {
-                retryAtResponse = 0
-                rssiAssigned = "No conectado"
-                runOnUiThread { testerFragment.fragmentUiUpdate(2) }
-            } else {
-                retryAtResponse++
-                service!!.sendApConnectionCmd()
-            }
-        }
-    }
-
-    /**
      * ## parsePingResponse
      * Analiza la respuesta obtenida por el comando AT, y determina
      * si el PING se completó de manera exitosa o no
@@ -566,6 +575,16 @@ class RootActivity : AppCompatActivity(),
         Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
         pingAssigned = (response.contains(PING_OK) && !response.contains(AT_CMD_ERROR))
         runOnUiThread { testerFragment.fragmentUiUpdate(4) }
+        if (pingAssigned)
+            service!!.currentState = StateMachine.DATA_CONNECTION
+        else {
+            runOnUiThread {
+                setStandardUI()
+            }
+            val dialog = ConfigInfoDialog(3)
+            dialog.show(supportFragmentManager, null)
+            service!!.currentState = StateMachine.POLING
+        }
     }
 
     /**
@@ -599,6 +618,8 @@ class RootActivity : AppCompatActivity(),
                         testerFragment.fragmentUiUpdate(5)
                         setStandardUI()
                     }
+                    val dialog = ConfigInfoDialog(4)
+                    dialog.show(supportFragmentManager, null)
                     return
                 }
                 serviceStep = 2
@@ -615,6 +636,8 @@ class RootActivity : AppCompatActivity(),
                     runOnUiThread {
                         setStandardUI()
                     }
+                    val dialog = ConfigInfoDialog(100)
+                    dialog.show(supportFragmentManager, null)
                 } else {
                     service!!.closeAtSocketCmd()
                 }

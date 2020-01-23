@@ -49,4 +49,12 @@
     <string name="cd_password_icon">Password</string>
 
 
+    <!-- ERROR MESSAGE's -->
+    <string name="error_no_communication">Ocurrió un error de comunicación con el dispositivo, intente nuevamente</string>
+    <string name="error_no_ap">No se detecta el Access Point</string>
+    <string name="error_no_ip">No se ha asignado dirección IP. Revisa la configuración de tu módem</string>
+    <string name="error_no_ping">Conectado, pero sin conexión a internet</string>
+    <string name="error_no_data">No hay conexión con el servidor de datos</string>
+    <string name="error_no_error">Configuración correcta</string>
+
 </resources>

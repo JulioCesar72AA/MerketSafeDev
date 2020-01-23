@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="300dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:minWidth="300dp"
+    android:minHeight="300dp"
+    android:gravity="center_vertical"
+    android:layout_gravity="center"
+    android:background="@drawable/gray_rounded_corners"
+    android:orientation="vertical">
+
+    <!-- Ícono de diálogo -->
+    <ImageView
+        android:id="@+id/ivApConfig"
+        android:layout_width="@dimen/tv_lock_icon"
+        android:layout_height="@dimen/tv_lock_icon"
+        android:layout_margin="@dimen/tv_textsize_20"
+        android:layout_gravity="center"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/cd_password_icon"
+        android:src="@drawable/ic_img_access_point"
+        android:tint="@color/colorNok"/>
+
+    <!-- Nombre Access Point Seleccionado -->
+
+    <!-- Información del error -->
+    <TextView
+        android:id="@+id/tvInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:fontFamily="@font/rubik_regular"
+        android:lines="3"
+        tools:text="@string/error_no_ip"
+        android:textAlignment="center"
+        android:textSize="@dimen/tv_textsize18"/>
+
+    <Button
+        android:id="@+id/btnAcceptConfig"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/tv_aceptar"
+        android:padding="@dimen/tv_padding_25"
+        android:clickable="true"
+        android:focusable="true"
+        android:textAlignment="center"
+        android:textColor="@color/colorNok"
+        style="@style/MyButton" />
+
+</LinearLayout>
