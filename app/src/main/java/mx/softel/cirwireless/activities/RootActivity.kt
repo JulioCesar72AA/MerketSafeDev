@@ -259,10 +259,12 @@ class RootActivity : AppCompatActivity(),
         when (command) {
             ReceivedCmd.AT_READY -> {
                 when (step) {
-                    0 -> parseOkWifiConfigured(response.toCharString(), 1)
-                    1 -> parseOkWifiConfigured(response.toCharString(), 2)
-                    2 -> parseWifiConfigured(response.toCharString())
-                    3 -> parseOkWifiConfigured(response.toCharString(), 0)
+                    0   -> parseOkWifiConfigured(response.toCharString(), 100)
+                    100 -> parseOkWifiConfigured(response.toCharString(), 1)
+                    1   -> parseOkWifiConfigured(response.toCharString(), 101)
+                    101 -> parseOkWifiConfigured(response.toCharString(), 2)
+                    2   -> parseWifiConfigured(response.toCharString())
+                    3   -> parseOkWifiConfigured(response.toCharString(), 0)
                 }
             }
             else -> { service!!.readAtResponseCmd() }
@@ -450,8 +452,10 @@ class RootActivity : AppCompatActivity(),
                               else WifiNokDialog.getInstance()
                     dialog.show(supportFragmentManager, null)
                 }
-                1 -> service!!.setInternalWifiCmd(ssidSelected, passwordTyped, AT_NO_SEND_SSID)
-                2 -> service!!.sendConfigureWifiCmd(ssidSelected, passwordTyped)
+                100 -> service!!.resetWifiCmd()
+                1   -> service!!.setInternalWifiCmd(ssidSelected, passwordTyped, AT_NO_SEND_SSID)
+                101 -> service!!.setAutoConnCmd(1)
+                2   -> service!!.sendConfigureWifiCmd(ssidSelected, passwordTyped)
             }
             wifiStep = nextStep
         } else {
@@ -481,6 +485,7 @@ class RootActivity : AppCompatActivity(),
         } else if (response.contains(AT_CMD_ERROR)) {
             val dialog = ConfigInfoDialog(0)
             dialog.show(supportFragmentManager, null)
+            runOnUiThread { setStandardUI() }
             service!!.currentState = StateMachine.POLING
         }
     }
@@ -728,6 +733,7 @@ class RootActivity : AppCompatActivity(),
                 if (!isRefreshed) service!!.sendRefreshApCmd()
                 if (command == ReceivedCmd.REFRESH_AP_OK) {
                     isRefreshed = true
+                    service!!.readAtResponseCmd()
                     runOnUiThread { setStandardUI() }
                 }
             }

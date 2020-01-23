@@ -79,6 +79,21 @@ object CommandUtils {
         return getCompleteCommand(AT_GENERIC, atCommand)
     }
 
+    fun setAutoConnCmd(enable: Int): ByteArray {
+        val atCommand = "AT+CWAUTOCONN=$enable".toByteArray()
+        return getCompleteCommand(AT_GENERIC, atCommand)
+    }
+
+    fun resetWifiCmd(): ByteArray {
+        val atCommand = "AT+RST".toByteArray()
+        return getCompleteCommand(AT_GENERIC, atCommand)
+    }
+
+    fun getWirelessFirmwareCmd(): ByteArray {
+        val atCommand = "AT+GMR".toByteArray()
+        return getCompleteCommand(AT_GENERIC, atCommand)
+    }
+
     fun readAtCmd(): ByteArray {
         return AT_READ + getCrc16(AT_READ)
     }

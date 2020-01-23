@@ -527,6 +527,14 @@ class BleService: Service() {
     fun sendStatusWifiCmd()
             = writeToCharacteristic(CommandUtils.getWifiStatusCmd())
 
+    fun setAutoConnCmd(enable: Int)
+            = writeToCharacteristic(CommandUtils.setAutoConnCmd(enable))
+
+    fun resetWifiCmd()
+            = writeToCharacteristic(CommandUtils.resetWifiCmd())
+
+    fun getWirelessFirmwareCmd()
+            = writeToCharacteristic(CommandUtils.getWirelessFirmwareCmd())
 
     /**
      * ## fromResponseGetMacList
