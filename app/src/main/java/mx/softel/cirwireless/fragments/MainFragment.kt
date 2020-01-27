@@ -2,10 +2,8 @@ package mx.softel.cirwireless.fragments
 
 import android.os.Bundle
 import android.util.Log
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
@@ -17,11 +15,14 @@ import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.AT_MODE_MASTER_SLAVE
 import mx.softel.cirwirelesslib.enums.DisconnectionReason
 import mx.softel.cirwirelesslib.enums.StateMachine
+import android.view.MenuInflater
+import android.widget.PopupMenu
+
 
 /**
  * A simple [Fragment] subclass.
  */
-class MainFragment : Fragment(), View.OnClickListener {
+class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClickListener {
 
     // BLUETOOTH
     private lateinit var navigation     : FragmentNavigation
@@ -29,6 +30,7 @@ class MainFragment : Fragment(), View.OnClickListener {
 
     // VIEW's
     private lateinit var ivBack         : ImageView
+    private lateinit var ivMenu         : ImageView
     private lateinit var cvConfigure    : CardView
     private lateinit var cvTest         : CardView
     private lateinit var tvMac          : TextView
@@ -40,6 +42,7 @@ class MainFragment : Fragment(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         navigation  = (activity!! as FragmentNavigation)
         root        = (activity!! as RootActivity)
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(inflater: LayoutInflater,
@@ -51,6 +54,7 @@ class MainFragment : Fragment(), View.OnClickListener {
         view.apply {
             // Asignamos las vistas por su ID
             ivBack          = findViewById(R.id.ivBack)
+            ivMenu          = findViewById(R.id.ivMenu)
             tvMac           = findViewById(R.id.tvMacSelected)
             cvConfigure     = findViewById(R.id.cvConfigurar)
             cvTest          = findViewById(R.id.cvProbar)
@@ -73,13 +77,21 @@ class MainFragment : Fragment(), View.OnClickListener {
      */
     private fun setOnClick() {
         ivBack      .setOnClickListener(this)
+        ivMenu      .setOnClickListener(this)
         cvTest      .setOnClickListener(this)
         cvConfigure .setOnClickListener(this)
     }
 
 
-
-
+    /************************************************************************************************/
+    /**     MENU                                                                                    */
+    /************************************************************************************************/
+    override fun onMenuItemClick(item: MenuItem?): Boolean {
+        when (item!!.itemId) {
+            R.id.action_update -> toast("Actualizando Firmware")
+        }
+        return true
+    }
 
 
     /************************************************************************************************/
@@ -95,6 +107,7 @@ class MainFragment : Fragment(), View.OnClickListener {
     override fun onClick(v: View?) {
         when (v!!.id) {
             R.id.ivBack         -> root.finishActivity(DisconnectionReason.NORMAL_DISCONNECTION)
+            R.id.ivMenu         -> createMenu()
             R.id.cvConfigurar   -> clickConfigure()
             R.id.cvProbar       -> clickTest()
         }
@@ -129,16 +142,24 @@ class MainFragment : Fragment(), View.OnClickListener {
                 service!!.apply {
                     setDeviceModeCmd(AT_MODE_MASTER_SLAVE)
                     currentState = StateMachine.SET_MODE
-
-                    if (actualFragment != testerFragment) {
-                        actualFragment = testerFragment
-                        runOnUiThread {
-                            navigateTo(testerFragment, true, null)
-                            setScanningUI()
-                        }
+                }
+                if (actualFragment != testerFragment) {
+                    actualFragment = testerFragment
+                    runOnUiThread {
+                        navigateTo(testerFragment, true, null)
+                        setScanningUI()
                     }
                 }
             }
+        }
+    }
+
+    private fun createMenu() {
+        val popup = PopupMenu(context, ivMenu)
+        popup.apply {
+            menuInflater.inflate(R.menu.menu_main, popup.menu)
+            setOnMenuItemClickListener(this@MainFragment)
+            show()
         }
     }
 

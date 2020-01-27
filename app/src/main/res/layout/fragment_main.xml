@@ -32,7 +32,23 @@
         android:layout_width="@dimen/ic_back_size"
         android:layout_height="@dimen/ic_back_size"
         android:layout_margin="@dimen/ic_back_margin"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
         android:src="@drawable/ic_back"
+        android:contentDescription="@string/cd_back_icon"/>
+
+    <!-- Menu Button -->
+    <ImageView
+        android:id="@+id/ivMenu"
+        android:layout_width="@dimen/ic_back_size"
+        android:layout_height="@dimen/ic_back_size"
+        android:layout_margin="@dimen/ic_back_margin"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_menu"
         android:contentDescription="@string/cd_back_icon"/>
 
     <!-- Contenido de la vista -->
