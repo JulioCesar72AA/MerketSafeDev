@@ -231,7 +231,7 @@ class RootActivity : AppCompatActivity(),
      * Termina el fragmento de Access Points y retorna al punto inicial
      */
     override fun dialogOk() {
-        service!!.terminateCmd()
+        //service!!.terminateCmd()
         backFragment()
     }
 
@@ -483,14 +483,15 @@ class RootActivity : AppCompatActivity(),
 
     private fun parseStatus(response: String) {
         if (response.contains(AT_CMD_STATUS)) {
-            cipStatusMode = response.substringAfter("$AT_CMD_STATUS:")
-                .substringBefore("$AT_CMD_OK")
-                .replace("\r", "")
-                .replace("\n", "").toInt()
-            if (cipStatusMode == 3 || response.contains("TCP")) {
+
+            if (response.contains("TCP")) {
                 service!!.closeAtSocketCmd()
                 return
             }
+            cipStatusMode = response.substringAfter("$AT_CMD_STATUS:")
+                .substringBefore(AT_CMD_OK)
+                .replace("\r", "")
+                .replace("\n", "").toInt()
             service!!.currentState = StateMachine.SET_MODE
         }
 
@@ -766,6 +767,7 @@ class RootActivity : AppCompatActivity(),
             StateMachine.POLING -> {
                 // Habilitamos la pantalla cuando se inicia el poleo
                 // Quiere decir que el dispositivo está listo para recibir comandos
+                if (!isRefreshed) service!!.initCmd()
                 if (command == ReceivedCmd.POLEO) {
                     isRefreshed = true
                     runOnUiThread { setStandardUI() }
@@ -824,7 +826,7 @@ class RootActivity : AppCompatActivity(),
                 }
             }
             DisconnectionReason.DISCONNECTION_OCURRED, DisconnectionReason.CONNECTION_FAILED -> {
-                runOnUiThread { toast("No se puede conectar con el dispositivo") }
+                runOnUiThread { toast("Tiempo de espera agotado, desconectando") }
                 handler.apply {
                     postDelayed(disconnectionRunnable, UI_TIMEOUT)
                 }
