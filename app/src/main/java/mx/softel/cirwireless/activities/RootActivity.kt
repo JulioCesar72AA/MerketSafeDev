@@ -57,6 +57,7 @@ class RootActivity : AppCompatActivity(),
     private  var isRefreshed        : Boolean       = false
     private  var isScanning         : Boolean       = false
     private  var isWifiConnected    : Boolean       = false
+    private  var getApLaunched      : Boolean       = false
 
     // VARIABLES DE FLUJO
     private  var disconnectionReason: DisconnectionReason   = DisconnectionReason.UNKNOWN
@@ -230,6 +231,7 @@ class RootActivity : AppCompatActivity(),
      * Termina el fragmento de Access Points y retorna al punto inicial
      */
     override fun dialogOk() {
+        service!!.terminateCmd()
         backFragment()
     }
 
@@ -266,6 +268,20 @@ class RootActivity : AppCompatActivity(),
                     2   -> parseWifiConfigured(response.toCharString())
                     3   -> parseOkWifiConfigured(response.toCharString(), 0)
                 }
+            }
+            else -> { service!!.readAtResponseCmd() }
+        }
+    }
+
+    private fun checkStatus(response: ByteArray, command: ReceivedCmd) {
+        Log.d(TAG, "Respuesta: ${response.toCharString()}")
+        if (cipStatusMode == -1) {
+            service!!.checkCipStatusCmd()
+            cipStatusMode = -2
+        }
+        when (command) {
+            ReceivedCmd.AT_READY -> {
+                parseStatus(response.toCharString())
             }
             else -> { service!!.readAtResponseCmd() }
         }
@@ -462,6 +478,24 @@ class RootActivity : AppCompatActivity(),
             wifiStep = 0
             parseOkWifiConfigured(response, wifiStep)
             Log.e(TAG, "Ocurrió un error con $nextStep")
+        }
+    }
+
+    private fun parseStatus(response: String) {
+        if (response.contains(AT_CMD_STATUS)) {
+            cipStatusMode = response.substringAfter("$AT_CMD_STATUS:")
+                .substringBefore("$AT_CMD_OK")
+                .replace("\r", "")
+                .replace("\n", "").toInt()
+            if (cipStatusMode == 3 || response.contains("TCP")) {
+                service!!.closeAtSocketCmd()
+                return
+            }
+            service!!.currentState = StateMachine.SET_MODE
+        }
+
+        if (response.contains(AT_CMD_CLOSED)) {
+            service!!.currentState = StateMachine.SET_MODE
         }
     }
 
@@ -730,18 +764,21 @@ class RootActivity : AppCompatActivity(),
 
             // STATUS DE POLEO
             StateMachine.POLING -> {
-                // Actualizamos los access points recién se conecta al dispositivo
-                // TODO: No es necesario actualizar al dispositivo recién se conecta
-                if (!isRefreshed) service!!.sendRefreshApCmd()
-                if (command == ReceivedCmd.REFRESH_AP_OK) {
+                // Habilitamos la pantalla cuando se inicia el poleo
+                // Quiere decir que el dispositivo está listo para recibir comandos
+                if (command == ReceivedCmd.POLEO) {
                     isRefreshed = true
-                    service!!.readAtResponseCmd()
                     runOnUiThread { setStandardUI() }
                 }
+                cipStatusMode = -1
             }
 
             // STATUS DE MAC'S DE AP'S QUE EL DISPOSITIVO VE
             StateMachine.GET_AP -> {
+                if (!getApLaunched) {
+                    service!!.getMacListCmd()
+                    getApLaunched = true
+                }
                 if (command == ReceivedCmd.GET_AP) {
                     // Casteamos el resultado y navegamos al fragmento de AP's
                     deviceMacList = service!!.fromResponseGetMacList(response)
@@ -755,6 +792,7 @@ class RootActivity : AppCompatActivity(),
             StateMachine.WIFI_CONFIG        -> { wifiConfigProcess(response, command, wifiStep) }
 
             // TESTING CONNECTION MACHINE *************************************************************
+            StateMachine.UNKNOWN            -> { checkStatus(response, command) }
             StateMachine.SET_MODE           -> { checkModeSetted(response, command) }
             StateMachine.GET_CONFIG_AP      -> { getSsidFromResponse(response, command) }
             StateMachine.GET_STATUS_AP      -> { getApStatusFromAT(response, command) }
@@ -874,6 +912,7 @@ class RootActivity : AppCompatActivity(),
         private var retryAtResponse         = 0
         private var serviceStep             = 0
         private var wifiStep                = 0
+        private var cipStatusMode           = -1
 
         // Timeouts de la actividad
         private const val UI_TIMEOUT        = 500L

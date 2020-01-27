@@ -14,16 +14,23 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import mx.softel.cirwireless.R
+import mx.softel.cirwireless.activities.RootActivity
 
 class ConfigInfoDialog(var code: Int): DialogFragment(), View.OnClickListener {
 
-    private lateinit var ivIcon: ImageView
-    private lateinit var tvInfo: TextView
-    private lateinit var btnOk : Button
+    private lateinit var root   : RootActivity
+
+    private lateinit var ivIcon : ImageView
+    private lateinit var tvInfo : TextView
+    private lateinit var btnOk  : Button
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
-    /************************************************************************************************/
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        root        = (activity!! as RootActivity)
+    }
+
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -72,7 +79,10 @@ class ConfigInfoDialog(var code: Int): DialogFragment(), View.OnClickListener {
     /************************************************************************************************/
     override fun onClick(v: View?) {
         when (v!!.id) {
-            R.id.btnAcceptConfig -> { dismiss() }
+            R.id.btnAcceptConfig -> {
+                root.service!!.terminateCmd()
+                dismiss()
+            }
         }
     }
 

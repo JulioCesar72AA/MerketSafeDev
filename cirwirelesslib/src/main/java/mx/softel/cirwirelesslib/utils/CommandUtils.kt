@@ -99,6 +99,18 @@ object CommandUtils {
     }
 
 
+    fun initialCmd(): ByteArray {
+        return getCompleteCommand(AT_GENERIC, "S_T_R_T".toByteArray())
+    }
+
+    fun terminateCmd(): ByteArray {
+        return getCompleteCommand(AT_GENERIC, "E_N_D".toByteArray())
+    }
+
+    fun checkCipStatusCmd(): ByteArray {
+        return getCompleteCommand(AT_GENERIC, "AT+CIPSTATUS".toByteArray())
+    }
+
 
     /************************************************************************************************/
     /**      CRC                                                                                    */

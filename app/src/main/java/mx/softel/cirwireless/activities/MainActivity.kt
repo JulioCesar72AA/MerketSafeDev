@@ -189,7 +189,7 @@ class MainActivity: AppCompatActivity(),
     companion object {
         private val TAG = MainActivity::class.java.simpleName
 
-        private const val TIMEOUT           = 10_000L
+        private const val TIMEOUT           = 5_000L
     }
 
 

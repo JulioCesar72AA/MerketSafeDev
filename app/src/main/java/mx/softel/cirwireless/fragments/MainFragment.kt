@@ -106,7 +106,8 @@ class MainFragment : Fragment(), View.OnClickListener {
         else{
             toast("Actualizando datos")
             root.service!!.apply {
-                getMacListCmd()
+                initCmd()
+                //getMacListCmd()
                 currentState = StateMachine.GET_AP
             }
         }
@@ -121,15 +122,16 @@ class MainFragment : Fragment(), View.OnClickListener {
             root.apply{
                 setScanningUI()
                 service!!.apply {
-                    setDeviceModeCmd(AT_MODE_MASTER_SLAVE)
-                    currentState = StateMachine.SET_MODE
+                    initCmd()
+                    //setDeviceModeCmd(AT_MODE_MASTER_SLAVE)
+                    currentState = StateMachine.UNKNOWN
                 }
                 if (actualFragment != testerFragment) {
                     actualFragment = testerFragment
-                    runOnUiThread {
-                        navigateTo(testerFragment, true, null)
-                        setScanningUI()
-                    }
+                }
+                runOnUiThread {
+                    navigateTo(testerFragment, true, null)
+                    setScanningUI()
                 }
             }
         }

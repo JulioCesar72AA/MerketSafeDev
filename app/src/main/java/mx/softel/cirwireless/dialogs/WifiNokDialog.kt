@@ -45,7 +45,10 @@ class WifiNokDialog: DialogFragment(), View.OnClickListener {
     /************************************************************************************************/
     override fun onClick(v: View?) {
         when (v!!.id) {
-            R.id.btnAcceptWifiNok -> { dismiss() }
+            R.id.btnAcceptWifiNok -> {
+
+                dismiss()
+            }
         }
     }
 

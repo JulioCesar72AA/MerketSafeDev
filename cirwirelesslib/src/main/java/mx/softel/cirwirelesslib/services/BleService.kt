@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.util.Log
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.*
+import mx.softel.cirwirelesslib.extensions.toCharString
 import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.utils.CommandUtils
 import java.lang.Exception
@@ -536,6 +537,15 @@ class BleService: Service() {
     fun getWirelessFirmwareCmd()
             = writeToCharacteristic(CommandUtils.getWirelessFirmwareCmd())
 
+    fun initCmd()
+            = writeToCharacteristic(CommandUtils.initialCmd())
+
+    fun terminateCmd()
+            = writeToCharacteristic(CommandUtils.terminateCmd())
+
+    fun checkCipStatusCmd()
+            = writeToCharacteristic(CommandUtils.checkCipStatusCmd())
+
     /**
      * ## fromResponseGetMacList
      * A partir de la respuesta obtenida por [getMacListCmd] parsea la respuesta
@@ -627,6 +637,7 @@ class BleService: Service() {
         override fun onCharacteristicWrite(gatt: BluetoothGatt?,
                                            characteristic: BluetoothGattCharacteristic?,
                                            status: Int) {
+            Log.e(TAG, "Escribiendo: ${characteristic!!.value.toHex()} -> ${characteristic.value.toCharString()}")
             //super.onCharacteristicWrite(gatt, characteristic, status)
         }
 

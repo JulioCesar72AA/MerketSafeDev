@@ -36,6 +36,7 @@ const val AT_CMD_OK                         = "OK"
 const val AT_CMD_CLOSED                     = "CLOSED"
 const val AT_CMD_ERROR                      = "ERROR"
 const val AT_CMD_CONNECT                    = "CONNECT"
+const val AT_CMD_STATUS                     = "STATUS"
 
 const val AT_MODE_MASTER_SLAVE              = 3
 const val AT_MODE_SLAVE                     = 1
