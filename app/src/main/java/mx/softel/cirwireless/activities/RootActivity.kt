@@ -503,10 +503,12 @@ class RootActivity : AppCompatActivity(),
         Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
         if (response.contains(WIFI_SUBSTRING_AP_AFTER)) {
             rssiAssigned = response
-                .substringAfterLast(",")
+                .substringAfterLast(",-")
                 .substringBefore("OK")
+                .substringBefore(",0")
                 .replace("\r", "")
                 .replace("\n", "")
+            rssiAssigned = "-$rssiAssigned"
             Log.e(TAG, "SSID: $ssidAssigned, RSSI: $rssiAssigned")
             runOnUiThread { testerFragment.fragmentUiUpdate(2) }
             service!!.currentState = StateMachine.GET_IP

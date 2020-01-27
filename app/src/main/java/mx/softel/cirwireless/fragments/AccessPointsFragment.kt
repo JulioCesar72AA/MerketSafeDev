@@ -29,9 +29,6 @@ class AccessPointsFragment: Fragment(),
     private lateinit var root           : RootActivity
     private lateinit var wifiManager    : WifiManager
 
-    // FLAGS
-    private var isScanning              = false
-
     // LIST DATA
     private lateinit var wifiResults    : MutableList<ScanResult>
     private          var apMacList      = ArrayList<String>()     // Lista validada de MACS
