@@ -3,7 +3,9 @@ package mx.softel.cirwireless.activities
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.view.MenuItem
 import android.view.View
+import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -20,7 +22,8 @@ import mx.softel.scanblelib.ble.BleManager
 class MainActivity: AppCompatActivity(),
                     SwipeRefreshLayout.OnRefreshListener,
                     View.OnClickListener,
-                    ScanRecyclerAdapter.OnScanClickListener {
+                    ScanRecyclerAdapter.OnScanClickListener,
+                    PopupMenu.OnMenuItemClickListener {
 
     private var bleDevices = ArrayList<BleDevice>()
     private var isScanning = false
@@ -73,12 +76,38 @@ class MainActivity: AppCompatActivity(),
                 // Ignoramos el click para bloquear los demás elementos
                 toast(R.string.tst_scanning)
             }
+            R.id.ivMenu -> createMenu()
         }
     }
 
     private fun setOnClick() {
         scanMask.setOnClickListener(this)
+        ivMenu  .setOnClickListener(this)
     }
+
+
+
+
+    /************************************************************************************************/
+    /**     MENU                                                                                    */
+    /************************************************************************************************/
+    override fun onMenuItemClick(item: MenuItem?): Boolean {
+        when (item!!.itemId) {
+            R.id.action_info -> startActivity(Intent(this, InfoActivity::class.java))
+        }
+        return true
+    }
+
+
+    private fun createMenu() {
+        val popup = PopupMenu(this, ivMenu)
+        popup.apply {
+            menuInflater.inflate(R.menu.menu_version, popup.menu)
+            setOnMenuItemClickListener(this@MainActivity)
+            show()
+        }
+    }
+
 
 
     /************************************************************************************************/
