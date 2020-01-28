@@ -100,228 +100,192 @@
                 android:id="@+id/cvDispositivos"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground"
                 app:cardBackgroundColor="@color/cardScanBackground"
                 app:cardCornerRadius="@dimen/cv_corner_radius"
                 app:cardElevation="@dimen/cv_elevation_access"
                 app:cardUseCompatPadding="true" >
 
-                <ScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
 
-                    <TableLayout
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/cv_margin30"
+                    android:layout_gravity="center_vertical" >
+
+                    <!-- SSID  -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/cv_margin30"
-                        android:layout_gravity="center_vertical" >
+                        android:orientation="horizontal"
+                        android:padding="@dimen/padding17"
+                        android:weightSum="1" >
 
-                        <!-- Fila 4  -->
-                        <LinearLayout
+                        <TextView
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:padding="@dimen/padding17"
-                            android:weightSum="1" >
+                            android:layout_height="match_parent"
+                            android:layout_weight=".55"
+                            android:gravity="center_vertical"
+                            android:fontFamily="@font/rubik_bold"
+                            android:text="@string/tv_dispositivos_ssid"
+                            android:textColor="@color/colorIconBlue"
+                            android:textSize="@dimen/tv_textsize18"  />
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight=".55"
-                                android:gravity="center_vertical"
-                                android:fontFamily="@font/rubik_bold"
-                                android:text="@string/tv_ap_access"
-                                android:textColor="@color/colorIconBlue"
-                                android:textSize="@dimen/tv_textsize18"  />
-
-                            <ImageView
-                                android:id="@+id/ivCheckAp"
-                                android:layout_width="match_parent"
-                                android:layout_height="20dp"
-                                android:layout_weight=".45"
-                                android:scaleType="fitStart"
-                                tools:src="@drawable/ic_ok"
-                                android:contentDescription="@string/cd_test_icon" />
-
-                        </LinearLayout>
-
-                        <!-- Fila 1  -->
-                        <LinearLayout
+                        <TextView
+                            android:id="@+id/tvSsidDispositivos"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:padding="@dimen/padding17"
-                            android:weightSum="1" >
+                            android:layout_height="match_parent"
+                            android:layout_weight=".45"
+                            tools:text="@string/tv_redes_access"
+                            android:gravity="center"
+                            android:textSize="@dimen/tv_textsize18"  />
+                    </LinearLayout>
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight=".55"
-                                android:gravity="center_vertical"
-                                android:fontFamily="@font/rubik_bold"
-                                android:text="@string/tv_ip"
-                                android:textColor="@color/colorIconBlue"
-                                android:textSize="@dimen/tv_textsize18" />
+                    <!-- RSSI -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/padding17"
+                        android:weightSum="1" >
 
-                            <TextView
-                                android:id="@+id/tvIpDispositivos"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight=".45"
-                                tools:text="@string/tv_dispositivos_ip"
-                                android:textSize="@dimen/tv_textsize18" />
-                        </LinearLayout>
-
-                        <!-- Fila 2  -->
-                        <LinearLayout
+                        <TextView
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:padding="@dimen/padding17"
-                            android:weightSum="1" >
+                            android:layout_height="match_parent"
+                            android:layout_weight=".55"
+                            android:gravity="center_vertical"
+                            android:fontFamily="@font/rubik_bold"
+                            android:text="@string/tv_sdi_access"
+                            android:textColor="@color/colorIconBlue"
+                            android:textSize="@dimen/tv_textsize18"  />
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight=".55"
-                                android:gravity="center_vertical"
-                                android:fontFamily="@font/rubik_bold"
-                                android:text="@string/tv_dispositivos_ssid"
-                                android:textColor="@color/colorIconBlue"
-                                android:textSize="@dimen/tv_textsize18"  />
-
-                            <TextView
-                                android:id="@+id/tvSsidDispositivos"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight=".45"
-                                tools:text="@string/tv_redes_access"
-                                android:textSize="@dimen/tv_textsize18"  />
-                        </LinearLayout>
-
-                        <!-- Fila 3  -->
-                        <LinearLayout
+                        <TextView
+                            android:id="@+id/tvRssiDispositivos"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:padding="@dimen/padding17"
-                            android:weightSum="1" >
+                            android:layout_height="match_parent"
+                            android:layout_weight=".45"
+                            tools:text="@string/tv_ssdi_number_access"
+                            android:gravity="center"
+                            android:textSize="@dimen/tv_textsize18"  />
+                    </LinearLayout>
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight=".55"
-                                android:gravity="center_vertical"
-                                android:fontFamily="@font/rubik_bold"
-                                android:text="@string/tv_sdi_access"
-                                android:textColor="@color/colorIconBlue"
-                                android:textSize="@dimen/tv_textsize18"  />
+                    <!-- Access Point -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/padding17"
+                        android:weightSum="1" >
 
-                            <TextView
-                                android:id="@+id/tvRssiDispositivos"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight=".45"
-                                tools:text="@string/tv_ssdi_number_access"
-                                android:textSize="@dimen/tv_textsize18"  />
-                        </LinearLayout>
-
-                        <!-- Fila 5  -->
-                        <LinearLayout
+                        <TextView
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:padding="@dimen/padding17"
-                            android:weightSum="1" >
+                            android:layout_height="match_parent"
+                            android:layout_weight=".55"
+                            android:gravity="center_vertical"
+                            android:fontFamily="@font/rubik_bold"
+                            android:text="@string/tv_ap_access"
+                            android:textColor="@color/colorIconBlue"
+                            android:textSize="@dimen/tv_textsize18"  />
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight=".55"
-                                android:gravity="center_vertical"
-                                android:fontFamily="@font/rubik_bold"
-                                android:text="@string/tv_internet_access"
-                                android:textColor="@color/colorIconBlue"
-                                android:textSize="@dimen/tv_textsize18"  />
-
-                            <ImageView
-                                android:id="@+id/ivCheckInternet"
-                                android:layout_width="match_parent"
-                                android:layout_height="20dp"
-                                android:layout_weight=".45"
-                                android:scaleType="fitStart"
-                                tools:src="@drawable/ic_nok"
-                                android:contentDescription="@string/cd_test_icon"/>
-                        </LinearLayout>
-
-                        <!-- Fila 6  -->
-                        <LinearLayout
+                        <ImageView
+                            android:id="@+id/ivCheckAp"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:padding="@dimen/padding17"
-                            android:weightSum="1" >
+                            android:layout_height="20dp"
+                            android:layout_weight=".45"
+                            android:scaleType="fitCenter"
+                            tools:src="@drawable/ic_ok"
+                            android:contentDescription="@string/cd_test_icon" />
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight=".55"
-                                android:gravity="center_vertical"
-                                android:fontFamily="@font/rubik_bold"
-                                android:text="@string/tv_data_access"
-                                android:textColor="@color/colorIconBlue"
-                                android:textSize="@dimen/tv_textsize18"  />
+                    </LinearLayout>
 
-                            <ImageView
-                                android:id="@+id/ivCheckData"
-                                android:layout_width="match_parent"
-                                android:layout_height="20dp"
-                                android:layout_weight=".45"
-                                android:scaleType="fitStart"
-                                tools:src="@drawable/ic_ok"
-                                android:contentDescription="@string/cd_test_icon"/>
-                        </LinearLayout>
+                    <!-- IP -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/padding17"
+                        android:weightSum="1" >
 
-                        <!-- Fila 7  -->
-                        <LinearLayout
+                        <TextView
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:padding="@dimen/padding17"
-                            android:weightSum="1" >
+                            android:layout_height="match_parent"
+                            android:layout_weight=".55"
+                            android:gravity="center_vertical"
+                            android:fontFamily="@font/rubik_bold"
+                            android:text="@string/tv_ip"
+                            android:textColor="@color/colorIconBlue"
+                            android:textSize="@dimen/tv_textsize18" />
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight=".55"
-                                android:gravity="center_vertical"
-                                android:fontFamily="@font/rubik_bold"
-                                android:text="@string/tv_status_access"
-                                android:textColor="@color/colorIconBlue"
-                                android:textSize="@dimen/tv_textsize18"  />
+                        <TextView
+                            android:id="@+id/tvIpDispositivos"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight=".45"
+                            tools:text="@string/tv_dispositivos_ip"
+                            android:gravity="center"
+                            android:textSize="@dimen/tv_textsize18" />
+                    </LinearLayout>
 
-                            <ImageView
-                                android:id="@+id/ivCheckStatus"
-                                android:layout_width="match_parent"
-                                android:layout_height="@dimen/tv_padding_25"
-                                android:layout_weight=".45"
-                                android:scaleType="fitStart"
-                                tools:src="@drawable/ic_nok"
-                                android:contentDescription="@string/cd_test_icon"/>
-                        </LinearLayout>
+                    <!-- Internet -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/padding17"
+                        android:weightSum="1" >
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight=".55"
+                            android:gravity="center_vertical"
+                            android:fontFamily="@font/rubik_bold"
+                            android:text="@string/tv_internet_access"
+                            android:textColor="@color/colorIconBlue"
+                            android:textSize="@dimen/tv_textsize18"  />
+
+                        <ImageView
+                            android:id="@+id/ivCheckInternet"
+                            android:layout_width="match_parent"
+                            android:layout_height="20dp"
+                            android:layout_weight=".45"
+                            android:scaleType="fitCenter"
+                            tools:src="@drawable/ic_nok"
+                            android:contentDescription="@string/cd_test_icon"/>
+                    </LinearLayout>
+
+                    <!-- Conexión a servidor -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/padding17"
+                        android:weightSum="1" >
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight=".55"
+                            android:gravity="center_vertical"
+                            android:fontFamily="@font/rubik_bold"
+                            android:text="@string/tv_data_access"
+                            android:textColor="@color/colorIconBlue"
+                            android:textSize="@dimen/tv_textsize18"  />
+
+                        <ImageView
+                            android:id="@+id/ivCheckData"
+                            android:layout_width="match_parent"
+                            android:layout_height="20dp"
+                            android:layout_weight=".45"
+                            android:scaleType="fitCenter"
+                            tools:src="@drawable/ic_ok"
+                            android:contentDescription="@string/cd_test_icon"/>
+                    </LinearLayout>
 
 
-                    </TableLayout>
-
-                </ScrollView>
-
+                </TableLayout>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
 
-
     </TableLayout>
-
 
 </RelativeLayout>

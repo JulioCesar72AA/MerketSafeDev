@@ -1,18 +1,18 @@
 package mx.softel.cirwireless.activities
 
-import android.app.Dialog
 import android.bluetooth.BluetoothDevice
 import android.content.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
-import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.cirwireless.R
+import mx.softel.cirwireless.dialogs.ConfigInfoDialog
 import mx.softel.cirwireless.dialogs.PasswordDialog
 import mx.softel.cirwireless.dialogs.WifiNokDialog
 import mx.softel.cirwireless.dialogs.WifiOkDialog
@@ -24,47 +24,47 @@ import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.toCharString
-import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.services.BleService
 
-
 class RootActivity : AppCompatActivity(),
-    FragmentNavigation,
-    PasswordDialog.OnDialogClickListener,
-    WifiOkDialog.OnWifiDialogListener,
-    BleService.OnBleConnection {
+                     FragmentNavigation,
+                     PasswordDialog.OnDialogClickListener,
+                     WifiOkDialog.OnWifiDialogListener,
+                     BleService.OnBleConnection {
 
     // BLUETOOTH DEVICE
-    internal lateinit var bleDevice         : BluetoothDevice
-    internal lateinit var bleMac            : String
-    internal lateinit var ssidSelected      : String
-    private  lateinit var passwordTyped     : String
+    internal lateinit var bleDevice     : BluetoothDevice
+    internal lateinit var bleMac        : String
+    internal lateinit var ssidSelected  : String
+    private  lateinit var passwordTyped : String
 
     // VALORES PARA FRAGMENT DE TESTER
-    internal var ipAssigned         : String            = ""
-    internal var apAssigned         : Boolean           = false
-    internal var ssidAssigned       : String            = ""
-    internal var rssiAssigned       : String            = ""
-    internal var pingAssigned       : Boolean           = false
-    internal var dataAssigned       : Boolean           = false
-    internal var statusAssigned     : Boolean           = false
+    internal var ipAssigned         : String        = ""
+    internal var apAssigned         : Boolean       = false
+    internal var ssidAssigned       : String        = ""
+    internal var rssiAssigned       : String        = ""
+    internal var pingAssigned       : Boolean       = false
+    internal var dataAssigned       : Boolean       = false
 
     // SERVICE CONNECTIONS / FLAGS
-    internal var service                    : BleService?           = null
-    private  var isServiceConnected         : Boolean               = false
-    private  var isRefreshed                : Boolean               = false
+    internal var service            : BleService?   = null
+    private  var isServiceConnected : Boolean       = false
+    private  var isRefreshed        : Boolean       = false
+    private  var isScanning         : Boolean       = false
+    private  var isWifiConnected    : Boolean       = false
+    private  var getApLaunched      : Boolean       = false
 
-    // FLAGS / EXTRA VARIABLES
-    private  var disconnectionReason        : DisconnectionReason   = DisconnectionReason.UNKNOWN
-    internal var deviceMacList              : ArrayList<String>?    = null
-    internal var actualFragment             : Fragment?             = null
-    internal val mainFragment               : MainFragment          = MainFragment.getInstance()
-    internal val testerFragment             : TesterFragment        = TesterFragment.getInstance()
-    internal val wifiFragment               : AccessPointsFragment  = AccessPointsFragment.getInstance()
+    // VARIABLES DE FLUJO
+    private  var disconnectionReason: DisconnectionReason   = DisconnectionReason.UNKNOWN
+    internal var deviceMacList      : ArrayList<String>?    = null
+    internal var actualFragment     : Fragment?             = null
+    private  val mainFragment       : MainFragment          = MainFragment.getInstance()
+    internal val testerFragment     : TesterFragment        = TesterFragment.getInstance()
+    private  val wifiFragment       : AccessPointsFragment  = AccessPointsFragment.getInstance()
 
     // HANDLERS / RUNNABLES
-    private val handler                 = Handler()
-    private val disconnectionRunnable   = Runnable { finishActivity(disconnectionReason) }
+    private val handler               = Handler()
+    private val disconnectionRunnable = Runnable { finishActivity(disconnectionReason) }
 
 
     /************************************************************************************************/
@@ -80,21 +80,31 @@ class RootActivity : AppCompatActivity(),
 
     override fun onResume() {
         super.onResume()
-        // Asociamos el servicio de BLE
-        doBindService()
+        doBindService()     // Asociamos el servicio de BLE
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // Desasociamos el servicio de BLE
-        doUnbindService()
+        doUnbindService()   // Desasociamos el servicio de BLE
     }
 
+    /**
+     * ## onBackPressed
+     * Bloquea el "BackButton" mientras la pantalla se encuentra en
+     * estado de "escaneando"
+     */
     override fun onBackPressed() {
+        if (isScanning) {
+            toast("Espere un momento")
+            return
+        }
         backFragment()
-        //super.onBackPressed()
     }
 
+    /**
+     * ## setScanningUI
+     * Muestra en la actividad la máscara de escaneo
+     */
     internal fun setScanningUI() {
         scanMask.apply {
             visibility = View.VISIBLE
@@ -102,12 +112,18 @@ class RootActivity : AppCompatActivity(),
             setOnClickListener { toast("Espere un momento") }
         }
         pbScanning.visibility = View.VISIBLE
+        isScanning = true
     }
 
+    /**
+     * ## setStandardUI
+     * Elimina de la vista la máscara de bloqueo de escaneo
+     */
     internal fun setStandardUI() {
         scanMask.visibility = View.GONE
         pbScanning.visibility = View.GONE
         serviceStep = 0
+        isScanning = false
     }
 
     /**
@@ -138,6 +154,11 @@ class RootActivity : AppCompatActivity(),
             .commit()
     }
 
+    /**
+     * ## backFragment
+     * Realiza la navegación inversa de fragments, si ya no hay fragments por
+     * expulsar, desconecta el dispositivo y termina la actividad
+     */
     internal fun backFragment() {
         if (actualFragment == mainFragment) {
             finishActivity(DisconnectionReason.NORMAL_DISCONNECTION)
@@ -166,10 +187,12 @@ class RootActivity : AppCompatActivity(),
 
 
 
+
+
+
     /************************************************************************************************/
     /**     ON CLICK                                                                                */
     /************************************************************************************************/
-
     /**
      * ## dialogAccept
      * Se ejecuta al hacer click en "Aceptar" del diálogo de Password
@@ -181,7 +204,8 @@ class RootActivity : AppCompatActivity(),
         toast("Configurando el WIFI del dispositivo", Toast.LENGTH_LONG)
         passwordTyped = password
         service!!.apply {
-            sendConfigureWifiCmd(ssidSelected, passwordTyped)
+            //sendConfigureWifiCmd(ssidSelected, passwordTyped)
+            setDeviceModeCmd(AT_MODE_MASTER_SLAVE)
             currentState = StateMachine.WIFI_CONFIG
         }
         setScanningUI()
@@ -195,6 +219,12 @@ class RootActivity : AppCompatActivity(),
         toast("Cancelado")
     }
 
+    /**
+     * ## dialogOk
+     * Se ejecuta al hacer click en "Aceptar" en el diálogo de
+     * "Wifi correctamente configurado".
+     * Termina el fragmento de Access Points y retorna al punto inicial
+     */
     override fun dialogOk() {
         backFragment()
     }
@@ -203,161 +233,325 @@ class RootActivity : AppCompatActivity(),
 
 
 
-    /************************************************************************************************/
-    /**     CONTROL RESULTS                                                                         */
-    /************************************************************************************************/
-    private fun wifiConfigProcess(response: ByteArray, command: ReceivedCmd) {
-        Log.d(TAG, "wifiConfigProcess -> $command, RESPONSE -> ${response.toCharString()}, RESPONSE2 -> ${response.toHex()}")
 
+
+
+
+
+    /************************************************************************************************/
+    /**     CONTROL TESTER STATE MACHINE                                                            */
+    /************************************************************************************************/
+    /**
+     * ## wifiConfigProcess
+     * Máquina de estados mientras se espera la respuesta del comando AT
+     * de configuración WIFI. Está en espera de respuesta, buscando en ella
+     * WIFI GOT IP. Ejecuta el diálogo pertinente según el estado de la respuesta
+     *
+     * @param response Respuesta en Bytes
+     * @param command Tipo de respuesta recibida
+     */
+    private fun wifiConfigProcess(response: ByteArray, command: ReceivedCmd, step: Int) {
         when (command) {
-            ReceivedCmd.AT_OK -> {
-                Log.d(TAG, "AT Correctamente leído, esperando respuesta")
-                service!!.readAtResponseCmd()
-            }
-            ReceivedCmd.POLEO -> {
-                service!!.readAtResponseCmd()
-            }
             ReceivedCmd.AT_READY -> {
-                if (response.toCharString().contains("WIFI GOT IP")) {
-                    service!!.currentState = StateMachine.POLING
-                    Log.e(TAG, "Configuración correcta")
-                    runOnUiThread { setStandardUI() }
-                    val dialog = WifiOkDialog.getInstance()
-                    dialog.show(supportFragmentManager, null)
-                    return
+                when (step) {
+                    0   -> parseOkWifiConfigured(response.toCharString(), 100)
+                    100 -> parseOkWifiConfigured(response.toCharString(), 1)
+                    1   -> parseOkWifiConfigured(response.toCharString(), 101)
+                    101 -> parseOkWifiConfigured(response.toCharString(), 2)
+                    2   -> parseWifiConfigured(response.toCharString())
+                    3   -> parseOkWifiConfigured(response.toCharString(), 0)
                 }
-                if (response.toCharString().contains(AT_CMD_ERROR)) {
-                    service!!.currentState = StateMachine.POLING
-                    Log.e(TAG, "Ocurrió un error con el Wi-Fi")
-                    runOnUiThread { setStandardUI() }
-                    val dialog = WifiNokDialog.getInstance()
-                    dialog.apply {
-                        show(supportFragmentManager, null)
-                    }
-                    return
-                }
-                service!!.readAtResponseCmd()
             }
-            else -> {  }
+            else -> { service!!.readAtResponseCmd() }
         }
     }
 
+    private fun checkStatus(response: ByteArray, command: ReceivedCmd) {
+        if (cipStatusMode == -1) {
+            service!!.checkCipStatusCmd()
+            cipStatusMode = -2
+        }
+        when (command) {
+            ReceivedCmd.AT_READY -> {
+                parseStatus(response.toCharString())
+            }
+            else -> { service!!.readAtResponseCmd() }
+        }
+    }
 
+    /**
+     * ## checkModeSetted
+     * Espera confirmación del dispositivo recién configurado
+     *
+     * @param response Respuesta en Bytes
+     * @param command Tipo de respuesta recibida
+     */
+    private fun checkModeSetted(response: ByteArray, command: ReceivedCmd) {
+        when (command) {
+            ReceivedCmd.WAIT_AP     -> service!!.setDeviceModeCmd(AT_MODE_MASTER_SLAVE)
+            ReceivedCmd.AT_READY    -> {
+                service!!.apply {
+                    currentState = StateMachine.GET_CONFIG_AP
+                    getInternalWifiCmd()
+                }
+            }
+            else -> service!!.readAtResponseCmd()
+        }
+    }
+
+    private fun getSsidFromResponse(response: ByteArray, command: ReceivedCmd) {
+        when (command) {
+            ReceivedCmd.WAIT_AP     -> service!!.getInternalWifiCmd()
+            ReceivedCmd.AT_READY    -> parseSsidResponse(response.toCharString())
+            else                    -> service!!.readAtResponseCmd()
+        }
+    }
+
+    /**
+     * ## getIpFromAt
+     * Obtiene la IP asignada al dispositivo en el Access Point
+     *
+     * @param response Respuesta en Bytes
+     * @param command Tipo de respuesta recibida
+     */
     private fun getIpFromAt(response: ByteArray, command: ReceivedCmd) {
-        Log.d(TAG, "geIpFromAt -> $command, RESPONSE -> ${response.toCharString()}, RESPONSE2 -> ${response.toHex()}")
-
         when (command) {
-            ReceivedCmd.AT_OK -> {
-                Log.d(TAG, "AT Correctamente leído, esperando respuesta")
-                service!!.readAtResponseCmd()
-            }
-            ReceivedCmd.WAIT_AP -> {
-                service!!.sendIpAtCmd()
-            }
-            ReceivedCmd.POLEO -> {
-                service!!.readAtResponseCmd()
-            }
-            ReceivedCmd.AT_READY -> {
-                parseIpResponse(response.toCharString())
-                service!!.currentState = StateMachine.GET_STATUS_AP
-            }
-            else -> {  }
+            ReceivedCmd.WAIT_AP     -> service!!.sendIpAtCmd()
+            ReceivedCmd.AT_READY    -> parseIpResponse(response.toCharString())
+            else                    -> service!!.readAtResponseCmd()
         }
     }
 
+    /**
+     * ## getApStatusFromAT
+     * Obtiene el Access Point (SSID) al que está actualmente conectado,
+     * así como el RSSI que registra del Access Point
+     *
+     * @param response Respuesta en Bytes
+     * @param command Tipo de respuesta recibida
+     */
     private fun getApStatusFromAT(response: ByteArray, command: ReceivedCmd) {
-        Log.d(TAG, "getApStatusFromAT -> $command, RESPONSE -> ${response.toCharString()}, RESPONSE2 -> ${response.toHex()}")
-
         when (command) {
-            ReceivedCmd.AT_OK -> {
-                Log.d(TAG, "AT Correctamente leído, esperando respuesta")
-                service!!.readAtResponseCmd()
-            }
-            ReceivedCmd.WAIT_AP -> {
-                service!!.sendApConnectionCmd()
-            }
-            ReceivedCmd.POLEO -> {
-                service!!.readAtResponseCmd()
-            }
-            ReceivedCmd.AT_READY -> {
-                Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
-                parseApResponse(response.toCharString())
-                service!!.currentState = StateMachine.PING
-            }
-            else -> {  }
+            ReceivedCmd.WAIT_AP     -> service!!.sendApConnectionCmd()
+            ReceivedCmd.AT_READY    -> parseApResponse(response.toCharString())
+            else                    -> service!!.readAtResponseCmd()
         }
     }
 
+    /**
+     * ## getPing
+     * Ejecuta y recibe del comando AT un ping correcto,
+     * incorrecto o con error
+     *
+     * @param response Respuesta en Bytes
+     * @param command Tipo de respuesta recibida
+     */
     private fun getPing(response: ByteArray, command: ReceivedCmd) {
-        Log.d(TAG, "getPing -> $command, RESPONSE -> ${response.toCharString()}")
-
         when (command) {
-            ReceivedCmd.AT_OK -> {
-                Log.d(TAG, "AT Correctamente leído, esperando respuesta")
-                service!!.readAtResponseCmd()
-            }
-            ReceivedCmd.WAIT_AP -> {
-                service!!.sendPing("www.google.com")
-            }
-            ReceivedCmd.POLEO -> {
-                service!!.readAtResponseCmd()
-            }
-            ReceivedCmd.AT_READY -> {
-                Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
-                parsePingResponse(response.toCharString())
-                service!!.currentState = StateMachine.DATA_CONNECTION
-            }
-            else -> {  }
+            ReceivedCmd.WAIT_AP     -> service!!.sendPing("www.google.com")
+            ReceivedCmd.AT_READY    -> parsePingResponse(response.toCharString())
+            else                    -> service!!.readAtResponseCmd()
         }
     }
 
+    /**
+     * ## getDataConnection
+     * Ejecuta y gestiona la máquina de estados para obtener el estatus
+     * de la conexión de datos con el servidor configurado
+     *
+     * @param response Respuesta en Bytes
+     * @param command Tipo de respuesta recibida
+     * @param step Paso de la máquina de estados, según avanza en comandos
+     */
     private fun getDataConnection(response: ByteArray, command: ReceivedCmd, step: Int) {
-        Log.d(TAG, "getDataConnection -> $command, RESPONSE -> ${response.toCharString()}, STEP: $step, RESPONSE2 -> ${response.toHex()}")
-
         when (command) {
-            ReceivedCmd.AT_OK -> {
-                Log.d(TAG, "AT Correctamente leído, esperando respuesta")
-                service!!.readAtResponseCmd()
-            }
-            ReceivedCmd.WAIT_AP -> {
+            ReceivedCmd.AT_OK       -> service!!.readAtResponseCmd()
+            ReceivedCmd.AT_READY    -> parseDataResponse(response, step)
+            ReceivedCmd.WAIT_AP     -> {
                 when (step) {
                     0 -> service!!.closeAtSocketCmd()
                     3 -> service!!.sendStatusWifiCmd()
                 }
             }
-            ReceivedCmd.POLEO -> {
+            else -> {
                 when (step) {
-                    3 -> service!!.sendStatusWifiCmd()
-                    else -> service!!.readAtResponseCmd()
+                    3       -> service!!.sendStatusWifiCmd()
+                    else    -> service!!.readAtResponseCmd()
                 }
             }
-            ReceivedCmd.AT_READY -> {
-                Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
-                parseDataResponse(response, step)
-            }
-            ReceivedCmd.WIFI_STATUS -> {
-                if (response[4] == 0x28.toByte()) {
-                    statusAssigned = response[5] == 0x07.toByte() || response[5] == 0x08.toByte()
-                    service!!.currentState = StateMachine.POLING
-                    runOnUiThread {
-                        testerFragment.fragmentUiUpdate(5)
-                        setStandardUI()
-                    }
-                } else {
-                    Log.e(TAG, "Enviando comando de WIFI STATUS")
-                    service!!.sendStatusWifiCmd()
-                }
-            }
-            else -> {  }
         }
     }
 
 
+
+
+
+
+
+
+    /************************************************************************************************/
+    /**     PARSER                                                                                  */
+    /************************************************************************************************/
+    /**
+     * ## parseWifiConfigured
+     * Extrae el estatus de conexión obtenido por el dispositivo
+     *
+     * @param response Cadena de respuesta del comando AT
+     */
+    private fun parseWifiConfigured(response: String) {
+        if (response.contains("WIFI GOT IP")) {
+            wifiStep = 3
+            isWifiConnected = true
+            service!!.setDeviceModeCmd(AT_MODE_SLAVE)
+        } else if (response.contains(AT_CMD_ERROR)) {
+            wifiStep = 3
+            isWifiConnected = false
+            service!!.setDeviceModeCmd(AT_MODE_SLAVE)
+        }
+        service!!.readAtResponseCmd()
+    }
+
+    /**
+     * ## parseOkWifiConfigured
+     * Establece la siguiente acción partiendo de la máquina de estados de
+     * conexión Wifi, validando a cada paso que la respuesta sea un OK
+     *
+     * @param response Cadena de respuesta del comando AT
+     * @param nextStep Estado siguiente de la máquina de estados
+     */
+    private fun parseOkWifiConfigured(response: String, nextStep: Int) {
+        if (response.contains(AT_CMD_OK)) {
+            when (nextStep) {
+                0 -> {
+                    service!!.currentState = StateMachine.POLING
+                    runOnUiThread { setStandardUI() }
+                    val dialog: DialogFragment
+                            = if (isWifiConnected) WifiOkDialog.getInstance()
+                              else WifiNokDialog.getInstance()
+                    dialog.show(supportFragmentManager, null)
+                }
+                100 -> service!!.resetWifiCmd()
+                1   -> service!!.setInternalWifiCmd(ssidSelected, passwordTyped, AT_NO_SEND_SSID)
+                101 -> service!!.setAutoConnCmd(1)
+                2   -> service!!.sendConfigureWifiCmd(ssidSelected, passwordTyped)
+            }
+            wifiStep = nextStep
+        } else {
+            wifiStep = 0
+            parseOkWifiConfigured(response, wifiStep)
+        }
+    }
+
+    private fun parseStatus(response: String) {
+        if (response.contains(AT_CMD_STATUS)) {
+
+            if (response.contains("TCP")) {
+                service!!.closeAtSocketCmd()
+                return
+            }
+            cipStatusMode = response.substringAfter("$AT_CMD_STATUS:")
+                .substringBefore(AT_CMD_OK)
+                .replace("\r", "")
+                .replace("\n", "").toInt()
+            service!!.currentState = StateMachine.SET_MODE
+        }
+
+        if (response.contains(AT_CMD_CLOSED)) {
+            service!!.currentState = StateMachine.SET_MODE
+        }
+    }
+
+    /**
+     * ## parseSsidResponse
+     * Obtiene de la respuesta el access point que vive internamente en
+     * el dispositivo y lo actualiza en la pantalla
+     *
+     * @param response Cadena de respuesta del comando AT
+     */
+    private fun parseSsidResponse(response: String) {
+        if (response.contains(AT_CMD_OK)) {
+            ssidAssigned = response
+                .substringAfter(SSID_SUBSTRING_AFTER)
+                .substringBefore("\",")
+            runOnUiThread { testerFragment.fragmentUiUpdate(1) }
+            service!!.apply{
+                currentState = StateMachine.GET_STATUS_AP
+                sendApConnectionCmd()
+            }
+        } else if (response.contains(AT_CMD_ERROR)) {
+            val dialog = ConfigInfoDialog(0)
+            dialog.show(supportFragmentManager, null)
+            runOnUiThread { setStandardUI() }
+            service!!.currentState = StateMachine.POLING
+        }
+    }
+
+    /**
+     * ## parseApResponse
+     * Extrae de la respuesta AT el SSID y el RSSI del Access
+     * Point actualmente conectado. Realiza 3 reintentos en caso
+     * de que no entregue los datos, al tercer intento fallido,
+     * se considera fallido
+     *
+     * @param response Cadena de respuesta del comando AT
+     */
+    private fun parseApResponse(response: String) {
+        if (response.contains(WIFI_SUBSTRING_AP_AFTER)) {
+            rssiAssigned = response
+                .substringAfterLast(",-")
+                .substringBefore("OK")
+                .substringBefore(",0")
+                .replace("\r", "")
+                .replace("\n", "")
+            rssiAssigned = "-$rssiAssigned"
+            runOnUiThread { testerFragment.fragmentUiUpdate(2) }
+            service!!.currentState = StateMachine.GET_IP
+        } else {
+            if (retryAtResponse >= 2) {
+                retryAtResponse = 0
+                rssiAssigned = "No conectado"
+                runOnUiThread {
+                    testerFragment.fragmentUiUpdate(2)
+                    setStandardUI()
+                }
+                val dialog = ConfigInfoDialog(1)
+                dialog.show(supportFragmentManager, null)
+                service!!.currentState = StateMachine.POLING
+            } else {
+                retryAtResponse++
+                service!!.sendApConnectionCmd()
+            }
+        }
+    }
+
+    /**
+     * ## parseIpResponse
+     * Extrae de la respuesta en formato Char la dirección IP que el
+     * Access Point asignó al dispositivo. Ejecuta 3 reintentos en caso
+     * de que no entregue IP, al tercer intento fallido, se considera fallido
+     *
+     * @param response Cadena de respuesta del comando AT
+     */
     private fun parseIpResponse(response: String) {
         if (response.contains(WIFI_NOT_IP_STRING)){
-            ipAssigned = "0.0.0.0"
-            apAssigned = false
+            if (retryAtResponse >= MAX_AT_RETRY) {
+                retryAtResponse = 0
+                ipAssigned = "IP No asignada"
+                apAssigned = false
+                runOnUiThread {
+                    testerFragment.fragmentUiUpdate(3)
+                    setStandardUI()
+                }
+                val dialog = ConfigInfoDialog(2)
+                dialog.show(supportFragmentManager, null)
+                service!!.currentState = StateMachine.POLING
+            } else {
+                retryAtResponse++
+                service!!.sendIpAtCmd()
+            }
+            return
         } else {
+            retryAtResponse = 0
             var ipRead = response.substringAfter(WIFI_SUBSTRING_IP_AFTER)
             ipRead = ipRead
                 .substringBefore(WIFI_SUBSTRING_IP_BEFORE)
@@ -366,36 +560,42 @@ class RootActivity : AppCompatActivity(),
                 .replace("\r", "")
             ipAssigned = ipRead
             apAssigned = true
+            service!!.currentState = StateMachine.PING
+            runOnUiThread { testerFragment.fragmentUiUpdate(3) }
         }
-        runOnUiThread { testerFragment.fragmentUiUpdate(1) }
     }
 
-    private fun parseApResponse(response: String) {
-        if (response.contains(WIFI_SUBSTRING_AP_AFTER)) {
-            ssidAssigned = response
-                .substringAfter(WIFI_SUBSTRING_AP_AFTER)
-                .substringBefore(",")
-                .replace("\"", "")
-                .replace("\n", "")
-                .replace("\r", "")
-            rssiAssigned = response
-                .substringAfterLast(",")
-                .substringBefore("OK")
-                .replace("\r", "")
-                .replace("\n", "")
-            Log.e(TAG, "SSID: $ssidAssigned, RSSI: $rssiAssigned")
-        } else {
-            ssidAssigned = "No data"
-            rssiAssigned = "No data"
-        }
-        runOnUiThread { testerFragment.fragmentUiUpdate(2) }
-    }
-
+    /**
+     * ## parsePingResponse
+     * Analiza la respuesta obtenida por el comando AT, y determina
+     * si el PING se completó de manera exitosa o no
+     *
+     * @param response Cadena de respuesta del comando AT
+     */
     private fun parsePingResponse(response: String) {
         pingAssigned = (response.contains(PING_OK) && !response.contains(AT_CMD_ERROR))
-        runOnUiThread { testerFragment.fragmentUiUpdate(3) }
+        runOnUiThread { testerFragment.fragmentUiUpdate(4) }
+        if (pingAssigned)
+            service!!.currentState = StateMachine.DATA_CONNECTION
+        else {
+            runOnUiThread {
+                setStandardUI()
+            }
+            val dialog = ConfigInfoDialog(3)
+            dialog.show(supportFragmentManager, null)
+            service!!.currentState = StateMachine.POLING
+        }
     }
 
+    /**
+     * ## parseDataResponse
+     * Controla el flujo para validar que el servidor de datos
+     * y el dispositivo estén correctamente comunicados, basado
+     * en máquina de estados
+     *
+     * @param response Cadena de respuesta del comando AT
+     * @param step Estado actual de la máquina de estados
+     */
     private fun parseDataResponse(response: ByteArray, step: Int) {
         val restring = response.toCharString()
         when (step) {
@@ -406,25 +606,42 @@ class RootActivity : AppCompatActivity(),
             1 -> {
                 if (restring.contains(AT_CMD_CONNECT)) {
                     service!!.closeAtSocketCmd()
-                    serviceStep = 2
                     dataAssigned = true
-                } else if (restring.contains(AT_CMD_CLOSED)) {
-                    Log.d(TAG, "El socket está cerrado")
+                } else if (restring.contains(AT_CMD_CLOSED)
+                    || restring.contains(AT_CMD_ERROR)) {
                     dataAssigned = false
+                    service!!.currentState = StateMachine.POLING
+                    service!!.setDeviceModeCmd(AT_MODE_SLAVE)
+                    runOnUiThread {
+                        testerFragment.fragmentUiUpdate(5)
+                        setStandardUI()
+                    }
+                    val dialog = ConfigInfoDialog(4)
+                    dialog.show(supportFragmentManager, null)
+                    return
                 }
-                runOnUiThread { testerFragment.fragmentUiUpdate(4) }
+                serviceStep = 2
+                runOnUiThread { testerFragment.fragmentUiUpdate(5) }
             }
             2 -> {
-                if (restring.contains(AT_CMD_CLOSED)) {
-                    Log.d(TAG, "Cerrando con éxito el socket")
-                    service!!.sendStatusWifiCmd()
-                    serviceStep = 3
+                if (restring.contains(AT_CMD_CLOSED) || restring.contains(AT_CMD_ERROR)) {
+                    service!!.currentState = StateMachine.POLING
+                    service!!.setDeviceModeCmd(AT_MODE_SLAVE)
+                    serviceStep = 0
+                    runOnUiThread {
+                        setStandardUI()
+                    }
+                    val dialog = ConfigInfoDialog(100)
+                    dialog.show(supportFragmentManager, null)
                 } else {
                     service!!.closeAtSocketCmd()
                 }
             }
         }
     }
+
+
+
 
 
 
@@ -476,8 +693,6 @@ class RootActivity : AppCompatActivity(),
     override fun connectionStatus(status: ActualState,
                                   newState: ActualState,
                                   disconnectionReason: DisconnectionReason?) {
-        Log.e(TAG, "connectionStatus -> $status : $newState")
-
         // newState solo puede ser CONNECTED o DISCONNECTED
         when (newState) {
             ActualState.CONNECTED       -> connectedDevice()
@@ -495,22 +710,26 @@ class RootActivity : AppCompatActivity(),
      * @param command Tipo de respuesta recibida
      */
     override fun commandState(state: StateMachine, response: ByteArray, command: ReceivedCmd) {
-
         when (state) {
 
             // STATUS DE POLEO
             StateMachine.POLING -> {
-                // Actualizamos los access points recién se conecta al dispositivo
-                // TODO: No es necesario actualizar al dispositivo recién se conecta
-                if (!isRefreshed) service!!.sendRefreshApCmd()
-                if (command == ReceivedCmd.REFRESH_AP_OK) {
+                // Habilitamos la pantalla cuando se inicia el poleo
+                // Quiere decir que el dispositivo está listo para recibir comandos
+                if (!isRefreshed) service!!.initCmd()
+                if (command == ReceivedCmd.POLEO) {
                     isRefreshed = true
                     runOnUiThread { setStandardUI() }
                 }
+                cipStatusMode = -1
             }
 
             // STATUS DE MAC'S DE AP'S QUE EL DISPOSITIVO VE
             StateMachine.GET_AP -> {
+                if (!getApLaunched) {
+                    service!!.getMacListCmd()
+                    getApLaunched = true
+                }
                 if (command == ReceivedCmd.GET_AP) {
                     // Casteamos el resultado y navegamos al fragmento de AP's
                     deviceMacList = service!!.fromResponseGetMacList(response)
@@ -521,25 +740,21 @@ class RootActivity : AppCompatActivity(),
             }
 
             // STATUS DE CONFIGURACIÓN WIFI
-            StateMachine.WIFI_CONFIG        -> { wifiConfigProcess(response, command) }
+            StateMachine.WIFI_CONFIG        -> { wifiConfigProcess(response, command, wifiStep) }
 
             // TESTING CONNECTION MACHINE *************************************************************
-            StateMachine.GET_IP             -> { getIpFromAt(response, command) }
+            StateMachine.UNKNOWN            -> { checkStatus(response, command) }
+            StateMachine.SET_MODE           -> { checkModeSetted(response, command) }
+            StateMachine.GET_CONFIG_AP      -> { getSsidFromResponse(response, command) }
             StateMachine.GET_STATUS_AP      -> { getApStatusFromAT(response, command) }
+            StateMachine.GET_IP             -> { getIpFromAt(response, command) }
             StateMachine.PING               -> { getPing(response, command) }
             StateMachine.DATA_CONNECTION    -> { getDataConnection(response, command, serviceStep) }
             // ****************************************************************************************
 
-
-
-
-            else -> Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
+            else -> { /* Ignoramos la respuesta */ }
         }
     }
-
-
-
-
 
     /**
      * ## errorConnection
@@ -550,26 +765,19 @@ class RootActivity : AppCompatActivity(),
      * @param reason
      */
     private fun errorConnection(reason: DisconnectionReason) {
-        Log.d(TAG, "errorConnection")
         disconnectionReason = reason
         when (reason) {
             DisconnectionReason.ERROR_133, DisconnectionReason.ERROR_257 -> {
                 runOnUiThread { toast("Ocurrió un error") }
-                handler.apply {
-                    postDelayed(disconnectionRunnable, UI_TIMEOUT)
-                }
+                handler.apply { postDelayed(disconnectionRunnable, UI_TIMEOUT) }
             }
             DisconnectionReason.DISCONNECTION_OCURRED, DisconnectionReason.CONNECTION_FAILED -> {
-                runOnUiThread { toast("No se puede conectar con el dispositivo") }
-                handler.apply {
-                    postDelayed(disconnectionRunnable, UI_TIMEOUT)
-                }
+                runOnUiThread { toast("Tiempo de espera agotado, desconectando") }
+                handler.apply { postDelayed(disconnectionRunnable, UI_TIMEOUT) }
             }
             DisconnectionReason.FIRMWARE_UNSOPPORTED -> {
                 runOnUiThread { toast("Dispositivo no soportado") }
-                handler.apply {
-                    postDelayed(disconnectionRunnable, UI_TIMEOUT)
-                }
+                handler.apply { postDelayed(disconnectionRunnable, UI_TIMEOUT) }
             }
             else -> toast("Desconectando el dispositivo")
         }
@@ -582,7 +790,6 @@ class RootActivity : AppCompatActivity(),
      * algunas características necesarias para la comunicación
      */
     private fun connectedDevice() {
-        Log.d(TAG, "connectedDevice")
         runOnUiThread { toast("Dispositivo conectado") }
         service!!.discoverDeviceServices()
     }
@@ -600,7 +807,6 @@ class RootActivity : AppCompatActivity(),
 
         override fun onServiceConnected(name: ComponentName?, xservice: IBinder?) {
             // Obtenemos la instancia del servicio una vez conectado
-            Log.d(TAG, "onServiceConnected")
             service = (xservice as (BleService.LocalBinder)).getService()
             service!!.apply {
                 registerActivity(this@RootActivity)
@@ -609,13 +815,11 @@ class RootActivity : AppCompatActivity(),
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            Log.d(TAG, "onServiceDisconnected")
             service!!.stopBleService()
         }
     }
 
     private fun doBindService() {
-        Log.d(TAG, "doBindService")
         // Conecta la aplicación con el servicio
         bindService(Intent(this, BleService::class.java),
             connection, Context.BIND_AUTO_CREATE)
@@ -623,7 +827,6 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun doUnbindService() {
-        Log.d(TAG, "doUnbindService")
         if (isServiceConnected) {
             // Termina la conexión existente con el servicio
             service!!.stopBleService()
@@ -645,12 +848,13 @@ class RootActivity : AppCompatActivity(),
     companion object {
         private val TAG = RootActivity::class.java.simpleName
 
-        private var statusCountDown     = 0
-        private var waitCountDown       = 0
-        private var retryConnection     = 0
-        private var serviceStep         = 0
+        private var retryAtResponse         = 0
+        private var serviceStep             = 0
+        private var wifiStep                = 0
+        private var cipStatusMode           = -1
 
         // Timeouts de la actividad
         private const val UI_TIMEOUT        = 500L
+        private const val MAX_AT_RETRY      = 2
     }
 }

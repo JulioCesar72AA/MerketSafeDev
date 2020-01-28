@@ -5,9 +5,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.MainActivity">
+    tools:context=".activities.MainActivity"
+    android:background="@drawable/gradient_bg_azul">
 
-    <include layout="@layout/double_background"/>
+    <!-- Menu Button -->
+    <ImageView
+        android:id="@+id/ivMenu"
+        android:layout_width="@dimen/ic_back_size"
+        android:layout_height="@dimen/ic_back_size"
+        android:layout_margin="@dimen/ic_back_margin"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:layout_gravity="end"
+        android:src="@drawable/ic_menu"
+        android:contentDescription="@string/cd_back_icon"/>
 
     <!-- Contenido de la vista -->
     <TableLayout
@@ -20,29 +32,29 @@
             android:layout_height="match_parent"
             android:layout_weight=".5"
             android:gravity="center"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:layout_marginStart="@dimen/cv_margin_access_point"
             android:layout_marginEnd="@dimen/cv_margin_access_point"
             android:layout_marginTop="@dimen/cv_margin_access_point_top">
 
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="180dp"
+                android:layout_height="match_parent"
                 android:contentDescription="@string/cd_icon_router"
-                android:scaleType="centerInside"
                 android:paddingStart="@dimen/cv_access_margin_start"
                 android:paddingEnd="@dimen/cv_access_margin_end"
-                android:src="@drawable/ic_bluetooth"
-                android:tint="@android:color/white"/>
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_img_scaneo_refri"
+                android:tint="@android:color/white" />
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
+                android:layout_height="wrap_content"
                 android:fontFamily="@font/rubik_bold"
-                android:text="@string/tv_scan"
+                android:gravity="start|center_vertical"
                 android:lineHeight="@dimen/tv_lineheight_30"
+                android:text="@string/tv_scan"
                 android:textColor="@color/colortextwhite"
                 android:textSize="@dimen/tv_textsize_32"
                 tools:ignore="UnusedAttribute" />

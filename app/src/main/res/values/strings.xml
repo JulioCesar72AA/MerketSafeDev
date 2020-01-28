@@ -1,7 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">CIR Wireless</string>
-    <string name="action_settings">Settings</string>
 
+    <!-- MENU's -->
+    <string name="action_update">Actualizar módulo Wifi</string>
+    <string name="action_info">Información</string>
 
     <!-- TOAST's -->
     <string name="tst_scanning" tools:ignore="Typos">Espere un momento… Escaneando</string>
@@ -37,6 +39,7 @@
     <string name="tv_status_access">STATUS</string>
     <string name="tv_wifi_nok">No se pudo configurar el Wifi, intente nuevamente</string>
     <string name="tv_wifi_ok">El Wifi se configuró correctamente</string>
+    <string name="tv_version">Versión: %s</string>
 
     <!-- CONTENT DESCRIPTION's -->
     <string name="cd_bluetooth_icon">Bluetooth</string>
@@ -47,6 +50,14 @@
     <string name="cd_icon_dispositivos">Dispositivo</string>
     <string name="cd_back_icon">Volver</string>
     <string name="cd_password_icon">Password</string>
+
+    <!-- ERROR MESSAGE's -->
+    <string name="error_no_communication">Ocurrió un error de comunicación con el dispositivo, intente nuevamente</string>
+    <string name="error_no_ap">No se detecta el Access Point</string>
+    <string name="error_no_ip">No se ha asignado dirección IP. Revisa la configuración de tu módem</string>
+    <string name="error_no_ping">Conectado, pero sin conexión a internet</string>
+    <string name="error_no_data">No hay conexión con el servidor de datos</string>
+    <string name="error_no_error">Configuración correcta</string>
 
 
 </resources>

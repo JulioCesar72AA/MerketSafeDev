@@ -22,7 +22,6 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        Log.d(TAG, "onResume")
         if (adapter.isEnabled) {
             Handler().postDelayed({
                 startActivity(Intent(this, MainActivity::class.java))
@@ -40,12 +39,7 @@ class SplashActivity : AppCompatActivity() {
     /**     BLUETOOTH                                                                               */
     /************************************************************************************************/
     private fun enableBle() {
-        Log.d(TAG, "enableBle")
-
-        if (adapter.isEnabled) {
-            Log.i(TAG, "El bluetooth ya está encendido")
-        } else {
-            Log.i(TAG, "Encendiendo el bluetooth")
+        if (!adapter.isEnabled) {
             val turnOn = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             startActivityForResult(turnOn, 0)
         }

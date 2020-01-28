@@ -28,6 +28,7 @@ const val WIFI_NOT_IP_STRING                = "+CIFSR:STAIP,\"0.0.0.0\""
 const val WIFI_SUBSTRING_IP_AFTER           = "+CIFSR:STAIP,"
 const val WIFI_SUBSTRING_IP_BEFORE          = "+CIFSR:STAMAC"
 const val WIFI_SUBSTRING_AP_AFTER           = "+CWJAP:"
+const val SSID_SUBSTRING_AFTER              = "+CWSAP:\"ID_"
 
 const val PING_OK                           = "+PING:"
 
@@ -35,3 +36,9 @@ const val AT_CMD_OK                         = "OK"
 const val AT_CMD_CLOSED                     = "CLOSED"
 const val AT_CMD_ERROR                      = "ERROR"
 const val AT_CMD_CONNECT                    = "CONNECT"
+const val AT_CMD_STATUS                     = "STATUS"
+
+const val AT_MODE_MASTER_SLAVE              = 3
+const val AT_MODE_SLAVE                     = 1
+const val AT_NO_SEND_SSID                   = 1
+const val AT_SEND_SSID                      = 0

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.InfoActivity"
+    android:background="@drawable/gradient_bg_azul">
+
+    <!-- Back Button -->
+    <ImageView
+        android:id="@+id/ivBackInfo"
+        android:layout_width="@dimen/ic_back_size"
+        android:layout_height="@dimen/ic_back_size"
+        android:layout_margin="@dimen/ic_back_margin"
+        android:src="@drawable/ic_back"
+        android:contentDescription="@string/cd_back_icon" />
+
+    <ImageView
+        android:id="@+id/ivLogo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:padding="@dimen/cv_margin"
+        android:src="@drawable/logo_splashscreen"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/ivLogo"
+            android:layout_margin="@dimen/cv_margin"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvVersion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:fontFamily="@font/rubik_medium"
+                android:textSize="@dimen/tv_textsize_32"
+                android:textColor="@android:color/white"
+                tools:text="Versión: 1.1.1"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:fontFamily="@font/rubik_light"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/tv_textsize18"
+                android:text="SOFTEL S.A. de C.V."/>
+
+        </LinearLayout>
+
+</RelativeLayout>

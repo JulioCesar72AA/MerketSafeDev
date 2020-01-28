@@ -15,118 +15,83 @@ object CommandUtils {
     private val AT_READ             = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x34)
 
 
-    fun refreshAccessPointsCmd(): ByteArray {
-        return REFRESH_AP + getCrc16(REFRESH_AP)
-    }
+    fun refreshAccessPointsCmd(): ByteArray
+            = REFRESH_AP + getCrc16(REFRESH_AP)
 
-    fun getAccessPointsCmd(): ByteArray {
-        return GET_AP_MAC_LIST + getCrc16(GET_AP_MAC_LIST)
-    }
+    fun getAccessPointsCmd(): ByteArray
+            = GET_AP_MAC_LIST + getCrc16(GET_AP_MAC_LIST)
 
-    fun getWifiStatusCmd(): ByteArray {
-        return WIFI_STATUS + getCrc16(WIFI_STATUS)
-    }
+    fun getWifiStatusCmd(): ByteArray
+            = WIFI_STATUS + getCrc16(WIFI_STATUS)
 
     fun setSsidCmd(ssid: String): ByteArray {
-        // Iniciamos el cálculo del tamaño, así como la conversión a bytes del SSID
         val nameBytes = ssid.toByteArray()
-        val size = SET_SSID.size + nameBytes.size + 2
-        var cmd = SET_SSID + nameBytes
-        cmd[3] = size.toByte()
-
-        // Calculamos el CRC del comando completo
-        val crc = getCrc16(cmd)
-
-        // Lo concatenamos con el comando final
-        cmd += crc
-        return cmd
+        return getCompleteCommand(SET_SSID, nameBytes)
     }
 
     fun setPasswordCmd(password: String): ByteArray {
-        // Iniciamos el cálculo del tamaño, así como la conversión a bytes del password
         val passBytes = password.toByteArray()
-        val size = SET_PASSWORD.size + passBytes.size + 2
-        var cmd = SET_PASSWORD + passBytes
-        cmd[3] = size.toByte()
-
-        // Calculamos el CRC del comando completo
-        val crc = getCrc16(cmd)
-
-        // Lo concatenamos en el comando final
-        cmd += crc
-        return cmd
+        return getCompleteCommand(SET_PASSWORD, passBytes)
     }
 
     fun configureAccessPointCmd(ssid: String, password: String): ByteArray {
         val atCommand = "AT+CWJAP=\"$ssid\",\"$password\"".toByteArray()
-        val size = atCommand.size + 8
-        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
-        cmd[3] = size.toByte()
-
-        val crc = getCrc16(cmd)
-        cmd += crc
-
-        return cmd
+        return getCompleteCommand(AT_GENERIC, atCommand)
     }
 
     fun checkIpAddressCmd(): ByteArray {
         val atCommand = "AT+CIFSR".toByteArray()
-        val size = atCommand.size + 8
-        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
-        cmd[3] = size.toByte()
-
-        val crc = getCrc16(cmd)
-        cmd += crc
-
-        return cmd
+        return getCompleteCommand(AT_GENERIC, atCommand)
     }
 
     fun checkApConnectionCmd(): ByteArray {
         val atCommand = "AT+CWJAP?".toByteArray()
-        val size = atCommand.size + 8
-        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
-        cmd[3] = size.toByte()
-
-        val crc = getCrc16(cmd)
-        cmd += crc
-
-        return cmd
+        return getCompleteCommand(AT_GENERIC, atCommand)
     }
 
     fun pingApCmd(domain: String): ByteArray {
         val atCommand = "AT+PING=\"$domain\"".toByteArray()
-        val size = atCommand.size + 8
-        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
-        cmd[3] = size.toByte()
-
-        val crc = getCrc16(cmd)
-        cmd += crc
-
-        return cmd
+        return getCompleteCommand(AT_GENERIC, atCommand)
     }
 
     fun closeSocketCmd(): ByteArray {
         val atCommand = "AT+CIPCLOSE".toByteArray()
-        val size = atCommand.size + 8
-        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
-        cmd[3] = size.toByte()
-
-        val crc = getCrc16(cmd)
-        cmd += crc
-
-        return cmd
+        return getCompleteCommand(AT_GENERIC, atCommand)
     }
 
     fun openSocketCmd(server: String, port: String): ByteArray {
         val atCommand = "AT+CIPSTART=\"TCP\",\"$server\",$port".toByteArray()
-        val size = atCommand.size + 8
-        var cmd = AT_GENERIC + atCommand + 0x00.toByte()
-        cmd[3] = size.toByte()
+        return getCompleteCommand(AT_GENERIC, atCommand)
+    }
 
-        val crc = getCrc16(cmd)
-        cmd += crc
+    fun setDeviceWifiModeCmd(mode: Int): ByteArray {
+        val atCommand = "AT+CWMODE=$mode".toByteArray()
+        return getCompleteCommand(AT_GENERIC, atCommand)
+    }
 
-        return cmd
+    fun setInternalNameAPCmd(ssid: String, password: String, flag: Int): ByteArray {
+        val atCommand = "AT+CWSAP=\"ID_$ssid\",\"$password\",6,0,4,$flag".toByteArray()
+        return getCompleteCommand(AT_GENERIC, atCommand)
+    }
+
+    fun getInternalNameAPCmd(): ByteArray {
+        val atCommand = "AT+CWSAP?".toByteArray()
+        return getCompleteCommand(AT_GENERIC, atCommand)
+    }
+
+    fun setAutoConnCmd(enable: Int): ByteArray {
+        val atCommand = "AT+CWAUTOCONN=$enable".toByteArray()
+        return getCompleteCommand(AT_GENERIC, atCommand)
+    }
+
+    fun resetWifiCmd(): ByteArray {
+        val atCommand = "AT+RST".toByteArray()
+        return getCompleteCommand(AT_GENERIC, atCommand)
+    }
+
+    fun getWirelessFirmwareCmd(): ByteArray {
+        val atCommand = "AT+GMR".toByteArray()
+        return getCompleteCommand(AT_GENERIC, atCommand)
     }
 
     fun readAtCmd(): ByteArray {
@@ -134,10 +99,33 @@ object CommandUtils {
     }
 
 
+    fun initialCmd(): ByteArray {
+        return getCompleteCommand(AT_GENERIC, "S_T_R_T".toByteArray())
+    }
+
+    fun terminateCmd(): ByteArray {
+        return getCompleteCommand(AT_GENERIC, "E_N_D".toByteArray())
+    }
+
+    fun checkCipStatusCmd(): ByteArray {
+        return getCompleteCommand(AT_GENERIC, "AT+CIPSTATUS".toByteArray())
+    }
+
 
     /************************************************************************************************/
     /**      CRC                                                                                    */
     /************************************************************************************************/
+    private fun getCompleteCommand(startArray: ByteArray, atCmd: ByteArray): ByteArray {
+        val size = if (startArray.contentEquals(AT_GENERIC)) atCmd.size + 8 else atCmd.size + 7
+        var cmd = startArray + atCmd + 0x00.toByte()
+        cmd[3] = size.toByte()
+
+        val crc = getCrc16(cmd)
+        cmd += crc
+
+        return cmd
+    }
+
     private fun getCrc16(buffer: ByteArray): ByteArray {
         var crc = 0
         for (element in buffer) {

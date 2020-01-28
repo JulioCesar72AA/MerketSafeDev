@@ -24,8 +24,8 @@
 
     <!-- TEXT VIEW's -->
     <dimen name="tv_lineheight_30">30dp</dimen>
-    <dimen name="tv_textsize_32">30dp</dimen>
-    <dimen name="tv_textsize_20">20dp</dimen>
+    <dimen name="tv_textsize_32">28dp</dimen>
+    <dimen name="tv_textsize_20">18dp</dimen>
     <dimen name="tv_padding_25">20dp</dimen>
     <dimen name="tv_lock_icon">100dp</dimen>
     <dimen name="tv_textsize18">18dp</dimen>

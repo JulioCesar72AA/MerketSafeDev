@@ -25,7 +25,6 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
     private lateinit var apChecked          : ImageView
     private lateinit var internetChecked    : ImageView
     private lateinit var dataChecked        : ImageView
-    private lateinit var statusChecked      : ImageView
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -50,7 +49,6 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
             apChecked       = findViewById(R.id.ivCheckAp)
             internetChecked = findViewById(R.id.ivCheckInternet)
             dataChecked     = findViewById(R.id.ivCheckData)
-            statusChecked   = findViewById(R.id.ivCheckStatus)
         }
 
         initUIData()
@@ -67,9 +65,14 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
             rssiAssigned = ""
             pingAssigned = false
             apAssigned = false
+            dataAssigned = false
         }
     }
 
+    private fun setAccessPointUI() {
+        tvSsidResult.text   = root.ssidAssigned
+        tvRssiResult.text   = root.rssiAssigned
+    }
 
     private fun setIpAddressUI() {
         tvIpResult.text     = root.ipAssigned
@@ -77,11 +80,6 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
             resources.getDrawable(R.drawable.ic_ok, null)
         else resources.getDrawable(R.drawable.ic_nok, null)
         apChecked.setImageDrawable(iconAp)
-    }
-
-    private fun setAccessPointUI() {
-        tvSsidResult.text   = root.ssidAssigned
-        tvRssiResult.text   = root.rssiAssigned
     }
 
     private fun setPingUI() {
@@ -96,13 +94,6 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
             resources.getDrawable(R.drawable.ic_ok, null)
         else resources.getDrawable(R.drawable.ic_nok, null)
         dataChecked.setImageDrawable(iconData)
-    }
-
-    private fun setStatusUI() {
-        val iconData = if (root.statusAssigned)
-            resources.getDrawable(R.drawable.ic_ok, null)
-        else resources.getDrawable(R.drawable.ic_nok, null)
-        statusChecked.setImageDrawable(iconData)
     }
 
     private fun initUIData() {
@@ -133,11 +124,11 @@ class TesterFragment: Fragment(), View.OnClickListener, FragmentUiUpdate {
     override fun fragmentUiUpdate(state: Int) {
         when (state) {
             0 -> initUIData()
-            1 -> setIpAddressUI()
-            2 -> setAccessPointUI()
-            3 -> setPingUI()
-            4 -> setDataUI()
-            5 -> setStatusUI()
+            1 -> tvSsidResult.text = root.ssidAssigned
+            2 -> tvRssiResult.text = root.rssiAssigned
+            3 -> setIpAddressUI()
+            4 -> setPingUI()
+            5 -> setDataUI()
         }
     }
 
