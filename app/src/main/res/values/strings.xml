@@ -2,7 +2,7 @@
     <string name="app_name">CIR Wireless</string>
 
     <!-- MENU's -->
-    <string name="action_update">Actualizar Firmware</string>
+    <string name="action_update">Actualizar módulo Wifi</string>
     <string name="action_info">Información</string>
 
     <!-- TOAST's -->
@@ -50,7 +50,6 @@
     <string name="cd_icon_dispositivos">Dispositivo</string>
     <string name="cd_back_icon">Volver</string>
     <string name="cd_password_icon">Password</string>
-
 
     <!-- ERROR MESSAGE's -->
     <string name="error_no_communication">Ocurrió un error de comunicación con el dispositivo, intente nuevamente</string>

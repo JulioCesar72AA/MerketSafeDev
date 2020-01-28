@@ -26,6 +26,7 @@ class ConfigInfoDialog(var code: Int): DialogFragment(), View.OnClickListener {
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
+    /************************************************************************************************/
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         root        = (activity!! as RootActivity)
@@ -34,7 +35,6 @@ class ConfigInfoDialog(var code: Int): DialogFragment(), View.OnClickListener {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        Log.d(TAG, "onCreateView -------------------------------------------------------------")
         val view = inflater.inflate(R.layout.pop_up_config_error, container, false)
         view.apply {
             ivIcon  = findViewById(R.id.ivApConfig)

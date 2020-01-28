@@ -12,13 +12,11 @@ import android.os.IBinder
 import android.util.Log
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.*
-import mx.softel.cirwirelesslib.extensions.toCharString
 import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.utils.CommandUtils
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
-
 
 class BleService: Service() {
 
@@ -591,8 +589,6 @@ class BleService: Service() {
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
 
-            Log.e(TAG, "CONNECTION: $status -> $newState")
-
             // Si existe desconexión...
             if (newState == 0) {
                 val reason = disconnectionReasonCode(status)
@@ -604,7 +600,6 @@ class BleService: Service() {
 
             // Si ya se encuentra conectado...
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                Log.e(TAG, "Conectado!!!!!!")
                 activity.connectionStatus(actualState(status),
                                           actualState(newState),
                         null)
@@ -637,7 +632,6 @@ class BleService: Service() {
         override fun onCharacteristicWrite(gatt: BluetoothGatt?,
                                            characteristic: BluetoothGattCharacteristic?,
                                            status: Int) {
-            Log.e(TAG, "Escribiendo: ${characteristic!!.value.toHex()} -> ${characteristic.value.toCharString()}")
             //super.onCharacteristicWrite(gatt, characteristic, status)
         }
 
@@ -669,7 +663,6 @@ class BleService: Service() {
             //super.onCharacteristicChanged(gatt, characteristic)
             if (characteristic == null) return
 
-            Log.e(TAG, "RESPUESTA: ${characteristic.value.toHex()} -> StateMachine: $currentState")
             activity.commandState(currentState,
                                   characteristic.value,
                                   receivedCommand(characteristic.value))

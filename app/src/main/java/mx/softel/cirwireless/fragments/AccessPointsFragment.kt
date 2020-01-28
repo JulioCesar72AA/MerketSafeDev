@@ -7,7 +7,6 @@ import android.content.IntentFilter
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,9 +20,9 @@ import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwirelesslib.enums.StateMachine
 
 class AccessPointsFragment: Fragment(),
-    AdapterView.OnItemClickListener,
-    SwipeRefreshLayout.OnRefreshListener,
-    View.OnClickListener {
+                            AdapterView.OnItemClickListener,
+                            SwipeRefreshLayout.OnRefreshListener,
+                            View.OnClickListener {
 
     // ROOT MANAGERS
     private lateinit var root           : RootActivity
@@ -79,11 +78,6 @@ class AccessPointsFragment: Fragment(),
         return view
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(TAG, "onDestroy")
-    }
-
     override fun onRefresh() {
         root.setScanningUI()
         root.service!!.apply {
@@ -116,13 +110,10 @@ class AccessPointsFragment: Fragment(),
 
             // Rellena la lista para mostrar en la pantalla estándar
             for (data in wifiResults) {
-                Log.d(TAG, "${data.SSID} - ${data.BSSID}")
-
                 // Establecemos una nueva lista de macs validadas por el dispositivo
                 if (root.deviceMacList == null) return
                 for (mac in root.deviceMacList!!) {
                     if (data.BSSID == mac) {
-                        Log.d(TAG, "macList: ${data.SSID} -> Mac: $mac")
                         if (!data.SSID.isNullOrEmpty()) apMacList.add(data.SSID)
                     }
                 }

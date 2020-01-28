@@ -1,7 +1,6 @@
 package mx.softel.cirwireless.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import android.widget.ImageView
@@ -13,7 +12,6 @@ import mx.softel.cirwireless.R
 import mx.softel.cirwireless.activities.RootActivity
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.interfaces.FragmentNavigation
-import mx.softel.cirwirelesslib.constants.AT_MODE_MASTER_SLAVE
 import mx.softel.cirwirelesslib.enums.DisconnectionReason
 import mx.softel.cirwirelesslib.enums.StateMachine
 
@@ -45,7 +43,6 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        Log.d(TAG, "onCreateView")
         val view = inflater.inflate(R.layout.fragment_main, container, false)
 
         view.apply {
@@ -58,14 +55,10 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
 
             // Asignamos el texto de los argumentos recibidos
             tvMac.text      = root.bleMac
+            ivMenu.visibility = View.GONE
         }
         setOnClick()
         return view
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(TAG, "onDestroy")
     }
 
     /**

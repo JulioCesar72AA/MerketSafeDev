@@ -6,10 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
-import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.scanning_mask.*
@@ -26,16 +24,13 @@ import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.toCharString
-import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.services.BleService
-import java.lang.StringBuilder
-
 
 class RootActivity : AppCompatActivity(),
-    FragmentNavigation,
-    PasswordDialog.OnDialogClickListener,
-    WifiOkDialog.OnWifiDialogListener,
-    BleService.OnBleConnection {
+                     FragmentNavigation,
+                     PasswordDialog.OnDialogClickListener,
+                     WifiOkDialog.OnWifiDialogListener,
+                     BleService.OnBleConnection {
 
     // BLUETOOTH DEVICE
     internal lateinit var bleDevice     : BluetoothDevice
@@ -231,7 +226,6 @@ class RootActivity : AppCompatActivity(),
      * Termina el fragmento de Access Points y retorna al punto inicial
      */
     override fun dialogOk() {
-        //service!!.terminateCmd()
         backFragment()
     }
 
@@ -257,7 +251,6 @@ class RootActivity : AppCompatActivity(),
      * @param command Tipo de respuesta recibida
      */
     private fun wifiConfigProcess(response: ByteArray, command: ReceivedCmd, step: Int) {
-        Log.e(TAG, "wifiConfigProcess $command -> ${response.toHex()} -> $step -> ${response.toCharString()}")
         when (command) {
             ReceivedCmd.AT_READY -> {
                 when (step) {
@@ -274,7 +267,6 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun checkStatus(response: ByteArray, command: ReceivedCmd) {
-        Log.d(TAG, "Respuesta: ${response.toCharString()}")
         if (cipStatusMode == -1) {
             service!!.checkCipStatusCmd()
             cipStatusMode = -2
@@ -296,31 +288,22 @@ class RootActivity : AppCompatActivity(),
      */
     private fun checkModeSetted(response: ByteArray, command: ReceivedCmd) {
         when (command) {
-            ReceivedCmd.WAIT_AP -> {
-                service!!.setDeviceModeCmd(AT_MODE_MASTER_SLAVE)
-            }
-            ReceivedCmd.AT_READY -> {
-                Log.e(TAG, "Se configuró el modo 3: ${response.toCharString()}")
+            ReceivedCmd.WAIT_AP     -> service!!.setDeviceModeCmd(AT_MODE_MASTER_SLAVE)
+            ReceivedCmd.AT_READY    -> {
                 service!!.apply {
                     currentState = StateMachine.GET_CONFIG_AP
                     getInternalWifiCmd()
                 }
             }
-            else -> { service!!.readAtResponseCmd() }
+            else -> service!!.readAtResponseCmd()
         }
     }
 
     private fun getSsidFromResponse(response: ByteArray, command: ReceivedCmd) {
-        Log.e(TAG, "${service!!.currentState} RESPUESTA -> ${response.toCharString()}")
         when (command) {
-            ReceivedCmd.WAIT_AP -> {
-                service!!.getInternalWifiCmd()
-            }
-            ReceivedCmd.AT_READY -> {
-                Log.e(TAG, "Obteniendo AP configurado: ${response.toCharString()}")
-                parseSsidResponse(response.toCharString())
-            }
-            else -> { service!!.readAtResponseCmd() }
+            ReceivedCmd.WAIT_AP     -> service!!.getInternalWifiCmd()
+            ReceivedCmd.AT_READY    -> parseSsidResponse(response.toCharString())
+            else                    -> service!!.readAtResponseCmd()
         }
     }
 
@@ -332,15 +315,10 @@ class RootActivity : AppCompatActivity(),
      * @param command Tipo de respuesta recibida
      */
     private fun getIpFromAt(response: ByteArray, command: ReceivedCmd) {
-        Log.e(TAG, "${service!!.currentState} RESPUESTA -> ${response.toCharString()}")
         when (command) {
-            ReceivedCmd.WAIT_AP -> {
-                service!!.sendIpAtCmd()
-            }
-            ReceivedCmd.AT_READY -> {
-                parseIpResponse(response.toCharString())
-            }
-            else -> { service!!.readAtResponseCmd() }
+            ReceivedCmd.WAIT_AP     -> service!!.sendIpAtCmd()
+            ReceivedCmd.AT_READY    -> parseIpResponse(response.toCharString())
+            else                    -> service!!.readAtResponseCmd()
         }
     }
 
@@ -353,15 +331,10 @@ class RootActivity : AppCompatActivity(),
      * @param command Tipo de respuesta recibida
      */
     private fun getApStatusFromAT(response: ByteArray, command: ReceivedCmd) {
-        Log.e(TAG, "${service!!.currentState} RESPUESTA -> ${response.toCharString()}")
         when (command) {
-            ReceivedCmd.WAIT_AP -> {
-                service!!.sendApConnectionCmd()
-            }
-            ReceivedCmd.AT_READY -> {
-                parseApResponse(response.toCharString())
-            }
-            else -> { service!!.readAtResponseCmd() }
+            ReceivedCmd.WAIT_AP     -> service!!.sendApConnectionCmd()
+            ReceivedCmd.AT_READY    -> parseApResponse(response.toCharString())
+            else                    -> service!!.readAtResponseCmd()
         }
     }
 
@@ -374,16 +347,10 @@ class RootActivity : AppCompatActivity(),
      * @param command Tipo de respuesta recibida
      */
     private fun getPing(response: ByteArray, command: ReceivedCmd) {
-        Log.e(TAG, "${service!!.currentState} RESPUESTA -> ${response.toCharString()}")
         when (command) {
-            ReceivedCmd.WAIT_AP -> {
-                service!!.sendPing("www.google.com")
-            }
-            ReceivedCmd.AT_READY -> {
-                Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
-                parsePingResponse(response.toCharString())
-            }
-            else -> { service!!.readAtResponseCmd() }
+            ReceivedCmd.WAIT_AP     -> service!!.sendPing("www.google.com")
+            ReceivedCmd.AT_READY    -> parsePingResponse(response.toCharString())
+            else                    -> service!!.readAtResponseCmd()
         }
     }
 
@@ -397,26 +364,21 @@ class RootActivity : AppCompatActivity(),
      * @param step Paso de la máquina de estados, según avanza en comandos
      */
     private fun getDataConnection(response: ByteArray, command: ReceivedCmd, step: Int) {
-        Log.e(TAG, "${service!!.currentState} RESPUESTA -> ${response.toCharString()}")
         when (command) {
-            ReceivedCmd.AT_OK -> {
-                Log.d(TAG, "AT Correctamente leído, esperando respuesta")
-                service!!.readAtResponseCmd()
-            }
-            ReceivedCmd.WAIT_AP -> {
+            ReceivedCmd.AT_OK       -> service!!.readAtResponseCmd()
+            ReceivedCmd.AT_READY    -> parseDataResponse(response, step)
+            ReceivedCmd.WAIT_AP     -> {
                 when (step) {
                     0 -> service!!.closeAtSocketCmd()
                     3 -> service!!.sendStatusWifiCmd()
                 }
             }
-            ReceivedCmd.AT_READY -> {
-                Log.d(TAG, "MENSAJE RECIBIDO CORRECTAMENTE: ${response.toCharString()}")
-                parseDataResponse(response, step)
+            else -> {
+                when (step) {
+                    3       -> service!!.sendStatusWifiCmd()
+                    else    -> service!!.readAtResponseCmd()
+                }
             }
-            else -> { when (step) {
-                3 -> service!!.sendStatusWifiCmd()
-                else -> service!!.readAtResponseCmd()
-            } }
         }
     }
 
@@ -477,7 +439,6 @@ class RootActivity : AppCompatActivity(),
         } else {
             wifiStep = 0
             parseOkWifiConfigured(response, wifiStep)
-            Log.e(TAG, "Ocurrió un error con $nextStep")
         }
     }
 
@@ -508,9 +469,9 @@ class RootActivity : AppCompatActivity(),
      * @param response Cadena de respuesta del comando AT
      */
     private fun parseSsidResponse(response: String) {
-        Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
         if (response.contains(AT_CMD_OK)) {
-            ssidAssigned = response.substringAfter(SSID_SUBSTRING_AFTER)
+            ssidAssigned = response
+                .substringAfter(SSID_SUBSTRING_AFTER)
                 .substringBefore("\",")
             runOnUiThread { testerFragment.fragmentUiUpdate(1) }
             service!!.apply{
@@ -535,7 +496,6 @@ class RootActivity : AppCompatActivity(),
      * @param response Cadena de respuesta del comando AT
      */
     private fun parseApResponse(response: String) {
-        Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
         if (response.contains(WIFI_SUBSTRING_AP_AFTER)) {
             rssiAssigned = response
                 .substringAfterLast(",-")
@@ -544,7 +504,6 @@ class RootActivity : AppCompatActivity(),
                 .replace("\r", "")
                 .replace("\n", "")
             rssiAssigned = "-$rssiAssigned"
-            Log.e(TAG, "SSID: $ssidAssigned, RSSI: $rssiAssigned")
             runOnUiThread { testerFragment.fragmentUiUpdate(2) }
             service!!.currentState = StateMachine.GET_IP
         } else {
@@ -574,7 +533,6 @@ class RootActivity : AppCompatActivity(),
      * @param response Cadena de respuesta del comando AT
      */
     private fun parseIpResponse(response: String) {
-        Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
         if (response.contains(WIFI_NOT_IP_STRING)){
             if (retryAtResponse >= MAX_AT_RETRY) {
                 retryAtResponse = 0
@@ -615,7 +573,6 @@ class RootActivity : AppCompatActivity(),
      * @param response Cadena de respuesta del comando AT
      */
     private fun parsePingResponse(response: String) {
-        Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
         pingAssigned = (response.contains(PING_OK) && !response.contains(AT_CMD_ERROR))
         runOnUiThread { testerFragment.fragmentUiUpdate(4) }
         if (pingAssigned)
@@ -640,7 +597,6 @@ class RootActivity : AppCompatActivity(),
      * @param step Estado actual de la máquina de estados
      */
     private fun parseDataResponse(response: ByteArray, step: Int) {
-        Log.e(TAG, "${service!!.currentState} RESPUESTA -> $response")
         val restring = response.toCharString()
         when (step) {
             0 -> {
@@ -653,7 +609,6 @@ class RootActivity : AppCompatActivity(),
                     dataAssigned = true
                 } else if (restring.contains(AT_CMD_CLOSED)
                     || restring.contains(AT_CMD_ERROR)) {
-                    Log.d(TAG, "El socket está cerrado/error")
                     dataAssigned = false
                     service!!.currentState = StateMachine.POLING
                     service!!.setDeviceModeCmd(AT_MODE_SLAVE)
@@ -666,12 +621,9 @@ class RootActivity : AppCompatActivity(),
                     return
                 }
                 serviceStep = 2
-                runOnUiThread {
-                    testerFragment.fragmentUiUpdate(5)
-                }
+                runOnUiThread { testerFragment.fragmentUiUpdate(5) }
             }
             2 -> {
-                Log.d(TAG, "Cerrando el socket")
                 if (restring.contains(AT_CMD_CLOSED) || restring.contains(AT_CMD_ERROR)) {
                     service!!.currentState = StateMachine.POLING
                     service!!.setDeviceModeCmd(AT_MODE_SLAVE)
@@ -741,8 +693,6 @@ class RootActivity : AppCompatActivity(),
     override fun connectionStatus(status: ActualState,
                                   newState: ActualState,
                                   disconnectionReason: DisconnectionReason?) {
-        Log.e(TAG, "connectionStatus -> $status : $newState")
-
         // newState solo puede ser CONNECTED o DISCONNECTED
         when (newState) {
             ActualState.CONNECTED       -> connectedDevice()
@@ -760,7 +710,6 @@ class RootActivity : AppCompatActivity(),
      * @param command Tipo de respuesta recibida
      */
     override fun commandState(state: StateMachine, response: ByteArray, command: ReceivedCmd) {
-
         when (state) {
 
             // STATUS DE POLEO
@@ -803,7 +752,7 @@ class RootActivity : AppCompatActivity(),
             StateMachine.DATA_CONNECTION    -> { getDataConnection(response, command, serviceStep) }
             // ****************************************************************************************
 
-            else -> Log.e(TAG, "STATE -> $state, RESPONSE -> ${response.toHex()}, COMMAND -> $command")
+            else -> { /* Ignoramos la respuesta */ }
         }
     }
 
@@ -816,26 +765,19 @@ class RootActivity : AppCompatActivity(),
      * @param reason
      */
     private fun errorConnection(reason: DisconnectionReason) {
-        Log.d(TAG, "errorConnection")
         disconnectionReason = reason
         when (reason) {
             DisconnectionReason.ERROR_133, DisconnectionReason.ERROR_257 -> {
                 runOnUiThread { toast("Ocurrió un error") }
-                handler.apply {
-                    postDelayed(disconnectionRunnable, UI_TIMEOUT)
-                }
+                handler.apply { postDelayed(disconnectionRunnable, UI_TIMEOUT) }
             }
             DisconnectionReason.DISCONNECTION_OCURRED, DisconnectionReason.CONNECTION_FAILED -> {
                 runOnUiThread { toast("Tiempo de espera agotado, desconectando") }
-                handler.apply {
-                    postDelayed(disconnectionRunnable, UI_TIMEOUT)
-                }
+                handler.apply { postDelayed(disconnectionRunnable, UI_TIMEOUT) }
             }
             DisconnectionReason.FIRMWARE_UNSOPPORTED -> {
                 runOnUiThread { toast("Dispositivo no soportado") }
-                handler.apply {
-                    postDelayed(disconnectionRunnable, UI_TIMEOUT)
-                }
+                handler.apply { postDelayed(disconnectionRunnable, UI_TIMEOUT) }
             }
             else -> toast("Desconectando el dispositivo")
         }
@@ -848,7 +790,6 @@ class RootActivity : AppCompatActivity(),
      * algunas características necesarias para la comunicación
      */
     private fun connectedDevice() {
-        Log.d(TAG, "connectedDevice")
         runOnUiThread { toast("Dispositivo conectado") }
         service!!.discoverDeviceServices()
     }
@@ -866,7 +807,6 @@ class RootActivity : AppCompatActivity(),
 
         override fun onServiceConnected(name: ComponentName?, xservice: IBinder?) {
             // Obtenemos la instancia del servicio una vez conectado
-            Log.d(TAG, "onServiceConnected")
             service = (xservice as (BleService.LocalBinder)).getService()
             service!!.apply {
                 registerActivity(this@RootActivity)
@@ -875,13 +815,11 @@ class RootActivity : AppCompatActivity(),
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            Log.d(TAG, "onServiceDisconnected")
             service!!.stopBleService()
         }
     }
 
     private fun doBindService() {
-        Log.d(TAG, "doBindService")
         // Conecta la aplicación con el servicio
         bindService(Intent(this, BleService::class.java),
             connection, Context.BIND_AUTO_CREATE)
@@ -889,7 +827,6 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun doUnbindService() {
-        Log.d(TAG, "doUnbindService")
         if (isServiceConnected) {
             // Termina la conexión existente con el servicio
             service!!.stopBleService()
