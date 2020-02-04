@@ -7,13 +7,14 @@ import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import mx.softel.bleservicelib.enums.DisconnectionReason
 
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.activities.RootActivity
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.interfaces.FragmentNavigation
-import mx.softel.cirwirelesslib.enums.DisconnectionReason
 import mx.softel.cirwirelesslib.enums.StateMachine
+import mx.softel.cirwirelesslib.utils.CirCommands
 
 /**
  * A simple [Fragment] subclass.
@@ -84,7 +85,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
      */
     override fun onClick(v: View?) {
         when (v!!.id) {
-            R.id.ivBack         -> root.finishActivity(DisconnectionReason.NORMAL_DISCONNECTION)
+            R.id.ivBack         -> root.finishAndDisconnectActivity(DisconnectionReason.UNKNOWN.status)
             R.id.ivMenuUpdate   -> createMenu()
             R.id.cvConfigurar   -> clickConfigure()
             R.id.cvProbar       -> clickTest()
@@ -98,31 +99,27 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
      */
     private fun clickConfigure() {
         // Actualizamos los AccessPoints que el dispositivo ve
-        if (root.service!!.getCharacteristicWrite() == null)
+        if (root.cirService.getCharacteristicWrite() == null)
             clickConfigure()
         else{
             toast("Actualizando datos")
-            root.service!!.apply {
-                initCmd()
-                //getMacListCmd()
-                currentState = StateMachine.GET_AP
+            root.apply {
+                CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!)
+                cirService.setCurrentState(StateMachine.GET_AP)
             }
         }
     }
 
 
     private fun clickTest() {
-        if (root.service!!.getCharacteristicWrite() == null)
+        if (root.cirService.getCharacteristicWrite() == null)
             clickTest()
         else {
             toast("Solicitando los datos del dispositivo")
             root.apply{
                 setScanningUI()
-                service!!.apply {
-                    initCmd()
-                    //setDeviceModeCmd(AT_MODE_MASTER_SLAVE)
-                    currentState = StateMachine.UNKNOWN
-                }
+                CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!)
+                cirService.setCurrentState(StateMachine.UNKNOWN)
                 if (actualFragment != testerFragment) {
                     actualFragment = testerFragment
                 }

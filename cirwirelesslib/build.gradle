@@ -40,4 +40,5 @@ dependencies {
 
     // Project libraries
     implementation project(':scanblelib')
+    implementation project(':bleservicelib-1.0.0')
 }

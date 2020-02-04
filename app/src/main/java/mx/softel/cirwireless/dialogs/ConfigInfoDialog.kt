@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,8 +14,9 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.activities.RootActivity
+import mx.softel.cirwirelesslib.utils.CirCommands
 
-class ConfigInfoDialog(var code: Int): DialogFragment(), View.OnClickListener {
+class ConfigInfoDialog(private var code: Int): DialogFragment(), View.OnClickListener {
 
     private lateinit var root   : RootActivity
 
@@ -80,7 +80,7 @@ class ConfigInfoDialog(var code: Int): DialogFragment(), View.OnClickListener {
     override fun onClick(v: View?) {
         when (v!!.id) {
             R.id.btnAcceptConfig -> {
-                root.service!!.terminateCmd()
+                CirCommands.terminateCmd(root.service!!, root.cirService.getCharacteristicWrite()!!)
                 dismiss()
             }
         }

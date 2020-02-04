@@ -1,2 +1,2 @@
-include ':app', ':cirwirelesslib', ':scanblelib'
+include ':app', ':cirwirelesslib', ':scanblelib', ':bleservicelib-1.0.0'
 rootProject.name='CIR Wireless'

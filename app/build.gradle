@@ -12,7 +12,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 28
         versionCode 10
-        versionName "1.1.1"
+        versionName "1.1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -31,7 +31,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.google.android.material:material:1.1.0'
 
     // Testing Android
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -42,4 +42,5 @@ dependencies {
     // Project libraries
     implementation project(':cirwirelesslib')
     implementation project(':scanblelib')
+    implementation project(':bleservicelib-1.0.0')
 }

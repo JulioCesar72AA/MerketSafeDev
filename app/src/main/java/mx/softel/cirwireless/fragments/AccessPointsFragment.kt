@@ -18,7 +18,7 @@ import mx.softel.cirwireless.activities.RootActivity
 import mx.softel.cirwireless.dialogs.PasswordDialog
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwirelesslib.enums.StateMachine
-
+import mx.softel.cirwirelesslib.utils.CirCommands
 class AccessPointsFragment: Fragment(),
                             AdapterView.OnItemClickListener,
                             SwipeRefreshLayout.OnRefreshListener,
@@ -79,10 +79,10 @@ class AccessPointsFragment: Fragment(),
     }
 
     override fun onRefresh() {
-        root.setScanningUI()
-        root.service!!.apply {
-            getMacListCmd()
-            currentState = StateMachine.GET_AP
+        root.apply {
+            setScanningUI()
+            CirCommands.getMacListCmd(service!!, cirService.getCharacteristicWrite()!!)
+            cirService.setCurrentState(StateMachine.GET_AP)
         }
     }
 
@@ -199,6 +199,7 @@ class AccessPointsFragment: Fragment(),
      * ## scanWifi
      * Realiza el escaneo de los AccessPoints que el teléfono puede ver
      */
+    @Suppress("DEPRECATION")
     internal fun scanWifi() {
         // Leemos los Access Points del celular
         apMacList.clear()
