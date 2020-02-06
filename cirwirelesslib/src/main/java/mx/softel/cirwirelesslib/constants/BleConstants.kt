@@ -16,5 +16,6 @@ object BleConstants {
 
     // FIRMWARE VERSIONS
     const val FIRMWARE_346              = "3.4.6"
+    const val FIRMWARE_347              = "3.4.7"
 
 }

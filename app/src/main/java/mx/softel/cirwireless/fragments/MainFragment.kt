@@ -104,7 +104,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
         else{
             toast("Actualizando datos")
             root.apply {
-                CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!)
+                CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!, root.bleMacBytes)
                 cirService.setCurrentState(StateMachine.GET_AP)
             }
         }
@@ -118,7 +118,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             toast("Solicitando los datos del dispositivo")
             root.apply{
                 setScanningUI()
-                CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!)
+                CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!, root.bleMacBytes)
                 cirService.setCurrentState(StateMachine.UNKNOWN)
                 if (actualFragment != testerFragment) {
                     actualFragment = testerFragment

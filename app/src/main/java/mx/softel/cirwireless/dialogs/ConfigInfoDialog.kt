@@ -80,7 +80,7 @@ class ConfigInfoDialog(private var code: Int): DialogFragment(), View.OnClickLis
     override fun onClick(v: View?) {
         when (v!!.id) {
             R.id.btnAcceptConfig -> {
-                CirCommands.terminateCmd(root.service!!, root.cirService.getCharacteristicWrite()!!)
+                CirCommands.terminateCmd(root.service!!, root.cirService.getCharacteristicWrite()!!, root.bleMacBytes)
                 dismiss()
             }
         }

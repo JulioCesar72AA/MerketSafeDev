@@ -26,21 +26,25 @@ object CirCommands {
 
 
     fun setDeviceModeCmd(service        : BleService,
-                         characteristic : BluetoothGattCharacteristic, mode: Int)
-            = service.writeToCharacteristic(CommandUtils.setDeviceWifiModeCmd(mode), characteristic)
+                         characteristic : BluetoothGattCharacteristic,
+                         mode           : Int,
+                         mac            : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.setDeviceWifiModeCmd(mode, mac), characteristic)
 
 
     fun setInternalWifiCmd(service          : BleService,
                            characteristic   : BluetoothGattCharacteristic,
                            ssid             : String,
                            password         : String,
-                           flag             : Int)
-            = service.writeToCharacteristic(CommandUtils.setInternalNameAPCmd(ssid, password, flag), characteristic)
+                           flag             : Int,
+                           mac              : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.setInternalNameAPCmd(ssid, password, flag, mac), characteristic)
 
 
     fun getInternalWifiCmd(service          : BleService,
-                           characteristic   : BluetoothGattCharacteristic)
-            = service.writeToCharacteristic(CommandUtils.getInternalNameAPCmd(), characteristic)
+                           characteristic   : BluetoothGattCharacteristic,
+                           mac              : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.getInternalNameAPCmd(mac), characteristic)
 
 
     /**
@@ -54,8 +58,9 @@ object CirCommands {
     fun sendConfigureWifiCmd(service        : BleService,
                              characteristic : BluetoothGattCharacteristic,
                              ssid           : String,
-                             password       : String)
-            = service.writeToCharacteristic(CommandUtils.configureAccessPointCmd(ssid, password), characteristic)
+                             password       : String,
+                             mac            : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.configureAccessPointCmd(ssid, password, mac), characteristic)
 
 
     /**
@@ -64,8 +69,9 @@ object CirCommands {
      * por el Access Point, si no nos ha asignado, responde "0.0.0.0"
      */
     fun sendIpAtCmd(service         : BleService,
-                    characteristic  : BluetoothGattCharacteristic)
-            = service.writeToCharacteristic(CommandUtils.checkIpAddressCmd(), characteristic)
+                    characteristic  : BluetoothGattCharacteristic,
+                    mac             : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.checkIpAddressCmd(mac), characteristic)
 
     /**
      * ## sendApConnectionCmd
@@ -73,8 +79,9 @@ object CirCommands {
      * se encuentra conectado el dispositivo
      */
     fun sendApConnectionCmd(service         : BleService,
-                            characteristic  : BluetoothGattCharacteristic)
-            = service.writeToCharacteristic(CommandUtils.checkApConnectionCmd(), characteristic)
+                            characteristic  : BluetoothGattCharacteristic,
+                            mac             : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.checkApConnectionCmd(mac), characteristic)
 
 
     /**
@@ -86,8 +93,9 @@ object CirCommands {
      */
     fun sendPing(service        : BleService,
                  characteristic : BluetoothGattCharacteristic,
-                 domain         : String)
-            = service.writeToCharacteristic(CommandUtils.pingApCmd(domain), characteristic)
+                 domain         : String,
+                 mac            : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.pingApCmd(domain, mac), characteristic)
 
 
     /**
@@ -104,8 +112,9 @@ object CirCommands {
      * Ejecuta el comando para cerrar el socket con el servidor
      */
     fun closeAtSocketCmd(service        : BleService,
-                         characteristic : BluetoothGattCharacteristic)
-            = service.writeToCharacteristic(CommandUtils.closeSocketCmd(), characteristic)
+                         characteristic : BluetoothGattCharacteristic,
+                         mac            : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.closeSocketCmd(mac), characteristic)
 
 
     /**
@@ -118,8 +127,9 @@ object CirCommands {
     fun openAtSocketCmd(service         : BleService,
                         characteristic  : BluetoothGattCharacteristic,
                         server          : String,
-                        port            : String)
-            = service.writeToCharacteristic(CommandUtils.openSocketCmd(server, port), characteristic)
+                        port            : String,
+                        mac             : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.openSocketCmd(server, port, mac), characteristic)
 
 
     /**
@@ -159,33 +169,39 @@ object CirCommands {
 
     fun setAutoConnCmd(service          : BleService,
                        characteristic   : BluetoothGattCharacteristic,
-                       enable           : Int)
-            = service.writeToCharacteristic(CommandUtils.setAutoConnCmd(enable), characteristic)
+                       enable           : Int,
+                       mac              : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.setAutoConnCmd(enable, mac), characteristic)
 
 
     fun resetWifiCmd(service        : BleService,
-                     characteristic : BluetoothGattCharacteristic)
-            = service.writeToCharacteristic(CommandUtils.resetWifiCmd(), characteristic)
+                     characteristic : BluetoothGattCharacteristic,
+                     mac            : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.resetWifiCmd(mac), characteristic)
 
 
     fun getWirelessFirmwareCmd(service          : BleService,
-                               characteristic   : BluetoothGattCharacteristic)
-            = service.writeToCharacteristic(CommandUtils.getWirelessFirmwareCmd(), characteristic)
+                               characteristic   : BluetoothGattCharacteristic,
+                               mac              : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.getWirelessFirmwareCmd(mac), characteristic)
 
 
     fun initCmd(service         : BleService,
-                characteristic  : BluetoothGattCharacteristic)
-            = service.writeToCharacteristic(CommandUtils.initialCmd(), characteristic)
+                characteristic  : BluetoothGattCharacteristic,
+                mac             : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.initialCmd(mac), characteristic)
 
 
     fun terminateCmd(service        : BleService,
-                     characteristic : BluetoothGattCharacteristic)
-            = service.writeToCharacteristic(CommandUtils.terminateCmd(), characteristic)
+                     characteristic : BluetoothGattCharacteristic,
+                     mac            : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.terminateCmd(mac), characteristic)
 
 
     fun checkCipStatusCmd(service       : BleService,
-                          characteristic: BluetoothGattCharacteristic)
-            = service.writeToCharacteristic(CommandUtils.checkCipStatusCmd(), characteristic)
+                          characteristic: BluetoothGattCharacteristic,
+                          mac           : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.checkCipStatusCmd(mac), characteristic)
 
 
 
