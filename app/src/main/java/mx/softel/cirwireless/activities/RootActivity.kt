@@ -35,6 +35,7 @@ import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.utils.BleCirWireless
 import mx.softel.cirwirelesslib.utils.CirCommands
 import mx.softel.cirwirelesslib.utils.CirWirelessParser
+import mx.softel.cirwirelesslib.utils.CommandUtils
 
 class RootActivity : AppCompatActivity(),
                      FragmentNavigation,
@@ -269,12 +270,12 @@ class RootActivity : AppCompatActivity(),
         when (command) {
             ReceivedCmd.AT_READY -> {
                 when (step) {
-                    0   -> parseOkWifiConfigured(response.toCharString(), 100)
-                    100 -> parseOkWifiConfigured(response.toCharString(), 1)
-                    1   -> parseOkWifiConfigured(response.toCharString(), 101)
-                    101 -> parseOkWifiConfigured(response.toCharString(), 2)
-                    2   -> parseWifiConfigured  (response.toCharString())
-                    3   -> parseOkWifiConfigured(response.toCharString(), 0)
+                    0   -> parseOkWifiConfigured(response, 100)
+                    100 -> parseOkWifiConfigured(response, 1)
+                    1   -> parseOkWifiConfigured(response, 101)
+                    101 -> parseOkWifiConfigured(response, 2)
+                    2   -> parseWifiConfigured  (response)
+                    3   -> parseOkWifiConfigured(response, 0)
                 }
             }
             else -> {
@@ -290,7 +291,7 @@ class RootActivity : AppCompatActivity(),
             cipStatusMode = -2
         }
         when (command) {
-            ReceivedCmd.AT_READY -> parseStatus(response.toCharString())
+            ReceivedCmd.AT_READY -> parseStatus(response)
             else -> {
                 CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
             }
@@ -321,7 +322,7 @@ class RootActivity : AppCompatActivity(),
     private fun getSsidFromResponse(response: ByteArray, command: ReceivedCmd) {
         when (command) {
             ReceivedCmd.WAIT_AP     -> CirCommands.getInternalWifiCmd(service!!,cirService.getCharacteristicWrite()!!, bleMacBytes)
-            ReceivedCmd.AT_READY    -> parseSsidResponse(response.toCharString())
+            ReceivedCmd.AT_READY    -> parseSsidResponse(response)
             else                    -> CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
         }
     }
@@ -336,7 +337,7 @@ class RootActivity : AppCompatActivity(),
     private fun getIpFromAt(response: ByteArray, command: ReceivedCmd) {
         when (command) {
             ReceivedCmd.WAIT_AP     -> CirCommands.sendIpAtCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
-            ReceivedCmd.AT_READY    -> parseIpResponse(response.toCharString())
+            ReceivedCmd.AT_READY    -> parseIpResponse(response)
             else                    -> CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
         }
     }
@@ -352,7 +353,7 @@ class RootActivity : AppCompatActivity(),
     private fun getApStatusFromAT(response: ByteArray, command: ReceivedCmd) {
         when (command) {
             ReceivedCmd.WAIT_AP     -> CirCommands.sendApConnectionCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
-            ReceivedCmd.AT_READY    -> parseApResponse(response.toCharString())
+            ReceivedCmd.AT_READY    -> parseApResponse(response)
             else                    -> CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
         }
     }
@@ -368,7 +369,7 @@ class RootActivity : AppCompatActivity(),
     private fun getPing(response: ByteArray, command: ReceivedCmd) {
         when (command) {
             ReceivedCmd.WAIT_AP     -> CirCommands.sendPing(service!!, cirService.getCharacteristicWrite()!!, "www.google.com", bleMacBytes)
-            ReceivedCmd.AT_READY    -> parsePingResponse(response.toCharString())
+            ReceivedCmd.AT_READY    -> parsePingResponse(response)
             else                    -> CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
         }
     }
@@ -415,9 +416,14 @@ class RootActivity : AppCompatActivity(),
      * ## parseWifiConfigured
      * Extrae el estatus de conexión obtenido por el dispositivo
      *
-     * @param response Cadena de respuesta del comando AT
+     * @param dataResponse Cadena de respuesta del comando AT
      */
-    private fun parseWifiConfigured(response: String) {
+    private fun parseWifiConfigured(dataResponse: ByteArray) {
+
+        val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
+        val response = decResponse.toCharString()
+        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
         if (response.contains("WIFI GOT IP")) {
             wifiStep = 3
             isWifiConnected = true
@@ -435,10 +441,15 @@ class RootActivity : AppCompatActivity(),
      * Establece la siguiente acción partiendo de la máquina de estados de
      * conexión Wifi, validando a cada paso que la respuesta sea un OK
      *
-     * @param response Cadena de respuesta del comando AT
+     * @param dataResponse Cadena de respuesta del comando AT
      * @param nextStep Estado siguiente de la máquina de estados
      */
-    private fun parseOkWifiConfigured(response: String, nextStep: Int) {
+    private fun parseOkWifiConfigured(dataResponse: ByteArray, nextStep: Int) {
+
+        val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
+        val response = decResponse.toCharString()
+        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
         if (response.contains(AT_CMD_OK)) {
             when (nextStep) {
                 0 -> {
@@ -457,11 +468,16 @@ class RootActivity : AppCompatActivity(),
             wifiStep = nextStep
         } else {
             wifiStep = 0
-            parseOkWifiConfigured(response, wifiStep)
+            parseOkWifiConfigured(dataResponse, wifiStep)
         }
     }
 
-    private fun parseStatus(response: String) {
+    private fun parseStatus(dataResponse: ByteArray) {
+
+        val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
+        val response = decResponse.toCharString()
+        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
         if (response.contains(AT_CMD_STATUS)) {
 
             if (response.contains("TCP")) {
@@ -485,9 +501,14 @@ class RootActivity : AppCompatActivity(),
      * Obtiene de la respuesta el access point que vive internamente en
      * el dispositivo y lo actualiza en la pantalla
      *
-     * @param response Cadena de respuesta del comando AT
+     * @param dataResponse Cadena de respuesta del comando AT
      */
-    private fun parseSsidResponse(response: String) {
+    private fun parseSsidResponse(dataResponse: ByteArray) {
+
+        val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
+        val response = decResponse.toCharString()
+        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
         if (response.contains(AT_CMD_OK)) {
             ssidAssigned = response
                 .substringAfter(SSID_SUBSTRING_AFTER)
@@ -511,9 +532,14 @@ class RootActivity : AppCompatActivity(),
      * de que no entregue los datos, al tercer intento fallido,
      * se considera fallido
      *
-     * @param response Cadena de respuesta del comando AT
+     * @param dataResponse Cadena de respuesta del comando AT
      */
-    private fun parseApResponse(response: String) {
+    private fun parseApResponse(dataResponse: ByteArray) {
+
+        val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
+        val response = decResponse.toCharString()
+        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
         if (response.contains(WIFI_SUBSTRING_AP_AFTER)) {
             rssiAssigned = response
                 .substringAfterLast(",-")
@@ -548,9 +574,14 @@ class RootActivity : AppCompatActivity(),
      * Access Point asignó al dispositivo. Ejecuta 3 reintentos en caso
      * de que no entregue IP, al tercer intento fallido, se considera fallido
      *
-     * @param response Cadena de respuesta del comando AT
+     * @param dataResponse Cadena de respuesta del comando AT
      */
-    private fun parseIpResponse(response: String) {
+    private fun parseIpResponse(dataResponse: ByteArray) {
+
+        val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
+        val response = decResponse.toCharString()
+        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
         if (response.contains(WIFI_NOT_IP_STRING)){
             if (retryAtResponse >= MAX_AT_RETRY) {
                 retryAtResponse = 0
@@ -590,8 +621,13 @@ class RootActivity : AppCompatActivity(),
      *
      * @param response Cadena de respuesta del comando AT
      */
-    private fun parsePingResponse(response: String) {
-        pingAssigned = (response.contains(PING_OK) && !response.contains(AT_CMD_ERROR))
+    private fun parsePingResponse(response: ByteArray) {
+
+        val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
+        val stringResponse = decResponse.toCharString()
+        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
+        pingAssigned = (stringResponse.contains(PING_OK) && !stringResponse.contains(AT_CMD_ERROR))
         runOnUiThread { testerFragment.fragmentUiUpdate(4) }
         if (pingAssigned)
             cirService.setCurrentState(StateMachine.DATA_CONNECTION)
@@ -615,7 +651,11 @@ class RootActivity : AppCompatActivity(),
      * @param step Estado actual de la máquina de estados
      */
     private fun parseDataResponse(response: ByteArray, step: Int) {
-        val restring = response.toCharString()
+
+        val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
+        val restring = decResponse.toCharString()
+        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
         when (step) {
             0 -> {
                 CirCommands.openAtSocketCmd(service!!, cirService.getCharacteristicWrite()!!, "foodservices.otus.com.mx", "8030", bleMacBytes)
@@ -727,7 +767,7 @@ class RootActivity : AppCompatActivity(),
 
     override fun characteristicWrite(characteristic: BluetoothGattCharacteristic) {
         /* Nada que hacer por aquí*/
-        Log.i(TAG, "characteristicWrite: ${characteristic.value.toCharString()}")
+       // Log.i(TAG, "characteristicWrite: ${characteristic.value.toCharString()}")
     }
 
     override fun connectionStatus(status: DisconnectionReason, newState: ConnState) {
@@ -779,7 +819,7 @@ class RootActivity : AppCompatActivity(),
     private fun commandState(state: StateMachine,
                              response: ByteArray,
                              command: ReceivedCmd) {
-        Log.e(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toCharString()}")
+        Log.i(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toCharString()}")
         when (state) {
 
             // STATUS DE POLEO

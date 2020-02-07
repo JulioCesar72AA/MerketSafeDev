@@ -24,7 +24,8 @@ public class CLibraryWrapper {
     }
 
     public byte[] getDec(byte[] mac, byte[] data, byte[] llaveSTC) {
-        this.SG4_dec(mac, mac.length, data, data.length);
+        byte[] macRevers = new byte[]{(byte) mac[5], (byte) mac[4], (byte) mac[3], (byte) mac[2], (byte) mac[1], (byte) mac[0]};
+        this.SG4_dec(macRevers, macRevers.length, data, data.length);
         return data;
     }
 

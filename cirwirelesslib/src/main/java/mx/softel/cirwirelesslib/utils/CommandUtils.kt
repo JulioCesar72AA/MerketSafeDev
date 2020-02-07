@@ -1,6 +1,9 @@
 package mx.softel.cirwirelesslib.utils
 
+import android.util.Log
 import mx.softel.cirwirelesslib.extensions.toByteArray
+import mx.softel.cirwirelesslib.extensions.toCharString
+import mx.softel.cirwirelesslib.extensions.toHex
 
 object CommandUtils {
 
@@ -159,9 +162,13 @@ object CommandUtils {
     fun decryptResponse(response: ByteArray, mac: ByteArray): ByteArray {
         val noCrc = response.dropLast(2).toByteArray()
         val noHeader = noCrc.drop(5).toByteArray()
+        val result = wrapper.getDec(mac, noHeader, null)
+        Log.e(TAG, "${response.toHex()} -> ${response.toCharString()}")
+        Log.e(TAG, "${noHeader.toHex()} -> ${noHeader.toCharString()}")
+        Log.e(TAG, "${result.toHex()} -> ${result.toCharString()}")
 
         // Respuesta desencriptada
-        return wrapper.getDec(mac, noHeader, null)
+        return result
     }
 
     private fun getCrc16(buffer: ByteArray): ByteArray {
