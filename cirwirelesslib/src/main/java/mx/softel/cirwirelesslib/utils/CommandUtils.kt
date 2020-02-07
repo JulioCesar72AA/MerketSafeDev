@@ -156,6 +156,14 @@ object CommandUtils {
         return cmd
     }
 
+    fun decryptResponse(response: ByteArray, mac: ByteArray): ByteArray {
+        val noCrc = response.dropLast(2).toByteArray()
+        val noHeader = noCrc.drop(5).toByteArray()
+
+        // Respuesta desencriptada
+        return wrapper.getDec(mac, noHeader, null)
+    }
+
     private fun getCrc16(buffer: ByteArray): ByteArray {
         var crc = 0
         for (element in buffer) {
