@@ -47,92 +47,77 @@ object CommandUtils {
     /************************************************************************************************/
     fun configureAccessPointCmd(ssid: String, password: String, mac: ByteArray): ByteArray {
         val atCommand = "AT+CWJAP=\"$ssid\",\"$password\"".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun checkIpAddressCmd(mac: ByteArray): ByteArray {
         val atCommand = "AT+CIFSR".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun checkApConnectionCmd(mac: ByteArray): ByteArray {
         val atCommand = "AT+CWJAP?".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun pingApCmd(domain: String, mac: ByteArray): ByteArray {
         val atCommand = "AT+PING=\"$domain\"".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun closeSocketCmd(mac: ByteArray): ByteArray {
         val atCommand = "AT+CIPCLOSE".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun openSocketCmd(server: String, port: String, mac: ByteArray): ByteArray {
         val atCommand = "AT+CIPSTART=\"TCP\",\"$server\",$port".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun setDeviceWifiModeCmd(mode: Int, mac: ByteArray): ByteArray {
         val atCommand = "AT+CWMODE=$mode".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun setInternalNameAPCmd(ssid: String, password: String, flag: Int, mac: ByteArray): ByteArray {
         val atCommand = "AT+CWSAP=\"ID_$ssid\",\"$password\",6,0,4,$flag".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun getInternalNameAPCmd(mac: ByteArray): ByteArray {
         val atCommand = "AT+CWSAP?".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun setAutoConnCmd(enable: Int, mac: ByteArray): ByteArray {
         val atCommand = "AT+CWAUTOCONN=$enable".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun resetWifiCmd(mac: ByteArray): ByteArray {
         val atCommand = "AT+RST".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun getWirelessFirmwareCmd(mac: ByteArray): ByteArray {
         val atCommand = "AT+GMR".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun checkCipStatusCmd(mac: ByteArray): ByteArray {
         val atCommand = "AT+CIPSTATUS".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun initialCmd(mac: ByteArray): ByteArray {
         val atCommand = "S_T_R_T".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
     fun terminateCmd(mac: ByteArray): ByteArray {
         val atCommand = "E_N_D".toByteArray()
-        val atEncrypted = wrapper.getEnc(mac, atCommand, 1)
-        return getCompleteCommand(AT_GENERIC, atEncrypted)
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
 
@@ -147,6 +132,22 @@ object CommandUtils {
     private fun getCompleteCommand(startArray: ByteArray, atCmd: ByteArray): ByteArray {
         val size = if (startArray.contentEquals(AT_GENERIC)) atCmd.size + 8 else atCmd.size + 7
         var cmd = startArray + atCmd + 0x00.toByte()
+        cmd[3] = size.toByte()
+
+        val crc = getCrc16(cmd)
+        cmd += crc
+
+        return cmd
+    }
+
+    private fun getCompleteEncryptedCommand(startArray: ByteArray, atCmd: ByteArray, mac: ByteArray): ByteArray {
+        val size = if (startArray.contentEquals(AT_GENERIC)) atCmd.size + 8 else atCmd.size + 7
+        var cmd = atCmd + 0x00.toByte()
+
+        // Encriptando el bloque de datos
+        val encCmd = wrapper.getEnc(mac, cmd, 1)
+
+        cmd = startArray + encCmd
         cmd[3] = size.toByte()
 
         val crc = getCrc16(cmd)

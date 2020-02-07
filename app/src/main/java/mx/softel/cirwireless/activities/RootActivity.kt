@@ -284,6 +284,7 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun checkStatus(response: ByteArray, command: ReceivedCmd) {
+        Log.d(TAG, "CHECK STATUS")
         if (cipStatusMode == -1) {
             CirCommands.checkCipStatusCmd(service!!, cirService.getCharacteristicWrite()!!,bleMacBytes)
             cipStatusMode = -2
@@ -705,7 +706,7 @@ class RootActivity : AppCompatActivity(),
     /**     BLE SERVICE                                                                             */
     /************************************************************************************************/
     override fun characteristicChanged(characteristic: BluetoothGattCharacteristic) {
-        Log.d(TAG, "characteristicChanged: ${characteristic.value.toCharString()}")
+        //Log.d(TAG, "characteristicChanged: ${characteristic.value.toCharString()}")
 
         commandState(
             cirService.getCurrentState(),
@@ -778,7 +779,7 @@ class RootActivity : AppCompatActivity(),
     private fun commandState(state: StateMachine,
                              response: ByteArray,
                              command: ReceivedCmd) {
-        Log.e(TAG, "commandState: $state -> $command")
+        Log.e(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toCharString()}")
         when (state) {
 
             // STATUS DE POLEO
