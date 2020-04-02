@@ -29,7 +29,9 @@ object Catalog {
     const val BEACON_TYPE_0007              = "0x0007"
     const val BEACON_TYPE_0008              = "0x0008"
     const val BEACON_TYPE_0009              = "0x0009"
-    const val BEACON_TYPE_000A              = "0x000A"
+    const val BEACON_TYPE_000A              = "0x000a"
+    const val BEACON_TYPE_000B              = "0x000b"
+    const val BEACON_TYPE_000C              = "0x000c"
 
     const val BEACON_DESCRIPTION_0000       = "BootLoader"
     const val BEACON_DESCRIPTION_0001       = "Cir 2017"
@@ -42,7 +44,8 @@ object Catalog {
     const val BEACON_DESCRIPTION_0008       = "Cir 2017"
     const val BEACON_DESCRIPTION_0009       = "Cir 2017 1.3.6"
     const val BEACON_DESCRIPTION_000A       = "Cir 2017 1.3.9"
-
+    const val BEACON_DESCRIPTION_000B       = "Cir Wireless"
+    const val BEACON_DESCRIPTION_000C       = "Cir Wireless Blocked"
 
     // VALORES DEFAULT
     const val NULL_STRING                   = "null"
@@ -82,7 +85,9 @@ object Catalog {
             ($NULL_STRING, '$BEACON_TYPE_0007', '$BEACON_DESCRIPTION_0007', $DEVICE_IS_NOT_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED ),
             ($NULL_STRING, '$BEACON_TYPE_0008', '$BEACON_DESCRIPTION_0008', $DEVICE_IS_NOT_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED ),
             ($NULL_STRING, '$BEACON_TYPE_0009', '$BEACON_DESCRIPTION_0009', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED ),
-            ($NULL_STRING, '$BEACON_TYPE_000A', '$BEACON_DESCRIPTION_000A', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED )
+            ($NULL_STRING, '$BEACON_TYPE_000A', '$BEACON_DESCRIPTION_000A', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED ),
+            ($NULL_STRING, '$BEACON_TYPE_000B', '$BEACON_DESCRIPTION_000B', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED),
+            ($NULL_STRING, '$BEACON_TYPE_000C', '$BEACON_DESCRIPTION_000C', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED)
         """
 
     // Selección de beacons por tipo "recolectables"

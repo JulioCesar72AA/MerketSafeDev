@@ -3,6 +3,7 @@ package mx.softel.scanblelib.ble
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanRecord
 import android.bluetooth.le.ScanResult
+import android.util.Log
 import mx.softel.scanblelib.extensions.toHexValue
 
 class BleDevice(scanResult: ScanResult,
@@ -72,8 +73,8 @@ class BleDevice(scanResult: ScanResult,
                 BEGIN_OFFSET_FOR_NEW_BEACON,
                 END_OFFSET_FOR_NEW_BEACON
             )
-            val oldBeaconType = PREFIX_FOR_BLE_BEACONS + subOld
-            val newBeaconType = PREFIX_FOR_BLE_BEACONS + subNew
+            val oldBeaconType = (PREFIX_FOR_BLE_BEACONS + subOld)
+            val newBeaconType = (PREFIX_FOR_BLE_BEACONS + subNew)
 
             // Identificamos el tipo de Beacon del dispositivo
             val auxList = when {

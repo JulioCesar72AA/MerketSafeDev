@@ -7,6 +7,7 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.os.Handler
+import android.util.Log
 import mx.softel.scanblelib.extensions.isLocationPermissionGranted
 import mx.softel.scanblelib.extensions.requestLocationPermission
 import mx.softel.scanblelib.sqlite.BeaconsDatabaseHelper
@@ -79,13 +80,12 @@ class BleManager(private var appContext: Context,
 
             if (check) {
                 val scannedBleDevice = BleDevice(result, availableBeacons)
-                if (filterBeaconList.isEmpty()) {
+                val type = filterBeaconList.contains(scannedBleDevice.deviceBeaconType)
+                Log.e(TAG, mac + "type: $type ")
+                Log.e(TAG, mac + ":scannedDevice: " + scannedBleDevice.deviceBeaconType)
+
+                if (type) {
                     bleDevices.add(scannedBleDevice)
-                } else {
-                    val type = filterBeaconList.contains(scannedBleDevice.deviceBeaconType)
-                    if (type) {
-                        bleDevices.add(scannedBleDevice)
-                    }
                 }
             }
         }
