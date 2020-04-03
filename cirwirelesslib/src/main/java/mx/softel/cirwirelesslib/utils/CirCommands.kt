@@ -22,11 +22,8 @@ object CirCommands {
      * Ejecuta el comando para pedir los AccessPoints que el dispositivo almacenó (6)
      */
     fun getMacListCmd(service           : BleService,
-                      characteristic    : BluetoothGattCharacteristic) {
-        var command = CommandUtils.getAccessPointsCmd();
-        // Log.e("CIR_COMMANDS: ", "getMacListCmd: ${command.toHex()}")
-        service.writeToCharacteristic(CommandUtils.getAccessPointsCmd(), characteristic)
-    }
+                      characteristic    : BluetoothGattCharacteristic)
+            = service.writeToCharacteristic(CommandUtils.getAccessPointsCmd(), characteristic)
 
     fun setDeviceModeCmd(service        : BleService,
                          characteristic : BluetoothGattCharacteristic,
@@ -192,11 +189,7 @@ object CirCommands {
     fun initCmd(service         : BleService,
                 characteristic  : BluetoothGattCharacteristic,
                 mac             : ByteArray)
-    {
-        var command = CommandUtils.initialCmd(mac)
-        // Log.e("CirCommands", "CirCommand: ${command!!.toHex()}")
-        service.writeToCharacteristic(command, characteristic)
-    }
+            = service.writeToCharacteristic(CommandUtils.initialCmd(mac), characteristic)
 
 
     fun terminateCmd(service        : BleService,
@@ -226,21 +219,24 @@ object CirCommands {
         // Log.e("CIR_COMMANDS", "RESPONSE_MAC_LIST: ${response[3]} = ${0x2B.toByte()}")
         // Log.e("CIR_COMMANDS", "RESPONSE: ${response.toHex()}")
 
+        if (response[3].toInt() != 0) {
+            val list = ArrayList<String>()
+            val byteElement = ByteArray(6)
+            var macString: String
 
-        val list = ArrayList<String>()
-        val byteElement = ByteArray(6)
-        var macString: String
-
-        for (i in 0..2) {
-            // Iteramos por cada elemento de las MAC del arreglo
-            for (j in 0..2) {
-                byteElement[j] = response[(2 * i) + (j + 1)]
+            for (i in 0..2) {
+                // Iteramos por cada elemento de las MAC del arreglo
+                for (j in 0..2) {
+                    byteElement[j] = response[(2 * i) + (j + 1)]
+                }
+                // Casteamos el ByteArray en un String para el array final
+                macString = byteElement.toHex().replace(" ", ":")
+                list.add(macString)
             }
-            // Casteamos el ByteArray en un String para el array final
-            macString = byteElement.toHex().replace(" ", ":")
-            list.add(macString)
+            return list
         }
-        return list
+
+        return null;
     }
 
 }
