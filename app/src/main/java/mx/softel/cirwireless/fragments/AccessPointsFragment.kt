@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -106,10 +107,12 @@ class AccessPointsFragment: Fragment(),
 
         override fun onReceive(context: Context?, intent: Intent?) {
             wifiResults = wifiManager.scanResults
+            Log.e(TAG, "WIFI_RESULTS: $wifiResults")
             root.unregisterReceiver(this)
 
             // Rellena la lista para mostrar en la pantalla estándar
             for (data in wifiResults) {
+                Log.e(TAG, "wifi: $data")
                 // Establecemos una nueva lista de macs validadas por el dispositivo
                 if (root.deviceMacList == null) return
                 for (mac in root.deviceMacList!!) {

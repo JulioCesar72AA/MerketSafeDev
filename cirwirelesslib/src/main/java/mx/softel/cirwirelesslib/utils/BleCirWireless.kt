@@ -131,8 +131,8 @@ class BleCirWireless {
             val two = characteristic.value[2]
             val three = characteristic.value[3]
             firmware = "$one.$two.$three"
-
-            correctFirmware = (firmware == (BleConstants.FIRMWARE_348))
+            println("$TAG FIRMWARE $firmware")
+            correctFirmware = (firmware == (BleConstants.FIRMWARE_348)) || (firmware == (BleConstants.FIRMWARE_350))
 
             if (!correctFirmware)
                 service.disconnectBleDevice(DisconnectionReason.FIRMWARE_UNSUPPORTED.status)

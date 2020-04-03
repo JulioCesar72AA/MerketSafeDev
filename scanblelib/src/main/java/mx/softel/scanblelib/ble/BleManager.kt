@@ -80,12 +80,13 @@ class BleManager(private var appContext: Context,
 
             if (check) {
                 val scannedBleDevice = BleDevice(result, availableBeacons)
-                val type = filterBeaconList.contains(scannedBleDevice.deviceBeaconType)
-                Log.e(TAG, mac + "type: $type ")
-                Log.e(TAG, mac + ":scannedDevice: " + scannedBleDevice.deviceBeaconType)
-
-                if (type) {
+                if (filterBeaconList.isEmpty()) {
                     bleDevices.add(scannedBleDevice)
+                } else {
+                    val type = filterBeaconList.contains(scannedBleDevice.deviceBeaconType)
+                    if (type) {
+                        bleDevices.add(scannedBleDevice)
+                    }
                 }
             }
         }

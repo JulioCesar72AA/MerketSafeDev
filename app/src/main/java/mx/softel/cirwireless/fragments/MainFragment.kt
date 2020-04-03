@@ -105,7 +105,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             toast("Actualizando datos")
             root.apply {
                 CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!, root.bleMacBytes)
-                cirService.setCurrentState(StateMachine.GET_AP)
+                    cirService.setCurrentState(StateMachine.GET_AP)
             }
         }
     }

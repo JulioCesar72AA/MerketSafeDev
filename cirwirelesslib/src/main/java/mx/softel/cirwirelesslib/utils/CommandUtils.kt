@@ -163,9 +163,9 @@ object CommandUtils {
         val noCrc = response.dropLast(2).toByteArray()
         val noHeader = noCrc.drop(5).toByteArray()
         val result = wrapper.getDec(mac, noHeader, null)
-        Log.e(TAG, "${response.toHex()} -> ${response.toCharString()}")
-        Log.e(TAG, "${noHeader.toHex()} -> ${noHeader.toCharString()}")
-        Log.e(TAG, "${result.toHex()} -> ${result.toCharString()}")
+        // Log.e(TAG, "${response.toHex()} -> ${response.toCharString()}")
+        // Log.e(TAG, "${noHeader.toHex()} -> ${noHeader.toCharString()}")
+        // Log.e(TAG, "${result.toHex()} -> ${result.toCharString()}")
 
         // Respuesta desencriptada
         return result

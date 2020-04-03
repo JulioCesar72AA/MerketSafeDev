@@ -1,6 +1,7 @@
 package mx.softel.cirwirelesslib.utils
 
 import android.bluetooth.BluetoothGattCharacteristic
+import android.util.Log
 import mx.softel.bleservicelib.BleService
 import mx.softel.cirwirelesslib.extensions.toHex
 
@@ -21,9 +22,11 @@ object CirCommands {
      * Ejecuta el comando para pedir los AccessPoints que el dispositivo almacenó (6)
      */
     fun getMacListCmd(service           : BleService,
-                      characteristic    : BluetoothGattCharacteristic)
-            = service.writeToCharacteristic(CommandUtils.getAccessPointsCmd(), characteristic)
-
+                      characteristic    : BluetoothGattCharacteristic) {
+        var command = CommandUtils.getAccessPointsCmd();
+        // Log.e("CIR_COMMANDS: ", "getMacListCmd: ${command.toHex()}")
+        service.writeToCharacteristic(CommandUtils.getAccessPointsCmd(), characteristic)
+    }
 
     fun setDeviceModeCmd(service        : BleService,
                          characteristic : BluetoothGattCharacteristic,
@@ -189,7 +192,11 @@ object CirCommands {
     fun initCmd(service         : BleService,
                 characteristic  : BluetoothGattCharacteristic,
                 mac             : ByteArray)
-            = service.writeToCharacteristic(CommandUtils.initialCmd(mac), characteristic)
+    {
+        var command = CommandUtils.initialCmd(mac)
+        // Log.e("CirCommands", "CirCommand: ${command!!.toHex()}")
+        service.writeToCharacteristic(command, characteristic)
+    }
 
 
     fun terminateCmd(service        : BleService,
@@ -216,18 +223,18 @@ object CirCommands {
      */
     fun fromResponseGetMacList(response: ByteArray): ArrayList<String>? {
         // Validamos que el tamaño de la respuesta sea correcto para parsear los datos
-        if (response[3] != 0x2B.toByte()) {
-            return null
-        }
+        // Log.e("CIR_COMMANDS", "RESPONSE_MAC_LIST: ${response[3]} = ${0x2B.toByte()}")
+        // Log.e("CIR_COMMANDS", "RESPONSE: ${response.toHex()}")
+
 
         val list = ArrayList<String>()
         val byteElement = ByteArray(6)
         var macString: String
 
-        for (i in 0..5) {
+        for (i in 0..2) {
             // Iteramos por cada elemento de las MAC del arreglo
-            for (j in 0..5) {
-                byteElement[j] = response[(6 * i) + (j + 5)]
+            for (j in 0..2) {
+                byteElement[j] = response[(2 * i) + (j + 1)]
             }
             // Casteamos el ByteArray en un String para el array final
             macString = byteElement.toHex().replace(" ", ":")

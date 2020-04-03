@@ -422,7 +422,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
         val response = decResponse.toCharString()
-        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         if (response.contains("WIFI GOT IP")) {
             wifiStep = 3
@@ -448,7 +448,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
         val response = decResponse.toCharString()
-        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         if (response.contains(AT_CMD_OK)) {
             when (nextStep) {
@@ -476,7 +476,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
         val response = decResponse.toCharString()
-        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         if (response.contains(AT_CMD_STATUS)) {
 
@@ -507,7 +507,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
         val response = decResponse.toCharString()
-        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         if (response.contains(AT_CMD_OK)) {
             ssidAssigned = response
@@ -538,7 +538,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
         val response = decResponse.toCharString()
-        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         if (response.contains(WIFI_SUBSTRING_AP_AFTER)) {
             rssiAssigned = response
@@ -580,7 +580,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
         val response = decResponse.toCharString()
-        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         if (response.contains(WIFI_NOT_IP_STRING)){
             if (retryAtResponse >= MAX_AT_RETRY) {
@@ -625,7 +625,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
         val stringResponse = decResponse.toCharString()
-        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         pingAssigned = (stringResponse.contains(PING_OK) && !stringResponse.contains(AT_CMD_ERROR))
         runOnUiThread { testerFragment.fragmentUiUpdate(4) }
@@ -654,7 +654,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
         val restring = decResponse.toCharString()
-        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         when (step) {
             0 -> {
@@ -843,6 +843,7 @@ class RootActivity : AppCompatActivity(),
                 if (command == ReceivedCmd.GET_AP) {
                     // Casteamos el resultado y navegamos al fragmento de AP's
                     deviceMacList = CirCommands.fromResponseGetMacList(response)
+                    // Log.e(TAG, "DEVICE_MAC_LIST: $deviceMacList")
                     if (actualFragment != wifiFragment) navigateTo(wifiFragment, true, null)
                     else wifiFragment.scanWifi()
                     actualFragment = wifiFragment
