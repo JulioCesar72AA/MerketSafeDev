@@ -15,6 +15,9 @@
     <string name="btn_configure">Configurar</string>
     <string name="btn_test">Probar</string>
 
+    <string name="btn_open_lock">Abrir chapa</string>
+    <string name="btn_close_lock">Cerrar chapa</string>
+
     <!-- TEXT VIEW's -->
     <string name="tv_selected_device">Dispositivo BLE</string>
     <string name="tv_no_devices">No se encontraron dispositivos cercanos, desliza para volver a intentar</string>
@@ -50,6 +53,9 @@
     <string name="cd_icon_dispositivos">Dispositivo</string>
     <string name="cd_back_icon">Volver</string>
     <string name="cd_password_icon">Password</string>
+    <string name="cd_open_lock">Abre chapa</string>
+    <string name="cd_close_lock">Cierra chapa</string>
+
 
     <!-- ERROR MESSAGE's -->
     <string name="error_no_communication">Ocurrió un error de comunicación con el dispositivo, intente nuevamente</string>
@@ -58,6 +64,9 @@
     <string name="error_no_ping">Conectado, pero sin conexión a internet</string>
     <string name="error_no_data">No hay conexión con el servidor de datos</string>
     <string name="error_no_error">Configuración correcta</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
 </resources>

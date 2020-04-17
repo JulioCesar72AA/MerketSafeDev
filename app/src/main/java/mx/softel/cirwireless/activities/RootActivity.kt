@@ -756,18 +756,41 @@ class RootActivity : AppCompatActivity(),
     }
 
     override fun characteristicRead(characteristic: BluetoothGattCharacteristic) {
-        Log.d(TAG, "characteristicRead: ${characteristic.value.toHex()}")
+        Log.e(TAG, "characteristicRead: ${characteristic.value.toHex()}")
 
-        cirService.extractFirmwareData(
-            service!!,
-            cirService.getCharacteristicDeviceInfo()!!,
-            cirService.getNotificationDescriptor()!!
-        )
+        val uuidCharacteristic : String = characteristic.uuid.toString()
+        val value : ByteArray = characteristic.value
+
+        if (uuidCharacteristic == BleConstants.QUICK_COMMANDS_CHARACTERISTIC) {
+            wasLockSuccess(
+                cirService.getCurrentState(),
+                value
+            )
+
+        } else {
+            cirService.extractFirmwareData(
+                service!!,
+                cirService.getCharacteristicDeviceInfo()!!,
+                cirService.getNotificationDescriptor()!!
+            )
+        }
+
     }
 
     override fun characteristicWrite(characteristic: BluetoothGattCharacteristic) {
-        /* Nada que hacer por aquí*/
-       // Log.i(TAG, "characteristicWrite: ${characteristic.value.toCharString()}")
+       // Log.e(TAG, "characteristicWrite: ${characteristic.value.toCharString()}")
+
+        val uuidCharacteristic : String = characteristic.uuid.toString()
+        val value : ByteArray = characteristic.value
+
+        if (uuidCharacteristic == BleConstants.QUICK_COMMANDS_CHARACTERISTIC) {
+            quickCommandState(
+                cirService.getCurrentState(),
+                value,
+                CirWirelessParser.receivedCommand(value)
+            )
+
+        }
     }
 
     override fun connectionStatus(status: DisconnectionReason, newState: ConnState) {
@@ -799,9 +822,6 @@ class RootActivity : AppCompatActivity(),
 
         service!!.setMtu(300)
     }
-
-
-
 
 
     /************************************************************************************************/
@@ -865,6 +885,49 @@ class RootActivity : AppCompatActivity(),
 
             else -> { /* Ignoramos la respuesta */ }
         }
+    }
+
+    private fun wasLockSuccess (state: StateMachine, value: ByteArray) {
+        when (CirWirelessParser.lockResponse(value)) {
+            ReceivedCmd.LOCK_OK -> {
+                when (state) {
+                    StateMachine.OPENNING_LOCK -> {
+                        runOnUiThread{ toast("Cerradura abierta") }
+                    }
+
+                    StateMachine.CLOSING_LOCK -> {
+                        runOnUiThread { toast("Cerradura cerrada") }
+                    }
+
+                    else -> {/* Nothing here */}
+                }
+            }
+
+            ReceivedCmd.LOCK_NOT_ENABLED -> {
+                runOnUiThread { toast("Cerradura no habilitada") }
+            }
+            else -> { /* Nothing here */ }
+        }
+
+        cirService.setCurrentState(StateMachine.UNKNOWN)
+    }
+
+    private fun quickCommandState (state: StateMachine,
+                                   response: ByteArray,
+                                   command: ReceivedCmd) {
+        // Log.e(TAG, "quickCommandState: $state")
+        when (state) {
+            StateMachine.CLOSING_LOCK,
+            StateMachine.OPENNING_LOCK -> {
+                readLockResponse()
+            }
+            else -> { /* nothing here */}
+        }
+    }
+
+    private fun readLockResponse () {
+        // Log.e(TAG, "readLockResponse: ")
+        service!!.bleGatt!!.readCharacteristic(cirService.getQuickCommandsCharacteristic())
     }
 
     /**
@@ -950,12 +1013,6 @@ class RootActivity : AppCompatActivity(),
             isServiceConnected = false
         }
     }
-
-
-
-
-
-
 
 
     /************************************************************************************************/

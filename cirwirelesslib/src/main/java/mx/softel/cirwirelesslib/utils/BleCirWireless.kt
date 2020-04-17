@@ -15,9 +15,12 @@ class BleCirWireless {
     private val TAG = BleCirWireless::class.java.simpleName
 
     private var uuidService             : UUID?                         = null
+    private var uuidQuickCommandService : UUID?                         = null
+
     private var characteristicDeviceInfo: BluetoothGattCharacteristic?  = null
     private var characteristicNotify    : BluetoothGattCharacteristic?  = null
     private var characteristicWrite     : BluetoothGattCharacteristic?  = null
+    private var quickCommandsCharacteristic : BluetoothGattCharacteristic? = null
     private var notificationDescriptor  : BluetoothGattDescriptor?      = null
 
     private var currentState    : StateMachine  = StateMachine.UNKNOWN
@@ -30,6 +33,7 @@ class BleCirWireless {
     /************************************************************************************************/
     fun getCharacteristicDeviceInfo(): BluetoothGattCharacteristic? = characteristicDeviceInfo
     fun getCharacteristicWrite()     : BluetoothGattCharacteristic? = characteristicWrite
+    fun getQuickCommandsCharacteristic() : BluetoothGattCharacteristic? = quickCommandsCharacteristic
     fun getCharacteristicNotify()    : BluetoothGattCharacteristic? = characteristicNotify
     fun getNotificationDescriptor()  : BluetoothGattDescriptor?     = notificationDescriptor
     fun getCurrentState()            : StateMachine                 = currentState
@@ -50,6 +54,7 @@ class BleCirWireless {
             // Solicitamos e inicializamos las características de COMUNICACIÓN
             val characteristics = service.characteristics
             for (char in characteristics) {
+
                 when (char.uuid.toString()) {
                     BleConstants.CIR_NAMA_NOTIFY_UUID -> {
                         characteristicNotify = char
@@ -64,6 +69,20 @@ class BleCirWireless {
                     }
                     BleConstants.CIR_NAMA_WRITE_UUID -> {
                         characteristicWrite = char
+                    }
+                }
+            }
+        }
+
+        if (uuid == BleConstants.QUICK_COMMANDS_SERVICE) {
+            uuidQuickCommandService = service.uuid
+            val characteristics = service.characteristics
+
+            for (char in characteristics) {
+                Log.e(TAG, "uuid: ${char.uuid.toString()}")
+                when (char.uuid.toString()) {
+                    BleConstants.QUICK_COMMANDS_CHARACTERISTIC -> {
+                        quickCommandsCharacteristic = char
                     }
                 }
             }
@@ -140,6 +159,7 @@ class BleCirWireless {
             initPoleCmd(service, characteristicNotify!!, descriptor)
         }
     }
+
 
     fun descriptorFlag(service: BleService, descriptor: BluetoothGattDescriptor) {
         if (!isDescriptorOn) {

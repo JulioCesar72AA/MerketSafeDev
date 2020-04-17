@@ -10,5 +10,7 @@ enum class StateMachine {
     GET_IP,         // Obteniendo la IP
     GET_STATUS_AP,  // Obteniendo el RSSI
     PING,           // Obteniendo status de PING
-    DATA_CONNECTION // Obteniendo status de conexión a servidor
+    DATA_CONNECTION,// Obteniendo status de conexión a servidor
+    OPENNING_LOCK, // Abriendo chapa (cerradura)
+    CLOSING_LOCK // Cerrando chapa (cerradura)
 }

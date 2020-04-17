@@ -2,6 +2,7 @@ package mx.softel.cirwireless.fragments
 
 import android.os.Bundle
 import android.view.*
+import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import android.widget.ImageView
 import android.widget.PopupMenu
@@ -21,6 +22,8 @@ import mx.softel.cirwirelesslib.utils.CirCommands
  */
 class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClickListener {
 
+    private var lockOptionsEnabled       : Boolean = true
+
     // BLUETOOTH
     private lateinit var navigation     : FragmentNavigation
     private lateinit var root           : RootActivity
@@ -30,7 +33,11 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
     private lateinit var ivMenu         : ImageView
     private lateinit var cvConfigure    : CardView
     private lateinit var cvTest         : CardView
+    private lateinit var cvOpenLock     : CardView
+    private lateinit var cvCloseLock    : CardView
     private lateinit var tvMac          : TextView
+    private lateinit var cvLockOrConfig : CardView
+    private lateinit var ivLockOrConfig : ImageView
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -53,6 +60,10 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             tvMac           = findViewById(R.id.tvMacSelected)
             cvConfigure     = findViewById(R.id.cvConfigurar)
             cvTest          = findViewById(R.id.cvProbar)
+            cvOpenLock      = findViewById(R.id.cvOpenLock)
+            cvCloseLock     = findViewById(R.id.cvCloseLock)
+            cvLockOrConfig  = findViewById(R.id.cvConfigurationOrLock)
+            ivLockOrConfig  = findViewById(R.id.ivConfigOrLock)
 
             // Asignamos el texto de los argumentos recibidos
             tvMac.text      = root.bleMac
@@ -71,6 +82,9 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
         ivMenu      .setOnClickListener(this)
         cvTest      .setOnClickListener(this)
         cvConfigure .setOnClickListener(this)
+        cvOpenLock  .setOnClickListener(this)
+        cvCloseLock .setOnClickListener(this)
+        cvLockOrConfig.setOnClickListener(this)
     }
 
     /************************************************************************************************/
@@ -89,7 +103,79 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             R.id.ivMenuUpdate   -> createMenu()
             R.id.cvConfigurar   -> clickConfigure()
             R.id.cvProbar       -> clickTest()
+            R.id.cvConfigurationOrLock -> showConfigOrLockBtns()
+            R.id.cvCloseLock    -> sendCloseLockCommand()
+            R.id.cvOpenLock     -> sendOpenLockCommand()
         }
+    }
+
+    private fun sendCloseLockCommand () {
+        if (root.cirService.getQuickCommandsCharacteristic() == null)
+            sendCloseLockCommand()
+        else {
+            toast("Cerrando cerradura")
+            root.apply {
+                CirCommands.closeLock(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
+                cirService.setCurrentState(StateMachine.CLOSING_LOCK)
+            }
+        }
+    }
+
+    private fun sendOpenLockCommand () {
+        if (root.cirService.getQuickCommandsCharacteristic() == null)
+            sendOpenLockCommand()
+        else {
+            toast("Abriendo cerradura")
+            root.apply {
+                CirCommands.openLock(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
+                cirService.setCurrentState(StateMachine.OPENNING_LOCK)
+            }
+        }
+    }
+
+    private fun showConfigOrLockBtns () {
+        val animationForLockBtns : Int
+        val animationForConfigBtns : Int
+        val visibilityForLockBtns : Int
+        val visibilityForConfigBtns : Int
+        val image : Int
+
+        if (lockOptionsEnabled) {
+            animationForLockBtns = R.anim.slide_right_to_left
+            animationForConfigBtns = R.anim.slide_left_to_right
+
+            visibilityForLockBtns = View.GONE
+            visibilityForConfigBtns = View.VISIBLE
+
+            image = R.drawable.ic_abrir_chapa
+
+            lockOptionsEnabled = false
+
+        } else {
+            animationForLockBtns = R.anim.slide_left_to_right
+            animationForConfigBtns = R.anim.slide_right_to_left
+
+            visibilityForLockBtns = View.VISIBLE
+            visibilityForConfigBtns = View.GONE
+
+            image = R.drawable.ic_config
+
+            lockOptionsEnabled = true
+        }
+
+        cvOpenLock.startAnimation(AnimationUtils.loadAnimation(root, animationForLockBtns))
+        cvCloseLock.startAnimation(AnimationUtils.loadAnimation(root, animationForLockBtns))
+
+        cvConfigure.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
+        cvTest.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
+
+        cvOpenLock.visibility = visibilityForLockBtns
+        cvCloseLock.visibility = visibilityForLockBtns
+
+        cvConfigure.visibility = visibilityForConfigBtns
+        cvTest.visibility = visibilityForConfigBtns
+
+        ivLockOrConfig.setImageResource(image)
     }
 
     /**
@@ -151,11 +237,6 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             show()
         }
     }
-
-
-
-
-
 
 
     /************************************************************************************************/

@@ -17,6 +17,14 @@ object CommandUtils {
     private val WIFI_STATUS         = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x27)
     private val AT_GENERIC          = byteArrayOf(0x55, 0x13, 0x10, 0x00, 0x4B)
     private val AT_READ             = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x34)
+    private const val CLOSE_LOCK    = 0x0E
+    private const val OPEN_LOCK     = 0x0F
+
+    private val PASSCODE            = byteArrayOf(
+        0x4a, 0xb0.toByte(), 0x0d, 0xc6.toByte(), 0xfc.toByte(), 0x4e,
+        0x3e, 0x8c.toByte(), 0xf6.toByte(), 0x1a, 0x5a, 0xcb.toByte(),
+        0x94.toByte(), 0xe6.toByte(), 0x53, 0x15
+    )
 
     /************************************************************************************************/
     /**     COMANDOS PLANOS                                                                         */
@@ -123,11 +131,16 @@ object CommandUtils {
         return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
+    fun openLockCmd (mac: ByteArray): ByteArray {
+        val openLockCmd: ByteArray = byteArrayOf((PASSCODE.size + 2).toByte(), OPEN_LOCK.toByte()) + PASSCODE
+        // Log.e(TAG, "OPEN_LOCK_COMMAND: ${openLockCmd.toHex()}")
+        return getCompleteEncryptedCommand(openLockCmd, mac)
+    }
 
-
-
-
-
+    fun closeLockCmd (mac: ByteArray): ByteArray {
+        val closeLockCmd: ByteArray = byteArrayOf((PASSCODE.size + 2).toByte(), CLOSE_LOCK.toByte())  + PASSCODE
+        return getCompleteEncryptedCommand(closeLockCmd, mac)
+    }
 
     /************************************************************************************************/
     /**      CRC                                                                                    */
@@ -157,6 +170,10 @@ object CommandUtils {
         cmd += crc
 
         return cmd
+    }
+
+    private fun getCompleteEncryptedCommand (cmd: ByteArray, mac: ByteArray): ByteArray {
+        return wrapper.getEnc(mac, cmd, 1)
     }
 
     fun decryptResponse(response: ByteArray, mac: ByteArray): ByteArray {

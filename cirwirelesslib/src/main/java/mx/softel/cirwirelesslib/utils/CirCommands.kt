@@ -203,7 +203,15 @@ object CirCommands {
                           mac           : ByteArray)
             = service.writeToCharacteristic(CommandUtils.checkCipStatusCmd(mac), characteristic)
 
+    fun openLock (service           : BleService,
+                  characteristic    : BluetoothGattCharacteristic,
+                  mac               : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.openLockCmd(mac), characteristic)
 
+    fun closeLock (service          : BleService,
+                   characteristic   : BluetoothGattCharacteristic,
+                   mac              : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.closeLockCmd(mac), characteristic)
 
     /**
      * ## fromResponseGetMacList
