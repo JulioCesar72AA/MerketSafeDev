@@ -1,0 +1,80 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">CIR Wireless</string>
+
+    <!-- MENU's -->
+    <string name="action_update">Update WiFi Module</string>
+    <string name="action_info">Info</string>
+
+    <!-- TOAST's -->
+    <string name="tst_scanning" tools:ignore="Typos">Wait a moment … scanning</string>
+
+    <!-- HINT's -->
+    <string name="hint_password">Passcode</string>
+
+    <!-- BUTTON's -->
+    <string name="btn_configure">Configure</string>
+    <string name="btn_test">Test</string>
+
+    <string name="btn_open_lock">Open lock</string>
+    <string name="btn_close_lock">Close lock</string>
+
+    <!-- TEXT VIEW's -->
+    <string name="tv_selected_device">BLE device</string>
+    <string name="tv_no_devices">Nearby devices not found, swipe to try again</string>
+    <string name="tv_scan">Scan</string>
+    <string name="tv_cir_wireless">CIR Wireless</string>
+    <string name="tv_title_access">Access Points</string>
+    <string name="tv_title_dispositivos">Device</string>
+    <string name="tv_test_mac">00:1B:C5:00:08:11</string>
+    <string name="tv_password">Passcode</string>
+    <string name="tv_aceptar">Accept</string>
+    <string name="tv_cancelar">Cancel</string>
+    <string name="tv_ip">IP</string>
+    <string name="tv_dispositivos_ip">10.25.33</string>
+    <string name="tv_dispositivos_ssid">SSID</string>
+    <string name="tv_password_wifi">Infinitum32145</string>
+    <string name="tv_redes_access">Softel CMX</string>
+    <string name="tv_sdi_access">RSSI</string>
+    <string name="tv_ssdi_number_access">-30</string>
+    <string name="tv_ap_access">AP</string>
+    <string name="tv_internet_access">INTERNET</string>
+    <string name="tv_data_access">DATA</string>
+    <string name="tv_status_access">STATUS</string>
+    <string name="tv_wifi_nok">Configuration failed, try again</string>
+    <string name="tv_wifi_ok">Wifi successfully configured</string>
+    <string name="tv_version">Version: %s</string>
+
+    <!-- CONTENT DESCRIPTION's -->
+    <string name="cd_bluetooth_icon">Bluetooth</string>
+    <string name="cd_logo_cir_wireless_softel">logo CIR Wireless SOFTEL</string>
+    <string name="cd_config_icon">Configuration</string>
+    <string name="cd_test_icon">Test</string>
+    <string name="cd_icon_router">Router Icon</string>
+    <string name="cd_icon_dispositivos">Device</string>
+    <string name="cd_back_icon">Back</string>
+    <string name="cd_password_icon">Passcode</string>
+    <string name="cd_open_lock">Open lock</string>
+    <string name="cd_close_lock">Close lock</string>
+
+
+    <!-- ERROR MESSAGE's -->
+    <string name="error_no_communication">Communication error occurred, try again</string>
+    <string name="error_no_ap">Access Point not detected</string>
+    <string name="error_no_ip">IP direction wasn\'t assigned. Check your modem configuration</string>
+    <string name="error_no_ping">Connected, but without internet connection</string>
+    <string name="error_no_data">There is no connection to server</string>
+    <string name="error_no_error">Correct configuration</string>
+
+    <!-- TOAST's -->
+    <string name="lock_open">Lock is opened</string>
+    <string name="lock_close">Lock is closed</string>
+    <string name="lock_disabled">Lock is disabled</string>
+    <string name="device_connected">Device connected</string>
+    <string name="configuring_wifi_device">Configuring WiFi</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="error_occurred">Error occurred</string>
+    <string name="timeout_expired">Timeout expired, disconnecting</string>
+    <string name="unsupported_device">Unsupported device</string>
+    <string name="device_disconnecting">Device is disconnecting</string>
+    <string name="wait_moment">Wait a moment</string>
+</resources>

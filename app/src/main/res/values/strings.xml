@@ -65,8 +65,16 @@
     <string name="error_no_data">No hay conexión con el servidor de datos</string>
     <string name="error_no_error">Configuración correcta</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
-
+    <!-- TOAST's -->
+    <string name="lock_open">Cerradura abierta</string>
+    <string name="lock_close">Cerradura cerrada</string>
+    <string name="lock_disabled">Cerradura no habilitada</string>
+    <string name="device_connected">Dispositivo conectado</string>
+    <string name="configuring_wifi_device">Configurando el WIFI del dispositivo</string>
+    <string name="cancelled">Cancelado</string>
+    <string name="error_occurred">Ocurrió un error</string>
+    <string name="timeout_expired">Tiempo de espera agotado, desconectando</string>
+    <string name="unsupported_device">Dispositivo no soportado</string>
+    <string name="device_disconnecting">Desconectando el dispositivo</string>
+    <string name="wait_moment">Espera un momento</string>
 </resources>

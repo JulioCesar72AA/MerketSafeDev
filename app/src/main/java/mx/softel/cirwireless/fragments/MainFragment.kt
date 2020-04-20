@@ -1,6 +1,7 @@
 package mx.softel.cirwireless.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
@@ -176,6 +177,8 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
         cvTest.visibility = visibilityForConfigBtns
 
         ivLockOrConfig.setImageResource(image)
+
+        Log.e(TAG, "MACHINE_STATE: ${root.cirService.getCurrentState()}")
     }
 
     /**

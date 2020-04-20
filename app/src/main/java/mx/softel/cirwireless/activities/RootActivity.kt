@@ -110,7 +110,7 @@ class RootActivity : AppCompatActivity(),
      */
     override fun onBackPressed() {
         if (isScanning) {
-            toast("Espere un momento")
+            toast(getString(R.string.wait_moment))
             return
         }
         backFragment()
@@ -124,7 +124,7 @@ class RootActivity : AppCompatActivity(),
         scanMask.apply {
             visibility = View.VISIBLE
             background = getDrawable(R.color.hardMask)
-            setOnClickListener { toast("Espere un momento") }
+            setOnClickListener { toast(getString(R.string.wait_moment)) }
         }
         pbScanning.visibility = View.VISIBLE
         isScanning = true
@@ -217,7 +217,7 @@ class RootActivity : AppCompatActivity(),
      */
     override fun dialogAccept(password: String) {
 
-        toast("Configurando el WIFI del dispositivo", Toast.LENGTH_LONG)
+        toast(getString(R.string.configuring_wifi_device), Toast.LENGTH_LONG)
         passwordTyped = password
         CirCommands.setDeviceModeCmd(service!!,
                                      cirService.getCharacteristicWrite()!!,
@@ -232,7 +232,7 @@ class RootActivity : AppCompatActivity(),
      * Se ejecuta al hacer click en "Cancelar" del diálogo de Password
      */
     override fun dialogCancel() {
-        toast("Cancelado")
+        toast(getString(R.string.cancelled))
     }
 
     /**
@@ -892,11 +892,11 @@ class RootActivity : AppCompatActivity(),
             ReceivedCmd.LOCK_OK -> {
                 when (state) {
                     StateMachine.OPENNING_LOCK -> {
-                        runOnUiThread{ toast("Cerradura abierta") }
+                        runOnUiThread{ toast(getString(R.string.lock_open)) }
                     }
 
                     StateMachine.CLOSING_LOCK -> {
-                        runOnUiThread { toast("Cerradura cerrada") }
+                        runOnUiThread { toast(getString(R.string.lock_close)) }
                     }
 
                     else -> {/* Nothing here */}
@@ -904,12 +904,12 @@ class RootActivity : AppCompatActivity(),
             }
 
             ReceivedCmd.LOCK_NOT_ENABLED -> {
-                runOnUiThread { toast("Cerradura no habilitada") }
+                runOnUiThread { toast(getString(R.string.lock_disabled)) }
             }
             else -> { /* Nothing here */ }
         }
 
-        cirService.setCurrentState(StateMachine.UNKNOWN)
+        cirService.setCurrentState(StateMachine.POLING)
     }
 
     private fun quickCommandState (state: StateMachine,
@@ -942,19 +942,19 @@ class RootActivity : AppCompatActivity(),
         disconnectionReason = reason
         when (reason) {
             DisconnectionReason.NOT_AVAILABLE, DisconnectionReason.FAILURE -> {
-                runOnUiThread { toast("Ocurrió un error") }
+                runOnUiThread { toast(getString(R.string.error_occurred)) }
                 handler.apply { postDelayed(disconnectionRunnable, UI_TIMEOUT) }
             }
             DisconnectionReason.CONNECTION_FAILED -> {
-                runOnUiThread { toast("Tiempo de espera agotado, desconectando") }
+                runOnUiThread { toast(getString(R.string.timeout_expired)) }
                 handler.apply { postDelayed(disconnectionRunnable, UI_TIMEOUT) }
             }
             DisconnectionReason.FIRMWARE_UNSUPPORTED -> {
-                runOnUiThread { toast("Dispositivo no soportado") }
+                runOnUiThread { toast(getString(R.string.unsupported_device)) }
                 handler.apply { postDelayed(disconnectionRunnable, UI_TIMEOUT) }
             }
             else -> {
-                runOnUiThread { toast("Desconectando el dispositivo") }
+                runOnUiThread { toast(getString(R.string.device_disconnecting)) }
                 handler.apply {
                     postDelayed(disconnectionRunnable, UI_TIMEOUT)
                 }
@@ -969,7 +969,7 @@ class RootActivity : AppCompatActivity(),
      * algunas características necesarias para la comunicación
      */
     private fun connectedDevice() {
-        runOnUiThread { toast("Dispositivo conectado") }
+        runOnUiThread { toast(getString(R.string.device_connected)) }
         service!!.discoverDeviceServices()
     }
 
