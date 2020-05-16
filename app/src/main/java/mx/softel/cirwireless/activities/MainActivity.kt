@@ -167,6 +167,7 @@ class MainActivity: AppCompatActivity(),
     private fun scanDevices() {
         isScanning = true
         val bleManager = BleManager(this, TIMEOUT)
+        bleDevices.clear()
         bleManager.scanBleDevices {
             bleDevices = it
             if (bleDevices.isEmpty()) {

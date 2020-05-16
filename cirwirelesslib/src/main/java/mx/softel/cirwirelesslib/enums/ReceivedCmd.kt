@@ -16,5 +16,7 @@ enum class ReceivedCmd {
     WIFI_PASS_FAIL,
     WIFI_STATUS,
     LOCK_OK,
-    LOCK_NOT_ENABLED
+    LOCK_NOT_ENABLED,
+    RELOAD_OK,
+    RELOAD_NOT_ENABLED
 }

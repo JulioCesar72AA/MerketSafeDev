@@ -24,8 +24,9 @@
     <!-- Contenido de la vista -->
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:weightSum="2">
 
         <!-- Título sección -->
         <LinearLayout
@@ -34,7 +35,7 @@
             android:layout_marginStart="@dimen/cv_margin_access_point"
             android:layout_marginTop="@dimen/cv_margin_access_point_top"
             android:layout_marginEnd="@dimen/cv_margin_access_point"
-            android:layout_weight=".5"
+            android:layout_weight=".7"
             android:gravity="center"
             android:orientation="horizontal"
             android:weightSum="1" >
@@ -90,8 +91,7 @@
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/cv_margin_access_point"
             android:layout_marginEnd="@dimen/cv_margin_access_point"
-            android:layout_marginBottom="@dimen/cv_margin_access_point"
-            android:layout_weight=".2"
+            android:layout_weight=".4"
             android:orientation="vertical" >
 
 
@@ -286,6 +286,11 @@
             </androidx.cardview.widget.CardView>
         </LinearLayout>
 
+        <include
+            layout="@layout/branding"
+            android:layout_weight=".9"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent" />
     </TableLayout>
 
 </RelativeLayout>

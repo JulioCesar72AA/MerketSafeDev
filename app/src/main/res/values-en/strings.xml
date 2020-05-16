@@ -7,6 +7,8 @@
 
     <!-- TOAST's -->
     <string name="tst_scanning" tools:ignore="Typos">Wait a moment … scanning</string>
+    <string name="locking">Locking</string>
+    <string name="unlocking">Unlocking</string>
 
     <!-- HINT's -->
     <string name="hint_password">Passcode</string>
@@ -15,13 +17,15 @@
     <string name="btn_configure">Configure</string>
     <string name="btn_test">Test</string>
 
-    <string name="btn_open_lock">Open lock</string>
-    <string name="btn_close_lock">Close lock</string>
+    <string name="btn_open_lock">Unlock</string>
+    <string name="btn_close_lock">Lock</string>
+    <string name="btn_recharge_fridge">Reload</string>
 
     <!-- TEXT VIEW's -->
-    <string name="tv_selected_device">BLE device</string>
+    <string name="tv_selected_device_status">Connecting to\nBLE device</string>
+    <string name="tv_selected_device_status_connected">Connnected to\nBLE device</string>
     <string name="tv_no_devices">Nearby devices not found, swipe to try again</string>
-    <string name="tv_scan">Scan</string>
+    <string name="tv_scan">Scanning …</string>
     <string name="tv_cir_wireless">CIR Wireless</string>
     <string name="tv_title_access">Access Points</string>
     <string name="tv_title_dispositivos">Device</string>
@@ -53,8 +57,8 @@
     <string name="cd_icon_dispositivos">Device</string>
     <string name="cd_back_icon">Back</string>
     <string name="cd_password_icon">Passcode</string>
-    <string name="cd_open_lock">Open lock</string>
-    <string name="cd_close_lock">Close lock</string>
+    <string name="cd_open_lock">Unlock</string>
+    <string name="cd_close_lock">Lock</string>
 
 
     <!-- ERROR MESSAGE's -->
@@ -77,4 +81,6 @@
     <string name="unsupported_device">Unsupported device</string>
     <string name="device_disconnecting">Device is disconnecting</string>
     <string name="wait_moment">Wait a moment</string>
+    <string name="reload_enabled">Reload activated</string>
+    <string name="reload_not_available">Reload is not available</string>
 </resources>

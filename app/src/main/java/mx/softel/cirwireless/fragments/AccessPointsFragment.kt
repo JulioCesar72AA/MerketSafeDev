@@ -112,7 +112,7 @@ class AccessPointsFragment: Fragment(),
 
             // Rellena la lista para mostrar en la pantalla estándar
             for (data in wifiResults) {
-                Log.e(TAG, "wifi: $data")
+                // Log.e(TAG, "wifi: $data")
                 // Establecemos una nueva lista de macs validadas por el dispositivo
                 if (root.deviceMacList == null) return
                 for (mac in root.deviceMacList!!) {

@@ -76,15 +76,16 @@
     <!-- Contenido de la vista -->
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:weightSum="2">
 
         <!-- Ícono y textos -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:weightSum="1"
-            android:gravity="bottom"
+            android:layout_weight="0.5"
+            android:weightSum="2"
+            android:gravity="center"
             android:orientation="vertical">
 
             <!-- Ícono de Bluetooth -->
@@ -92,7 +93,7 @@
                 android:id="@+id/imageView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.08"
+                android:layout_weight="0.35"
                 android:paddingStart="70dp"
                 android:paddingEnd="70dp"
                 android:paddingTop="70dp"
@@ -103,119 +104,174 @@
 
             <!-- Dispositivo BLE -->
             <TextView
+                android:id="@+id/tvBleStatusConnection"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.46"
+                android:layout_weight="0.78"
                 android:fontFamily="@font/rubik_bold"
                 android:gravity="center"
-                android:text="@string/tv_selected_device"
+                android:text="@string/tv_selected_device_status"
                 android:textColor="@color/colortextwhite"
-                android:textSize="28dp"/>
+                android:textSize="26dp"/>
 
             <!-- MAC del dispositivo seleccionado -->
             <TextView
                 android:id="@+id/tvMacSelected"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.46"
+                android:layout_weight="0.85"
                 android:fontFamily="@font/rubik_regular"
                 android:gravity="center"
                 android:textColor="@color/colortextwhite"
-                android:textSize="22dp"
+                android:textSize="20dp"
                 tools:text="00:1B:C5:86:A6:1B"/>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1.9"
+            android:layout_weight="0.6"
             android:baselineAligned="false"
             android:gravity="center"
             android:orientation="horizontal">
 
             <!-- Botones Chapa -->
-            <!-- CardView Close Lock -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cvOpenLock"
-                android:layout_width="@dimen/cv_fixed_size"
-                android:layout_height="@dimen/cv_fixed_size"
-                android:layout_margin="@dimen/cv_margin"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground"
-                app:cardElevation="@dimen/cv_elevation"
-                app:cardCornerRadius="@dimen/cv_corner_radius"
-                app:cardUseCompatPadding="true"
-                app:cardBackgroundColor="@color/cardScanBackground">
+            <TableLayout
+                android:id="@+id/tlLockContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center">
 
-                <LinearLayout
+                    <!-- CardView Open Lock -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cvOpenLock"
+                        android:layout_width="@dimen/cv_lock_size"
+                        android:layout_height="@dimen/cv_lock_size"
+                        android:layout_margin="@dimen/cv_margin"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        app:cardElevation="@dimen/cv_elevation"
+                        app:cardCornerRadius="@dimen/cv_corner_radius"
+                        app:cardUseCompatPadding="true"
+                        app:cardBackgroundColor="@color/cardScanBackground">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:layout_margin="@dimen/cv_close_open_lock">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="8"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/ic_abrir_chapa"
+                                android:contentDescription="@string/cd_config_icon"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="2"
+                                android:gravity="center"
+                                android:text="@string/btn_open_lock"
+                                android:fontFamily="@font/rubik_bold"
+                                android:textColor="@color/colorIconBlue"/>
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Cardview Close Lock -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cvCloseLock"
+                        android:layout_width="@dimen/cv_lock_size"
+                        android:layout_height="@dimen/cv_lock_size"
+                        android:layout_margin="@dimen/cv_margin"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        app:cardElevation="@dimen/cv_elevation"
+                        app:cardCornerRadius="@dimen/cv_corner_radius"
+                        app:cardUseCompatPadding="true"
+                        app:cardBackgroundColor="@color/cardScanBackground"
+                        >
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:layout_margin="@dimen/cv_close_open_lock"
+                            >
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="8"
+                                android:src="@drawable/ic_cerrar_chapa"
+                                android:contentDescription="@string/cd_close_lock"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="2"
+                                android:gravity="center"
+                                android:text="@string/btn_close_lock"
+                                android:fontFamily="@font/rubik_bold"
+                                android:textColor="@color/colorIconBlue"/>
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </TableRow>
+
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:layout_margin="@dimen/cv_close_open_lock">
+                    android:layout_height="wrap_content"
+                    android:gravity="center" >
 
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="8"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/ic_abrir_chapa"
-                        android:contentDescription="@string/cd_config_icon"/>
+                    <!-- Cardview Recharge Fridge -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cvRecharge"
+                        android:layout_width="@dimen/cv_lock_size"
+                        android:layout_height="@dimen/cv_lock_size"
+                        android:layout_margin="@dimen/cv_margin"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        app:cardElevation="@dimen/cv_elevation"
+                        app:cardCornerRadius="@dimen/cv_corner_radius"
+                        app:cardUseCompatPadding="true"
+                        app:cardBackgroundColor="@color/cardScanBackground" >
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="2"
-                        android:gravity="center"
-                        android:text="@string/btn_open_lock"
-                        android:fontFamily="@font/rubik_bold"
-                        android:textColor="@color/colorIconBlue"/>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:layout_margin="@dimen/cv_close_open_lock" >
 
-                </LinearLayout>
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="8"
+                                android:src="@drawable/ic_reload"
+                                android:contentDescription="@string/cd_close_lock"/>
 
-            </androidx.cardview.widget.CardView>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="2"
+                                android:gravity="center"
+                                android:text="@string/btn_recharge_fridge"
+                                android:fontFamily="@font/rubik_bold"
+                                android:textColor="@color/colorIconBlue"/>
 
-            <!-- Cardview Open Lock -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cvCloseLock"
-                android:layout_width="@dimen/cv_fixed_size"
-                android:layout_height="@dimen/cv_fixed_size"
-                android:layout_margin="@dimen/cv_margin"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground"
-                app:cardElevation="@dimen/cv_elevation"
-                app:cardCornerRadius="@dimen/cv_corner_radius"
-                app:cardUseCompatPadding="true"
-                app:cardBackgroundColor="@color/cardScanBackground"
-                >
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:layout_margin="@dimen/cv_close_open_lock"
-                    >
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="8"
-                        android:src="@drawable/ic_cerrar_chapa"
-                        android:contentDescription="@string/cd_close_lock"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="2"
-                        android:gravity="center"
-                        android:text="@string/btn_close_lock"
-                        android:fontFamily="@font/rubik_bold"
-                        android:textColor="@color/colorIconBlue"/>
-
-                </LinearLayout>
-
-            </androidx.cardview.widget.CardView>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </TableRow>
+            </TableLayout>
 
             <!-- Botones Configuración -->
             <!-- CardView Configurar -->
@@ -299,8 +355,13 @@
                         android:textColor="@color/colorIconBlue"/>
 
                 </LinearLayout>
-
             </androidx.cardview.widget.CardView>
         </LinearLayout>
+
+        <include
+            layout="@layout/branding"
+            android:layout_weight="0.8"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent" />
     </TableLayout>
 </RelativeLayout>

@@ -1,12 +1,12 @@
 package mx.softel.cirwireless.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import android.widget.ImageView
 import android.widget.PopupMenu
+import android.widget.TableLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import mx.softel.bleservicelib.enums.DisconnectionReason
@@ -21,7 +21,7 @@ import mx.softel.cirwirelesslib.utils.CirCommands
 /**
  * A simple [Fragment] subclass.
  */
-class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClickListener {
+class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClickListener, RootActivity.RootEvents {
 
     private var lockOptionsEnabled       : Boolean = true
 
@@ -34,8 +34,11 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
     private lateinit var ivMenu         : ImageView
     private lateinit var cvConfigure    : CardView
     private lateinit var cvTest         : CardView
+    private lateinit var tlLockBtns     : TableLayout
     private lateinit var cvOpenLock     : CardView
     private lateinit var cvCloseLock    : CardView
+    private lateinit var cvRechargeFridge:CardView
+    private lateinit var tvBleStatusConnection : TextView
     private lateinit var tvMac          : TextView
     private lateinit var cvLockOrConfig : CardView
     private lateinit var ivLockOrConfig : ImageView
@@ -58,11 +61,14 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             // Asignamos las vistas por su ID
             ivBack          = findViewById(R.id.ivBack)
             ivMenu          = findViewById(R.id.ivMenuUpdate)
+            tvBleStatusConnection = findViewById(R.id.tvBleStatusConnection)
             tvMac           = findViewById(R.id.tvMacSelected)
             cvConfigure     = findViewById(R.id.cvConfigurar)
             cvTest          = findViewById(R.id.cvProbar)
+            tlLockBtns      = findViewById(R.id.tlLockContainer)
             cvOpenLock      = findViewById(R.id.cvOpenLock)
             cvCloseLock     = findViewById(R.id.cvCloseLock)
+            cvRechargeFridge= findViewById(R.id.cvRecharge)
             cvLockOrConfig  = findViewById(R.id.cvConfigurationOrLock)
             ivLockOrConfig  = findViewById(R.id.ivConfigOrLock)
 
@@ -85,6 +91,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
         cvConfigure .setOnClickListener(this)
         cvOpenLock  .setOnClickListener(this)
         cvCloseLock .setOnClickListener(this)
+        cvRechargeFridge.setOnClickListener(this)
         cvLockOrConfig.setOnClickListener(this)
     }
 
@@ -105,8 +112,20 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             R.id.cvConfigurar   -> clickConfigure()
             R.id.cvProbar       -> clickTest()
             R.id.cvConfigurationOrLock -> showConfigOrLockBtns()
+            R.id.cvRecharge     -> sendReloadCommand()
             R.id.cvCloseLock    -> sendCloseLockCommand()
             R.id.cvOpenLock     -> sendOpenLockCommand()
+        }
+    }
+
+    private fun sendReloadCommand () {
+        if (root.cirService.getQuickCommandsCharacteristic() == null)
+            sendReloadCommand()
+        else {
+            root.apply {
+                CirCommands.reloadFridge(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
+                cirService.setCurrentState(StateMachine.RELOADING_FRIDGE)
+            }
         }
     }
 
@@ -114,7 +133,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
         if (root.cirService.getQuickCommandsCharacteristic() == null)
             sendCloseLockCommand()
         else {
-            toast("Cerrando cerradura")
+            toast(getString(R.string.locking))
             root.apply {
                 CirCommands.closeLock(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
                 cirService.setCurrentState(StateMachine.CLOSING_LOCK)
@@ -126,7 +145,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
         if (root.cirService.getQuickCommandsCharacteristic() == null)
             sendOpenLockCommand()
         else {
-            toast("Abriendo cerradura")
+            toast(getString(R.string.unlocking))
             root.apply {
                 CirCommands.openLock(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
                 cirService.setCurrentState(StateMachine.OPENNING_LOCK)
@@ -164,21 +183,21 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             lockOptionsEnabled = true
         }
 
-        cvOpenLock.startAnimation(AnimationUtils.loadAnimation(root, animationForLockBtns))
-        cvCloseLock.startAnimation(AnimationUtils.loadAnimation(root, animationForLockBtns))
+        // Se colocan las animaciones a los botones de la seccion de chapa
+        tlLockBtns.startAnimation(AnimationUtils.loadAnimation(root, animationForLockBtns))
 
+        // Se colocan las animaciones a los botones de la seccion de configuración
         cvConfigure.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
         cvTest.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
 
-        cvOpenLock.visibility = visibilityForLockBtns
-        cvCloseLock.visibility = visibilityForLockBtns
+        // Se colocan la visibilidad de los botones de la seccion de chapa
+        tlLockBtns.visibility = visibilityForLockBtns
 
+        // Se colocan la visibilidad de los botones de la seccion de configuracion
         cvConfigure.visibility = visibilityForConfigBtns
         cvTest.visibility = visibilityForConfigBtns
 
         ivLockOrConfig.setImageResource(image)
-
-        Log.e(TAG, "MACHINE_STATE: ${root.cirService.getCurrentState()}")
     }
 
     /**
@@ -190,12 +209,15 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
         // Actualizamos los AccessPoints que el dispositivo ve
         if (root.cirService.getCharacteristicWrite() == null)
             clickConfigure()
-        else{
+        else {
             toast("Actualizando datos")
+            root.cirService.setCurrentState(StateMachine.GET_AP)
+            /*
             root.apply {
                 CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!, root.bleMacBytes)
-                    cirService.setCurrentState(StateMachine.GET_AP)
+                cirService.setCurrentState(StateMachine.GET_AP)
             }
+            */
         }
     }
 
@@ -207,11 +229,15 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             toast("Solicitando los datos del dispositivo")
             root.apply{
                 setScanningUI()
-                CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!, root.bleMacBytes)
+
+                // CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!, root.bleMacBytes)
+
                 cirService.setCurrentState(StateMachine.UNKNOWN)
+
                 if (actualFragment != testerFragment) {
                     actualFragment = testerFragment
                 }
+
                 runOnUiThread {
                     navigateTo(testerFragment, true, null)
                     setScanningUI()
@@ -252,6 +278,10 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
          * Singleton access to [MainFragment]
          */
         @JvmStatic fun getInstance() = MainFragment()
+    }
+
+    override fun deviceConnected() {
+        tvBleStatusConnection.text = getString(R.string.tv_selected_device_status_connected)
     }
 
 }

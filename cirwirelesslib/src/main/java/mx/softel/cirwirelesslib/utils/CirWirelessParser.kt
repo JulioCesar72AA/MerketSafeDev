@@ -31,6 +31,14 @@ object CirWirelessParser {
         }
     }
 
+    fun reloadResponse (response: ByteArray): ReceivedCmd {
+        return when (response[1]) {
+            RELOAD_OK               -> ReceivedCmd.RELOAD_OK
+            RELOAD_NOT_ENABLED      -> ReceivedCmd.RELOAD_NOT_ENABLED
+            else                    -> ReceivedCmd.UNKNOWN
+        }
+    }
+
     fun lockResponse (response: ByteArray): ReceivedCmd {
         return when (response[1]) {
             LOCK_CLOSED_OR_OPEN_OK  -> ReceivedCmd.LOCK_OK
@@ -55,5 +63,6 @@ object CirWirelessParser {
     private const val POLEO                 = 0xC5.toByte()
     private const val LOCK_CLOSED_OR_OPEN_OK= 0x01.toByte()
     private const val LOCK_NOT_ENABLED      = 0x1E.toByte()
-
+    private const val RELOAD_OK             = 0x01.toByte() // This is repeated 'cause this answers could change for this command
+    private const val RELOAD_NOT_ENABLED    = 0x1E.toByte() // This is repeated 'cause this answers could change for this command
 }

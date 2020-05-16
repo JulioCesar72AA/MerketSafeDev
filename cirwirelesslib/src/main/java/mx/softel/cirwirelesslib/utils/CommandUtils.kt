@@ -19,6 +19,7 @@ object CommandUtils {
     private val AT_READ             = byteArrayOf(0x55, 0x13, 0x10, 0x07, 0x34)
     private const val CLOSE_LOCK    = 0x0E
     private const val OPEN_LOCK     = 0x0F
+    private const val RELOAD_FRIDGE = 0x19
 
     private val PASSCODE            = byteArrayOf(
         0x4a, 0xb0.toByte(), 0x0d, 0xc6.toByte(), 0xfc.toByte(), 0x4e,
@@ -140,6 +141,12 @@ object CommandUtils {
     fun closeLockCmd (mac: ByteArray): ByteArray {
         val closeLockCmd: ByteArray = byteArrayOf((PASSCODE.size + 2).toByte(), CLOSE_LOCK.toByte())  + PASSCODE
         return getCompleteEncryptedCommand(closeLockCmd, mac)
+    }
+
+    fun reloadFridgeCmd (mac: ByteArray): ByteArray {
+        val reloadFridgeCmd: ByteArray = byteArrayOf((PASSCODE.size + 2).toByte(), RELOAD_FRIDGE.toByte()) + PASSCODE
+        // Log.e(TAG, "reloadFridgeCmd: ${reloadFridgeCmd.toHex()}")
+        return getCompleteEncryptedCommand(reloadFridgeCmd, mac)
     }
 
     /************************************************************************************************/

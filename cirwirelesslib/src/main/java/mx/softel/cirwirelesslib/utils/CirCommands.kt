@@ -213,6 +213,14 @@ object CirCommands {
                    mac              : ByteArray)
             = service.writeToCharacteristic(CommandUtils.closeLockCmd(mac), characteristic)
 
+    fun reloadFridge (service          : BleService,
+                      characteristic: BluetoothGattCharacteristic,
+                      mac : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.reloadFridgeCmd(mac), characteristic)
+
+    /*
+    0x19
+     */
     /**
      * ## fromResponseGetMacList
      * A partir de la respuesta obtenida por [getMacListCmd] parsea la respuesta

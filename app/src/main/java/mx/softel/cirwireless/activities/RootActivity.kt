@@ -702,11 +702,6 @@ class RootActivity : AppCompatActivity(),
 
 
 
-
-
-
-
-
     /************************************************************************************************/
     /**     NAVIGATION                                                                              */
     /************************************************************************************************/
@@ -756,17 +751,24 @@ class RootActivity : AppCompatActivity(),
     }
 
     override fun characteristicRead(characteristic: BluetoothGattCharacteristic) {
-        Log.e(TAG, "characteristicRead: ${characteristic.value.toHex()}")
+        // Log.e(TAG, "characteristicRead: ${characteristic.value.toHex()}")
 
         val uuidCharacteristic : String = characteristic.uuid.toString()
         val value : ByteArray = characteristic.value
 
         if (uuidCharacteristic == BleConstants.QUICK_COMMANDS_CHARACTERISTIC) {
-            wasLockSuccess(
-                cirService.getCurrentState(),
-                value
-            )
+            if (cirService.getCurrentState() == StateMachine.RELOADING_FRIDGE) {
+                wasReloadSuccess(
+                    cirService.getCurrentState(),
+                    value
+                )
+            } else {
+                wasLockSuccess(
+                    cirService.getCurrentState(),
+                    value
+                )
 
+            }
         } else {
             cirService.extractFirmwareData(
                 service!!,
@@ -794,7 +796,7 @@ class RootActivity : AppCompatActivity(),
     }
 
     override fun connectionStatus(status: DisconnectionReason, newState: ConnState) {
-        Log.d(TAG, "connectionStatus: $newState")
+        // Log.e(TAG, "connectionStatus: $newState")
 
         // newState solo puede ser CONNECTED o DISCONNECTED
         when (newState) {
@@ -839,14 +841,19 @@ class RootActivity : AppCompatActivity(),
     private fun commandState(state: StateMachine,
                              response: ByteArray,
                              command: ReceivedCmd) {
-        Log.i(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toCharString()}")
+        // Log.d(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toHex()}")
         when (state) {
 
             // STATUS DE POLEO
             StateMachine.POLING -> {
                 // Habilitamos la pantalla cuando se inicia el poleo
                 // Quiere decir que el dispositivo está listo para recibir comandos
-                if (!isRefreshed) CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+                /*
+                This was causing that buffer in Cir Wireless get full
+                if (!isRefreshed)
+                    CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+                */
+
                 if (command == ReceivedCmd.POLEO) {
                     isRefreshed = true
                     runOnUiThread { setStandardUI() }
@@ -856,16 +863,21 @@ class RootActivity : AppCompatActivity(),
 
             // STATUS DE MAC'S DE AP'S QUE EL DISPOSITIVO VE
             StateMachine.GET_AP -> {
+
                 if (!getApLaunched) {
                     CirCommands.getMacListCmd(service!!, cirService.getCharacteristicWrite()!!)
                     getApLaunched = true
                 }
+
                 if (command == ReceivedCmd.GET_AP) {
                     // Casteamos el resultado y navegamos al fragmento de AP's
                     deviceMacList = CirCommands.fromResponseGetMacList(response)
+
                     // Log.e(TAG, "DEVICE_MAC_LIST: $deviceMacList")
                     if (actualFragment != wifiFragment) navigateTo(wifiFragment, true, null)
+
                     else wifiFragment.scanWifi()
+
                     actualFragment = wifiFragment
                 }
             }
@@ -887,6 +899,23 @@ class RootActivity : AppCompatActivity(),
         }
     }
 
+    private fun wasReloadSuccess (state: StateMachine, value: ByteArray) {
+        // Log.e(TAG, "Value RELOAD: ${value.toHex()}")
+        when (CirWirelessParser.reloadResponse(value)) {
+            ReceivedCmd.RELOAD_OK -> {
+                runOnUiThread{ toast(getString(R.string.reload_enabled)) }
+            }
+
+            ReceivedCmd.RELOAD_NOT_ENABLED -> {
+                runOnUiThread{ toast(getString(R.string.reload_not_available)) }
+
+            }
+            else -> { runOnUiThread{ toast(getString(R.string.error_occurred)) } }
+        }
+
+        cirService.setCurrentState(StateMachine.POLING)
+    }
+
     private fun wasLockSuccess (state: StateMachine, value: ByteArray) {
         when (CirWirelessParser.lockResponse(value)) {
             ReceivedCmd.LOCK_OK -> {
@@ -899,14 +928,14 @@ class RootActivity : AppCompatActivity(),
                         runOnUiThread { toast(getString(R.string.lock_close)) }
                     }
 
-                    else -> {/* Nothing here */}
+                    else -> { runOnUiThread{ toast(getString(R.string.error_occurred)) } }
                 }
             }
 
             ReceivedCmd.LOCK_NOT_ENABLED -> {
                 runOnUiThread { toast(getString(R.string.lock_disabled)) }
             }
-            else -> { /* Nothing here */ }
+            else -> { runOnUiThread{ toast(getString(R.string.error_occurred)) } }
         }
 
         cirService.setCurrentState(StateMachine.POLING)
@@ -921,12 +950,20 @@ class RootActivity : AppCompatActivity(),
             StateMachine.OPENNING_LOCK -> {
                 readLockResponse()
             }
+
+            StateMachine.RELOADING_FRIDGE -> {
+                readReloadResponse()
+            }
             else -> { /* nothing here */}
         }
     }
 
     private fun readLockResponse () {
         // Log.e(TAG, "readLockResponse: ")
+        service!!.bleGatt!!.readCharacteristic(cirService.getQuickCommandsCharacteristic())
+    }
+
+    private fun readReloadResponse () {
         service!!.bleGatt!!.readCharacteristic(cirService.getQuickCommandsCharacteristic())
     }
 
@@ -940,6 +977,9 @@ class RootActivity : AppCompatActivity(),
      */
     private fun errorConnection(reason: DisconnectionReason) {
         disconnectionReason = reason
+
+        // Log.e(TAG, "errorConnection: $reason")
+
         when (reason) {
             DisconnectionReason.NOT_AVAILABLE, DisconnectionReason.FAILURE -> {
                 runOnUiThread { toast(getString(R.string.error_occurred)) }
@@ -970,12 +1010,12 @@ class RootActivity : AppCompatActivity(),
      */
     private fun connectedDevice() {
         runOnUiThread { toast(getString(R.string.device_connected)) }
+        if (actualFragment == mainFragment) {
+            (actualFragment as MainFragment).deviceConnected()
+        }
+
         service!!.discoverDeviceServices()
     }
-
-
-
-
 
 
 
@@ -1012,6 +1052,13 @@ class RootActivity : AppCompatActivity(),
             unbindService(connection)
             isServiceConnected = false
         }
+    }
+
+    /************************************************************************************************/
+    /**     ACTIVITY INTERFACES                                                                     */
+    /************************************************************************************************/
+    interface RootEvents {
+        fun deviceConnected ()
     }
 
 

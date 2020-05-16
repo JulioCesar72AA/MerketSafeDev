@@ -79,7 +79,7 @@ class BleCirWireless {
             val characteristics = service.characteristics
 
             for (char in characteristics) {
-                Log.e(TAG, "uuid: ${char.uuid.toString()}")
+                // Log.e(TAG, "uuid: ${char.uuid.toString()}")
                 when (char.uuid.toString()) {
                     BleConstants.QUICK_COMMANDS_CHARACTERISTIC -> {
                         quickCommandsCharacteristic = char

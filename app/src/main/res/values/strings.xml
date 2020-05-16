@@ -7,6 +7,8 @@
 
     <!-- TOAST's -->
     <string name="tst_scanning" tools:ignore="Typos">Espere un momento… Escaneando</string>
+    <string name="locking">Cerrando chapa</string>
+    <string name="unlocking">Abriendo chapa</string>
 
     <!-- HINT's -->
     <string name="hint_password">Contraseña</string>
@@ -17,11 +19,13 @@
 
     <string name="btn_open_lock">Abrir chapa</string>
     <string name="btn_close_lock">Cerrar chapa</string>
+    <string name="btn_recharge_fridge">Recargar</string>
 
     <!-- TEXT VIEW's -->
-    <string name="tv_selected_device">Dispositivo BLE</string>
+    <string name="tv_selected_device_status">Conectando\ndispositivo BLE</string>
+    <string name="tv_selected_device_status_connected">Dispositivo BLE\nconectado</string>
     <string name="tv_no_devices">No se encontraron dispositivos cercanos, desliza para volver a intentar</string>
-    <string name="tv_scan">Escaneo</string>
+    <string name="tv_scan">Escaneando</string>
     <string name="tv_cir_wireless">CIR Wireless</string>
     <string name="tv_title_access">Access Points</string>
     <string name="tv_title_dispositivos">Dispositivo</string>
@@ -77,4 +81,6 @@
     <string name="unsupported_device">Dispositivo no soportado</string>
     <string name="device_disconnecting">Desconectando el dispositivo</string>
     <string name="wait_moment">Espera un momento</string>
+    <string name="reload_enabled">Recarga activada</string>
+    <string name="reload_not_available">La recarga no está disponible</string>
 </resources>

@@ -14,7 +14,7 @@
     <dimen name="cv_elevation_access">7dp</dimen>
     <dimen name="cv_corner_radius">8dp</dimen>
     <dimen name="cv_content_margin">24dp</dimen>
-    <dimen name="cv_close_open_lock">20dp</dimen>
+    <dimen name="cv_close_open_lock">5dp</dimen>
     <dimen name="cv_margin_access_point">22dp</dimen>
     <dimen name="cv_margin_access_point_top">50dp</dimen>
     <dimen name="cv_card_access">20dp</dimen>
@@ -25,10 +25,11 @@
     <dimen name="cv_config_margin_end">10dp</dimen>
     <dimen name="cv_config_elevation">10dp</dimen>
     <dimen name="cv_rounded_corners">25dp</dimen>
+    <dimen name="cv_lock_size">120dp</dimen>
 
     <!-- IMAGES VIEW's -->
     <dimen name="iv_config_width_height">50dp</dimen>
-
+    <dimen name="iv_branding_height">30dp</dimen>
 
     <!-- TEXT VIEW's -->
     <dimen name="tv_lineheight_30">30dp</dimen>
@@ -52,5 +53,6 @@
     <dimen name="padding_popup_relative">27dp</dimen>
     <dimen name="padding_splash">50dp</dimen>
     <dimen name="padding_config_btn">5dp</dimen>
+    <dimen name="margin_branding_layout">10dp</dimen>
 
 </resources>

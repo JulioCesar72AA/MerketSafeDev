@@ -24,13 +24,14 @@
     <!-- Contenido de la vista -->
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:weightSum="2">
 
         <!-- Título sección -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight=".5"
+            android:layout_weight=".7"
             android:gravity="center"
             android:orientation="horizontal"
             android:layout_marginStart="@dimen/cv_margin_access_point"
@@ -56,7 +57,7 @@
                 android:lineHeight="@dimen/tv_lineheight_30"
                 android:text="@string/tv_scan"
                 android:textColor="@color/colortextwhite"
-                android:textSize="@dimen/tv_textsize_32"
+                android:textSize="22dp"
                 tools:ignore="UnusedAttribute" />
 
         </LinearLayout>
@@ -65,7 +66,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight=".2"
+            android:layout_weight=".4"
             android:orientation="vertical"
             android:layout_marginStart="@dimen/cv_margin_access_point"
             android:layout_marginEnd="@dimen/cv_margin_access_point"
@@ -111,17 +112,14 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
+
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.9"
+            layout="@layout/branding_white" />
     </TableLayout>
 
 
-
-
-
-
-
-
-
     <include layout="@layout/scanning_mask"/>
-
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
