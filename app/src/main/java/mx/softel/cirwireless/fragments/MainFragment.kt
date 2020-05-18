@@ -210,7 +210,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
         if (root.cirService.getCharacteristicWrite() == null)
             clickConfigure()
         else {
-            toast("Actualizando datos")
+            toast(getString(R.string.updating_data))
             root.cirService.setCurrentState(StateMachine.GET_AP)
             /*
             root.apply {
@@ -226,7 +226,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
         if (root.cirService.getCharacteristicWrite() == null)
             clickTest()
         else {
-            toast("Solicitando los datos del dispositivo")
+            toast(getString(R.string.getting_device_data))
             root.apply{
                 setScanningUI()
 

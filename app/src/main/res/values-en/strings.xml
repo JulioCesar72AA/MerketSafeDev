@@ -83,4 +83,7 @@
     <string name="wait_moment">Wait a moment</string>
     <string name="reload_enabled">Reload activated</string>
     <string name="reload_not_available">Reload is not available</string>
+    <string name="getting_device_data">Getting data from the device</string>
+    <string name="updating_data">Updating data</string>
+
 </resources>

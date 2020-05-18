@@ -83,4 +83,6 @@
     <string name="wait_moment">Espera un momento</string>
     <string name="reload_enabled">Recarga activada</string>
     <string name="reload_not_available">La recarga no está disponible</string>
+    <string name="getting_device_data">Solicitando los datos del dispositivo</string>
+    <string name="updating_data">Actualizando datos</string>
 </resources>
