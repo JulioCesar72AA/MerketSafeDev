@@ -98,6 +98,11 @@ class RootActivity : AppCompatActivity(),
         doBindService()     // Asociamos el servicio de BLE
     }
 
+    override fun onPause() {
+        super.onPause()
+        finishAndDisconnectActivity(DisconnectionReason.UNKNOWN.status)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         doUnbindService()   // Desasociamos el servicio de BLE
