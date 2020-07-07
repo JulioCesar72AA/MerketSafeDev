@@ -85,5 +85,6 @@
     <string name="reload_not_available">Reload is not available</string>
     <string name="getting_device_data">Getting data from the device</string>
     <string name="updating_data">Updating data</string>
-
+    <string name="updated_date">Date updated</string>
+    <string name="error_date">Date couldn\'t be updated</string>
 </resources>

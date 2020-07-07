@@ -43,6 +43,8 @@ class RootActivity : AppCompatActivity(),
                      WifiOkDialog.OnWifiDialogListener,
                      BleService.OnBleConnection {
 
+    private var firstTime               = true
+
     // BLUETOOTH DEVICE
     internal lateinit var bleDevice     : BluetoothDevice
     internal lateinit var bleMac        : String
@@ -272,6 +274,7 @@ class RootActivity : AppCompatActivity(),
      * @param command Tipo de respuesta recibida
      */
     private fun wifiConfigProcess(response: ByteArray, command: ReceivedCmd, step: Int) {
+        // Log.e("WifiConfigProcess", "step: $step response: ${response.toHex()}")
         when (command) {
             ReceivedCmd.AT_READY -> {
                 when (step) {
@@ -284,6 +287,7 @@ class RootActivity : AppCompatActivity(),
                 }
             }
             else -> {
+                // Log.e("Reading AT", "Writing command AT")
                 CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
             }
         }
@@ -489,6 +493,8 @@ class RootActivity : AppCompatActivity(),
                 CirCommands.closeAtSocketCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
                 return
             }
+
+            // Log.e("parseStatus", "$response")
             cipStatusMode = response.substringAfter("$AT_CMD_STATUS:")
                 .substringBefore(AT_CMD_OK)
                 .replace("\r", "")
@@ -512,7 +518,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
         val response = decResponse.toCharString()
-        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        // Log.e(TAG, "SSID: ${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         if (response.contains(AT_CMD_OK)) {
             ssidAssigned = response
@@ -543,7 +549,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
         val response = decResponse.toCharString()
-        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        // Log.e(TAG, "RSSI: ${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         if (response.contains(WIFI_SUBSTRING_AP_AFTER)) {
             rssiAssigned = response
@@ -585,7 +591,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
         val response = decResponse.toCharString()
-        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        // Log.e(TAG, "ip: ${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         if (response.contains(WIFI_NOT_IP_STRING)){
             if (retryAtResponse >= MAX_AT_RETRY) {
@@ -767,6 +773,12 @@ class RootActivity : AppCompatActivity(),
                     cirService.getCurrentState(),
                     value
                 )
+            } else if (cirService.getCurrentState() == StateMachine.UPDATING_DATE) {
+                wasUpdatedSuccess(
+                    cirService.getCurrentState(),
+                    value
+                )
+
             } else {
                 wasLockSuccess(
                     cirService.getCurrentState(),
@@ -780,6 +792,8 @@ class RootActivity : AppCompatActivity(),
                 cirService.getCharacteristicDeviceInfo()!!,
                 cirService.getNotificationDescriptor()!!
             )
+
+
         }
 
     }
@@ -862,6 +876,10 @@ class RootActivity : AppCompatActivity(),
                 if (command == ReceivedCmd.POLEO) {
                     isRefreshed = true
                     runOnUiThread { setStandardUI() }
+                    if (firstTime && actualFragment == mainFragment) {
+                        (actualFragment as MainFragment).deviceConnected()
+                        firstTime = false
+                    }
                 }
                 cipStatusMode = -1
             }
@@ -921,7 +939,22 @@ class RootActivity : AppCompatActivity(),
         cirService.setCurrentState(StateMachine.POLING)
     }
 
+    private fun wasUpdatedSuccess (state: StateMachine, value: ByteArray) {
+        // Log.e(TAG, "Value DATE: ${value.toHex()}")
+        when (CirWirelessParser.dateUpdateResponse(value)) {
+            ReceivedCmd.DATE_UPDATED -> {
+                runOnUiThread{ toast(getString(R.string.updated_date)) }
+            }
+
+            else -> { runOnUiThread{ toast(getString(R.string.error_date)) } }
+        }
+
+        cirService.setCurrentState(StateMachine.POLING)
+    }
+
+
     private fun wasLockSuccess (state: StateMachine, value: ByteArray) {
+        // Log.e(TAG, "Date Response: ${value.toHex()}")
         when (CirWirelessParser.lockResponse(value)) {
             ReceivedCmd.LOCK_OK -> {
                 when (state) {
@@ -959,18 +992,30 @@ class RootActivity : AppCompatActivity(),
             StateMachine.RELOADING_FRIDGE -> {
                 readReloadResponse()
             }
+
+            StateMachine.UPDATING_DATE -> {
+                readUpdatedDate()
+            }
             else -> { /* nothing here */}
         }
     }
+
 
     private fun readLockResponse () {
         // Log.e(TAG, "readLockResponse: ")
         service!!.bleGatt!!.readCharacteristic(cirService.getQuickCommandsCharacteristic())
     }
 
+
     private fun readReloadResponse () {
         service!!.bleGatt!!.readCharacteristic(cirService.getQuickCommandsCharacteristic())
     }
+
+
+    private fun readUpdatedDate () {
+        service!!.bleGatt!!.readCharacteristic(cirService.getQuickCommandsCharacteristic())
+    }
+
 
     /**
      * ## errorConnection
@@ -1015,10 +1060,6 @@ class RootActivity : AppCompatActivity(),
      */
     private fun connectedDevice() {
         runOnUiThread { toast(getString(R.string.device_connected)) }
-        if (actualFragment == mainFragment) {
-            (actualFragment as MainFragment).deviceConnected()
-        }
-
         service!!.discoverDeviceServices()
     }
 

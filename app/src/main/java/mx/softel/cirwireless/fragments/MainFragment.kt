@@ -76,6 +76,8 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             tvMac.text      = root.bleMac
             ivMenu.visibility = View.GONE
         }
+
+
         setOnClick()
         return view
     }
@@ -117,6 +119,19 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             R.id.cvOpenLock     -> sendOpenLockCommand()
         }
     }
+
+
+    private fun updateCirDate () {
+        if (root.cirService.getQuickCommandsCharacteristic() == null)
+            updateCirDate()
+        else {
+            root.apply {
+                CirCommands.updateDate(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
+                cirService.setCurrentState(StateMachine.UPDATING_DATE)
+            }
+        }
+    }
+
 
     private fun sendReloadCommand () {
         if (root.cirService.getQuickCommandsCharacteristic() == null)
@@ -282,6 +297,6 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
 
     override fun deviceConnected() {
         tvBleStatusConnection.text = getString(R.string.tv_selected_device_status_connected)
+        updateCirDate()
     }
-
 }

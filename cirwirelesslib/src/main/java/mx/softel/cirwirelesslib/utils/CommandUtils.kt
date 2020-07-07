@@ -4,6 +4,7 @@ import android.util.Log
 import mx.softel.cirwirelesslib.extensions.toByteArray
 import mx.softel.cirwirelesslib.extensions.toCharString
 import mx.softel.cirwirelesslib.extensions.toHex
+import java.util.*
 
 object CommandUtils {
 
@@ -20,6 +21,8 @@ object CommandUtils {
     private const val CLOSE_LOCK    = 0x0E
     private const val OPEN_LOCK     = 0x0F
     private const val RELOAD_FRIDGE = 0x19
+    private const val SET_DATE      = 0x29
+    private const val READ_DATE     = 0x32
 
     private val PASSCODE            = byteArrayOf(
         0x4a, 0xb0.toByte(), 0x0d, 0xc6.toByte(), 0xfc.toByte(), 0x4e,
@@ -50,6 +53,7 @@ object CommandUtils {
     }
 
     fun readAtCmd(): ByteArray {
+        // Log.e("readAtCmd", (AT_READ + getCrc16(AT_READ)).toHex())
         return AT_READ + getCrc16(AT_READ)
     }
 
@@ -89,6 +93,7 @@ object CommandUtils {
 
     fun setDeviceWifiModeCmd(mode: Int, mac: ByteArray): ByteArray {
         val atCommand = "AT+CWMODE=$mode".toByteArray()
+        // Log.e("setDEviceWifimode", "atCommand: ${atCommand.toHex()}")
         return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
@@ -134,19 +139,50 @@ object CommandUtils {
 
     fun openLockCmd (mac: ByteArray): ByteArray {
         val openLockCmd: ByteArray = byteArrayOf((PASSCODE.size + 2).toByte(), OPEN_LOCK.toByte()) + PASSCODE
+        // Log.e(TAG, "" + getCompleteEncryptedCommand(openLockCmd, mac).toHex())
         // Log.e(TAG, "OPEN_LOCK_COMMAND: ${openLockCmd.toHex()}")
         return getCompleteEncryptedCommand(openLockCmd, mac)
     }
 
     fun closeLockCmd (mac: ByteArray): ByteArray {
         val closeLockCmd: ByteArray = byteArrayOf((PASSCODE.size + 2).toByte(), CLOSE_LOCK.toByte())  + PASSCODE
+        // Log.e(TAG, "" + getCompleteEncryptedCommand(closeLockCmd, mac).toHex())
+
         return getCompleteEncryptedCommand(closeLockCmd, mac)
     }
+
 
     fun reloadFridgeCmd (mac: ByteArray): ByteArray {
         val reloadFridgeCmd: ByteArray = byteArrayOf((PASSCODE.size + 2).toByte(), RELOAD_FRIDGE.toByte()) + PASSCODE
         // Log.e(TAG, "reloadFridgeCmd: ${reloadFridgeCmd.toHex()}")
+        // Log.e(TAG, "" + getCompleteEncryptedCommand(reloadFridgeCmd, mac).toHex())
+
         return getCompleteEncryptedCommand(reloadFridgeCmd, mac)
+    }
+
+
+    fun setDate (mac: ByteArray): ByteArray {
+        val date = getDateFormat()
+        val datePackage: ByteArray = byteArrayOf((PASSCODE.size + 2 + date.size).toByte(), SET_DATE.toByte()) + PASSCODE + date
+        return getCompleteEncryptedCommand(datePackage, mac)
+    }
+
+    fun readDate (mac: ByteArray): ByteArray {
+        val readDate = byteArrayOf((PASSCODE.size + 2).toByte(), READ_DATE.toByte()) + PASSCODE
+        return getCompleteEncryptedCommand(readDate, mac)
+    }
+
+    private fun getDateFormat (): ByteArray {
+        val calendar = Calendar.getInstance()
+        val seconds = calendar.get(Calendar.SECOND).toByte()
+        val minutes = calendar.get(Calendar.MINUTE).toByte()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY).toByte()
+        val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH).toByte()
+        val dayOfWeek = (calendar.get(Calendar.DAY_OF_WEEK) - 1).toByte()
+        val month = (calendar.get(Calendar.MONTH) + 1).toByte()
+        val yearStr = calendar.get(Calendar.YEAR).toString()
+        val year = ("${yearStr[2]}${yearStr[3]}").toInt().toByte()
+        return byteArrayOf(seconds, minutes, hour, dayOfMonth, dayOfWeek, month, year)
     }
 
     /************************************************************************************************/
@@ -166,7 +202,7 @@ object CommandUtils {
     private fun getCompleteEncryptedCommand(startArray: ByteArray, atCmd: ByteArray, mac: ByteArray): ByteArray {
         val size = if (startArray.contentEquals(AT_GENERIC)) atCmd.size + 8 else atCmd.size + 7
         var cmd = atCmd + 0x00.toByte()
-
+        // Log.e("Before encrypted", "cmd: ${cmd.toHex()}")
         // Encriptando el bloque de datos
         val encCmd = wrapper.getEnc(mac, cmd, 1)
 

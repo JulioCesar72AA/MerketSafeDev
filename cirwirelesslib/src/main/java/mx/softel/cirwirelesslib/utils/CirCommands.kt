@@ -23,13 +23,14 @@ object CirCommands {
      */
     fun getMacListCmd(service           : BleService,
                       characteristic    : BluetoothGattCharacteristic)
-            = service.writeToCharacteristic(CommandUtils.getAccessPointsCmd(), characteristic)
+        = service.writeToCharacteristic(CommandUtils.getAccessPointsCmd(), characteristic)
+
 
     fun setDeviceModeCmd(service        : BleService,
                          characteristic : BluetoothGattCharacteristic,
                          mode           : Int,
                          mac            : ByteArray)
-            = service.writeToCharacteristic(CommandUtils.setDeviceWifiModeCmd(mode, mac), characteristic)
+        = service.writeToCharacteristic(CommandUtils.setDeviceWifiModeCmd(mode, mac), characteristic)
 
 
     fun setInternalWifiCmd(service          : BleService,
@@ -177,7 +178,7 @@ object CirCommands {
     fun resetWifiCmd(service        : BleService,
                      characteristic : BluetoothGattCharacteristic,
                      mac            : ByteArray)
-            = service.writeToCharacteristic(CommandUtils.resetWifiCmd(mac), characteristic)
+        = service.writeToCharacteristic(CommandUtils.resetWifiCmd(mac), characteristic)
 
 
     fun getWirelessFirmwareCmd(service          : BleService,
@@ -217,6 +218,16 @@ object CirCommands {
                       characteristic: BluetoothGattCharacteristic,
                       mac : ByteArray)
             = service.writeToCharacteristic(CommandUtils.reloadFridgeCmd(mac), characteristic)
+
+    fun updateDate (service         : BleService,
+                    characteristic  : BluetoothGattCharacteristic,
+                    mac             : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.setDate(mac), characteristic)
+
+    fun readDate (service           : BleService,
+                  characteristic    : BluetoothGattCharacteristic,
+                  mac               : ByteArray)
+            = service.writeToCharacteristic(CommandUtils.readDate(mac), characteristic)
 
     /*
     0x19

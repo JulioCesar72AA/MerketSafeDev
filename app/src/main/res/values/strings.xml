@@ -85,4 +85,6 @@
     <string name="reload_not_available">La recarga no está disponible</string>
     <string name="getting_device_data">Solicitando los datos del dispositivo</string>
     <string name="updating_data">Actualizando datos</string>
+    <string name="updated_date">Fecha actualizada</string>
+    <string name="error_date">No se ha podido actualizar la fecha</string>
 </resources>

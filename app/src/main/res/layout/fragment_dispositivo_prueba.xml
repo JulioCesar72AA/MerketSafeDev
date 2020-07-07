@@ -108,8 +108,8 @@
 
                 <TableLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/cv_margin30"
+                    android:layout_height="match_parent"
+                    android:layout_margin="@dimen/cv_margin5"
                     android:layout_gravity="center_vertical" >
 
                     <!-- SSID  -->

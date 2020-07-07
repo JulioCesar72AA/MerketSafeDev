@@ -20,7 +20,7 @@
     <dimen name="cv_card_access">20dp</dimen>
     <dimen name="cv_access_margin_start">19dp</dimen>
     <dimen name="cv_access_margin_end">19dp</dimen>
-    <dimen name="cv_margin30">30dp</dimen>
+    <dimen name="cv_margin5">5dp</dimen>
     <dimen name="cv_elevation_prototype">2dp</dimen>
     <dimen name="cv_config_margin_end">10dp</dimen>
     <dimen name="cv_config_elevation">10dp</dimen>

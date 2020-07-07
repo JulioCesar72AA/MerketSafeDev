@@ -39,6 +39,15 @@ object CirWirelessParser {
         }
     }
 
+
+    fun dateUpdateResponse (response: ByteArray): ReceivedCmd {
+        return when (response[1]) {
+            DATE_UPDATED            -> ReceivedCmd.DATE_UPDATED
+            else                    -> ReceivedCmd.DATE_ERROR
+        }
+    }
+
+
     fun lockResponse (response: ByteArray): ReceivedCmd {
         return when (response[1]) {
             LOCK_CLOSED_OR_OPEN_OK  -> ReceivedCmd.LOCK_OK
@@ -65,4 +74,6 @@ object CirWirelessParser {
     private const val LOCK_NOT_ENABLED      = 0x1E.toByte()
     private const val RELOAD_OK             = 0x01.toByte() // This is repeated 'cause this answers could change for this command
     private const val RELOAD_NOT_ENABLED    = 0x1E.toByte() // This is repeated 'cause this answers could change for this command
+    private const val DATE_UPDATED          = 0x01.toByte()
+    private const val DATE_ERROR            = 0x00.toByte()
 }

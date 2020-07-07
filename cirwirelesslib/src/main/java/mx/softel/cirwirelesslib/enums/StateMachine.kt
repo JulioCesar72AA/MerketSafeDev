@@ -13,5 +13,6 @@ enum class StateMachine {
     DATA_CONNECTION,// Obteniendo status de conexión a servidor
     OPENNING_LOCK, // Abriendo chapa (cerradura)
     CLOSING_LOCK, // Cerrando chapa (cerradura)
-    RELOADING_FRIDGE // Cargando refrigerador
+    RELOADING_FRIDGE, // Cargando refrigerador
+    UPDATING_DATE // Actualiza la fecha
 }

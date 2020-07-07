@@ -18,5 +18,7 @@ enum class ReceivedCmd {
     LOCK_OK,
     LOCK_NOT_ENABLED,
     RELOAD_OK,
-    RELOAD_NOT_ENABLED
+    RELOAD_NOT_ENABLED,
+    DATE_UPDATED,
+    DATE_ERROR
 }

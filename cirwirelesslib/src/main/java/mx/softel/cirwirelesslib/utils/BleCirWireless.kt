@@ -120,7 +120,7 @@ class BleCirWireless {
                     characteristic: BluetoothGattCharacteristic,
                     descriptor: BluetoothGattDescriptor) {
 
-        Log.d(TAG, "initPoleCmd")
+        // Log.d(TAG, "initPoleCmd")
         service.apply{
             enableCharacteristicNotification(true, characteristic)
             writeToDescriptor(BleService.DISABLE_NOTIFICATION, descriptor)
@@ -143,7 +143,7 @@ class BleCirWireless {
     fun extractFirmwareData(service: BleService,
                             characteristic: BluetoothGattCharacteristic,
                             descriptor: BluetoothGattDescriptor) {
-        Log.d(TAG, "extractFirmwareData")
+        // Log.d(TAG, "extractFirmwareData")
         // Lectura de DEVICE_INFO_UUID
         if (characteristic.uuid.toString() == BleConstants.DEVICE_INFO_UUID) {
             val one = characteristic.value[1]
