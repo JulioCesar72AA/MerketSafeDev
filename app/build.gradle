@@ -11,8 +11,8 @@ android {
         applicationId "mx.softel.cirwireless"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 12
-        versionName "1.4.1"
+        versionCode 14
+        versionName "1.4.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
