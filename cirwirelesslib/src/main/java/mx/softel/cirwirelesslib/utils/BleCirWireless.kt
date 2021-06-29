@@ -153,7 +153,10 @@ class BleCirWireless {
             println("$TAG FIRMWARE $firmware")
             correctFirmware = (firmware == BleConstants.FIRMWARE_350) ||
                     (firmware == BleConstants.FIRMWARE_351) ||
-                            (firmware == BleConstants.FIRMWARE_352) || (firmware == BleConstants.FIRMWARE_382)
+                    (firmware == BleConstants.FIRMWARE_352) ||
+                    (firmware == BleConstants.FIRMWARE_382) ||
+                    (firmware == BleConstants.FIRMWARE_390)
+
 
             if (!correctFirmware)
                 service.disconnectBleDevice(DisconnectionReason.FIRMWARE_UNSUPPORTED.status)
