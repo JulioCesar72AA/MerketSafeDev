@@ -154,8 +154,7 @@ class BleCirWireless {
             correctFirmware = (firmware == BleConstants.FIRMWARE_350) ||
                     (firmware == BleConstants.FIRMWARE_351) ||
                     (firmware == BleConstants.FIRMWARE_352) ||
-                    (firmware == BleConstants.FIRMWARE_382) ||
-                    (firmware == BleConstants.FIRMWARE_390)
+                    (firmware == BleConstants.FIRMWARE_382)
 
 
             if (!correctFirmware)
