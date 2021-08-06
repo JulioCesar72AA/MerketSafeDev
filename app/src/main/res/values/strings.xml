@@ -87,4 +87,5 @@
     <string name="updating_data">Actualizando datos</string>
     <string name="updated_date">Fecha actualizada</string>
     <string name="error_date">No se ha podido actualizar la fecha</string>
+    <string name="unsupported_config_action">Este dispositivo no soporta esta sección</string>
 </resources>

@@ -10,7 +10,11 @@ import android.os.Handler
 import android.util.Log
 import mx.softel.scanblelib.extensions.isLocationPermissionGranted
 import mx.softel.scanblelib.extensions.requestLocationPermission
+import mx.softel.scanblelib.extensions.toHexValue
 import mx.softel.scanblelib.sqlite.BeaconsDatabaseHelper
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class BleManager(private var appContext: Context,
                  private var scanningTime: Long = 10_000L,
@@ -42,6 +46,16 @@ class BleManager(private var appContext: Context,
     fun isImberaDevice(address: String): Boolean = (address.startsWith(PREFIX_BLE_1)
                                                  || address.startsWith(PREFIX_BLE_2)
                                                  || address.startsWith(PREFIX_WIFI))
+
+    fun isAValidBeacon (beaconId: String) : Boolean = when (beaconId) {
+        "0x000B" -> true
+        "0x000C" -> true
+        "0x000D" -> true
+        "0x000E" -> true
+        else -> false
+    }
+
+
 
     fun newDeviceScanned(mac: String): Boolean {
         for (device in bleDevices) {
@@ -75,12 +89,14 @@ class BleManager(private var appContext: Context,
     private val scanCallback = object : ScanCallback() {
 
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
-            val mac = result?.device!!.address
-            val check = isImberaDevice(mac) && newDeviceScanned(mac)
+            val mac         = result?.device!!.address
+            val beacon      = result?.scanRecord.bytes
+            val beaconId    = "0x${byteArrayOf(beacon[5], beacon[6]).toHexValue().toUpperCase(Locale.ROOT)}"
+            val check       = isImberaDevice(mac) && newDeviceScanned(mac) && isAValidBeacon(beaconId)
 
             if (check) {
                 val scannedBleDevice = BleDevice(result, availableBeacons)
-                if (filterBeaconList.isEmpty()) {
+                if (filterBeaconList.isEmpty()) { // NO BEACON FILTER
                     bleDevices.add(scannedBleDevice)
                 } else {
                     val type = filterBeaconList.contains(scannedBleDevice.deviceBeaconType)

@@ -31,11 +31,13 @@ import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.hexStringToByteArray
 import mx.softel.cirwirelesslib.extensions.toCharString
-import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.utils.BleCirWireless
 import mx.softel.cirwirelesslib.utils.CirCommands
 import mx.softel.cirwirelesslib.utils.CirWirelessParser
 import mx.softel.cirwirelesslib.utils.CommandUtils
+import mx.softel.scanblelib.extensions.toHexValue
+import java.util.*
+import kotlin.collections.ArrayList
 
 class RootActivity : AppCompatActivity(),
                      FragmentNavigation,
@@ -156,10 +158,23 @@ class RootActivity : AppCompatActivity(),
      */
     private fun getAndSetIntentData() {
         // Obtenemos la información del intent
-        val data = intent.extras!!
+        val data        = intent.extras!!
         bleDevice       = data[EXTRA_DEVICE] as BluetoothDevice
         bleMac          = data.getString(EXTRA_MAC)!!
         bleMacBytes     = bleMac.hexStringToByteArray()
+
+        val beaconBytes = data[EXTRA_BEACON_BYTES] as ByteArray
+        val beaconId    = "0x${byteArrayOf(beaconBytes[5], beaconBytes[6]).toHexValue().toUpperCase(Locale.ROOT)}"
+        enableWifiConfig = isACirWifiBeacon(beaconId)
+    }
+
+
+    fun isACirWifiBeacon (beaconId: String) : Boolean = when (beaconId) {
+        "0x000B" -> true
+        "0x000C" -> true
+        "0x000D" -> false
+        "0x000E" -> false
+        else -> false
     }
 
     /**
@@ -1113,6 +1128,7 @@ class RootActivity : AppCompatActivity(),
     /************************************************************************************************/
     companion object {
         private val TAG = RootActivity::class.java.simpleName
+        var enableWifiConfig        = true
 
         private var retryAtResponse         = 0
         private var serviceStep             = 0

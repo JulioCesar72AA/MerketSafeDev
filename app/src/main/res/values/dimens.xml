@@ -1,7 +1,6 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="button_magin">32dp</dimen>
-    <dimen name="scan_content_margin">12dp</dimen>
     <dimen name="scan_corner_radius">12dp</dimen>
     <dimen name="height_ic_bluetooth_">12dp</dimen>
     <dimen name="no_dimen">0dp</dimen>
@@ -55,4 +54,7 @@
     <dimen name="padding_config_btn">5dp</dimen>
     <dimen name="margin_branding_layout">10dp</dimen>
 
+    <!-- DEFAULT MARGIN VALUES -->
+    <dimen name="_8dp">8dp</dimen>
+    <dimen name="_16dp">16dp</dimen>
 </resources>

@@ -22,6 +22,6 @@ object BleConstants {
     const val FIRMWARE_352              = "3.5.2"
     const val FIRMWARE_353              = "3.5.3"
     const val FIRMWARE_382              = "3.8.2"
-
+    const val FIRMWARE_387              = "3.8.7"
 
 }

@@ -5,7 +5,7 @@ package mx.softel.scanblelib.extensions
  *
  * @return Cadena formateada como 0xFF
  */
-internal fun ByteArray.toHexValue(): String {
+fun ByteArray.toHexValue(): String {
     val sb = StringBuffer()
     for (byte in this) {
         sb.append(String.format("%02x", byte))

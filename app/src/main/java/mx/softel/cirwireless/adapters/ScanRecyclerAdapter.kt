@@ -37,6 +37,7 @@ class ScanRecyclerAdapter (private val devicesList: List<BleDevice>,
 
         fun bind(device: BleDevice) = with(itemView) {
             tvScanMac.text = device.getMac()
+            tvDeviceModel.text = device.getDeviceModelName()
         }
 
         override fun onClick(v: View?) {

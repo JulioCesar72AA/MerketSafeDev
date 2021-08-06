@@ -175,44 +175,48 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
         val visibilityForConfigBtns : Int
         val image : Int
 
-        if (lockOptionsEnabled) {
-            animationForLockBtns = R.anim.slide_right_to_left
-            animationForConfigBtns = R.anim.slide_left_to_right
+        if (RootActivity.enableWifiConfig) {
+            if (lockOptionsEnabled) {
+                animationForLockBtns = R.anim.slide_right_to_left
+                animationForConfigBtns = R.anim.slide_left_to_right
 
-            visibilityForLockBtns = View.GONE
-            visibilityForConfigBtns = View.VISIBLE
+                visibilityForLockBtns = View.GONE
+                visibilityForConfigBtns = View.VISIBLE
 
-            image = R.drawable.ic_abrir_chapa
+                image = R.drawable.ic_abrir_chapa
 
-            lockOptionsEnabled = false
+                lockOptionsEnabled = false
 
-        } else {
-            animationForLockBtns = R.anim.slide_left_to_right
-            animationForConfigBtns = R.anim.slide_right_to_left
+            } else {
+                animationForLockBtns = R.anim.slide_left_to_right
+                animationForConfigBtns = R.anim.slide_right_to_left
 
-            visibilityForLockBtns = View.VISIBLE
-            visibilityForConfigBtns = View.GONE
+                visibilityForLockBtns = View.VISIBLE
+                visibilityForConfigBtns = View.GONE
 
-            image = R.drawable.ic_config
+                image = R.drawable.ic_config
 
-            lockOptionsEnabled = true
-        }
+                lockOptionsEnabled = true
+            }
 
-        // Se colocan las animaciones a los botones de la seccion de chapa
-        tlLockBtns.startAnimation(AnimationUtils.loadAnimation(root, animationForLockBtns))
+            // Se colocan las animaciones a los botones de la seccion de chapa
+            tlLockBtns.startAnimation(AnimationUtils.loadAnimation(root, animationForLockBtns))
 
-        // Se colocan las animaciones a los botones de la seccion de configuración
-        cvConfigure.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
-        cvTest.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
+            // Se colocan las animaciones a los botones de la seccion de configuración
+            cvConfigure.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
+            cvTest.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
 
-        // Se colocan la visibilidad de los botones de la seccion de chapa
-        tlLockBtns.visibility = visibilityForLockBtns
+            // Se colocan la visibilidad de los botones de la seccion de chapa
+            tlLockBtns.visibility = visibilityForLockBtns
 
-        // Se colocan la visibilidad de los botones de la seccion de configuracion
-        cvConfigure.visibility = visibilityForConfigBtns
-        cvTest.visibility = visibilityForConfigBtns
+            // Se colocan la visibilidad de los botones de la seccion de configuracion
+            cvConfigure.visibility = visibilityForConfigBtns
+            cvTest.visibility = visibilityForConfigBtns
 
-        ivLockOrConfig.setImageResource(image)
+            ivLockOrConfig.setImageResource(image)
+
+        } else
+            toast(getString(R.string.unsupported_config_action))
     }
 
     /**

@@ -5,6 +5,9 @@ import android.bluetooth.le.ScanRecord
 import android.bluetooth.le.ScanResult
 import android.util.Log
 import mx.softel.scanblelib.extensions.toHexValue
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class BleDevice(scanResult: ScanResult,
                 private var availableBeacons: HashMap<String, String>) {
@@ -15,6 +18,7 @@ class BleDevice(scanResult: ScanResult,
     private val bleDevice       : BluetoothDevice   = scanResult.device
     private val beaconDevice    : ScanRecord?       = scanResult.scanRecord
     private val bleMacAddress   : String            = scanResult.device.address
+    private lateinit var modelName : String
 
     // FORMATO DEL BEACON
     private val BLE_DEVICE_NOT_ENCRYPTED    = 0     // El dispositivo contiene información sin encriptar
@@ -33,6 +37,7 @@ class BleDevice(scanResult: ScanResult,
     /**     CONSTRUCTORES                                                                           */
     /************************************************************************************************/
     init {
+        modelName = getCirModelName(getBeaconId(scanResult.scanRecord!!.bytes))
         analizeBeacon()
     }
 
@@ -47,6 +52,8 @@ class BleDevice(scanResult: ScanResult,
     fun getMac()                    : String            = bleMacAddress
     fun getName()                   : String            = name ?: "NULL"
     fun getBleDevice()              : BluetoothDevice   = bleDevice
+    fun getScanRecord()             : ScanRecord?       = beaconDevice
+    fun getDeviceModelName()        : String            = modelName
 
 
 
@@ -98,6 +105,19 @@ class BleDevice(scanResult: ScanResult,
         } catch (ex: Exception) {
             ex.stackTrace
         }
+    }
+
+
+    private fun getBeaconId (beacon: ByteArray): String =
+        "0x${byteArrayOf(beacon[5], beacon[6]).toHexValue().toUpperCase(Locale.ROOT)}"
+
+
+    private fun getCirModelName (beaconId: String) : String = when (beaconId) {
+        "0x000B" -> "CIR Wireless"
+        "0x000C" -> "CIR Wireless"
+        "0x000D" -> "CIR RS232"
+        "0x000E" -> "CIR RS232"
+        else -> "NO AVAILABLE"
     }
 
 

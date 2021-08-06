@@ -61,7 +61,7 @@ class MainActivity: AppCompatActivity(),
         scanDevices()
 
         // Detenemos el escaneo en pantalla
-        Handler().postDelayed({
+        Handler(mainLooper).postDelayed({
             srlScan.isRefreshing = false
         }, TIMEOUT)
     }
@@ -121,6 +121,7 @@ class MainActivity: AppCompatActivity(),
             putExtra(EXTRA_NAME,                dev.getName())
             putExtra(EXTRA_MAC,                 dev.getMac())
             putExtra(EXTRA_BEACON,              dev.getBeaconDeviceString())
+            putExtra(EXTRA_BEACON_BYTES,        dev.getScanRecord()?.bytes)
             putExtra(EXTRA_BEACON_ENCRYPTED,    dev.getDeviceBeaconIsEncrypted())
             putExtra(EXTRA_BEACON_TYPE,         dev.getBeaconType())
             putExtra(EXTRA_IS_ENCRYPTED,        dev.isEncrypted())

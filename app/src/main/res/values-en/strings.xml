@@ -87,4 +87,5 @@
     <string name="updating_data">Updating data</string>
     <string name="updated_date">Date updated</string>
     <string name="error_date">Date couldn\'t be updated</string>
+    <string name="unsupported_config_action">This device does not support this section</string>
 </resources>
