@@ -20,6 +20,7 @@
     <string name="btn_open_lock">Unlock</string>
     <string name="btn_close_lock">Lock</string>
     <string name="btn_recharge_fridge">Reload</string>
+    <string name="btn_update">Update</string>
 
     <!-- TEXT VIEW's -->
     <string name="tv_selected_device_status">Connecting to\nBLE device</string>
@@ -88,4 +89,18 @@
     <string name="updated_date">Date updated</string>
     <string name="error_date">Date couldn\'t be updated</string>
     <string name="unsupported_config_action">This device does not support this section</string>
+
+    <!-- POP UP CONFIG SELECTOR -->
+    <string name="select_an_option">Select an option</string>
+    <string name="how_to_configure_ip">How do you want to configure the IP?</string>
+    <string name="static_ip">Static IP</string>
+    <string name="dynamic_ip">Dynamic IP</string>
+    <string name="ipv4_address">Address IPv4</string>
+    <string name="enter_parameters">Enter the configuration parameters</string>
+    <string name="example_ipv4">Example: 192.168.1.100</string>
+    <string name="subnetwork_mask">Subnet mask</string>
+    <string name="example_subnetwork_mask">Example: 255.255.255.0</string>
+    <string name="gateway">Gateway</string>
+    <string name="example_gateway">Example: 192.168.1.1</string>
+    <string name="accept">Accept</string>
 </resources>

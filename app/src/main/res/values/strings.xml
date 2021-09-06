@@ -20,6 +20,8 @@
     <string name="btn_open_lock">Abrir chapa</string>
     <string name="btn_close_lock">Cerrar chapa</string>
     <string name="btn_recharge_fridge">Recargar</string>
+    <string name="btn_update">Actualizar</string>
+
 
     <!-- TEXT VIEW's -->
     <string name="tv_selected_device_status">Conectando\ndispositivo BLE</string>
@@ -88,4 +90,19 @@
     <string name="updated_date">Fecha actualizada</string>
     <string name="error_date">No se ha podido actualizar la fecha</string>
     <string name="unsupported_config_action">Este dispositivo no soporta esta sección</string>
+
+
+    <!-- POP CONFIG SELECTOR -->
+    <string name="select_an_option">Selecciona una opción</string>
+    <string name="how_to_configure_ip">¿Cómo deseas configurar la IP?</string>
+    <string name="static_ip">IP estatica</string>
+    <string name="dynamic_ip">IP dinámica</string>
+    <string name="ipv4_address">Dirección IPv4</string>
+    <string name="enter_parameters">Ingresa los parametros de configuración</string>
+    <string name="example_ipv4">Ejemplo: 192.168.1.100</string>
+    <string name="subnetwork_mask">Mascara de subred</string>
+    <string name="example_subnetwork_mask">Ejemplo: 255.255.255.0</string>
+    <string name="gateway">Puerta de enlace</string>
+    <string name="example_gateway">Ejemplo: 192.168.1.1</string>
+    <string name="accept">Aceptar</string>
 </resources>

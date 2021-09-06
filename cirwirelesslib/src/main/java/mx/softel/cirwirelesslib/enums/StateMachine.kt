@@ -4,6 +4,7 @@ enum class StateMachine {
     UNKNOWN,        // OTRO
     POLING,         // Estatus base
     WIFI_CONFIG,    // Configurando el WIFI en el CIR WIRELESS
+    SHOW_CONFIG_MODES, // Muestra las formas de configurar la CIR WIRELESS
     GET_AP,         // Obteniendo MAC's de AP que el dispositivo detecta
     SET_MODE,       // Obteniendo confirmación de que se configuró correctamente
     GET_CONFIG_AP,  // Obteniendo el SSID configurado

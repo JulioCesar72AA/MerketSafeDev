@@ -139,7 +139,8 @@
             <TableLayout
                 android:id="@+id/tlLockContainer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content"
+                android:visibility="visible">
                 <TableRow
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -274,88 +275,146 @@
             </TableLayout>
 
             <!-- Botones Configuración -->
-            <!-- CardView Configurar -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cvConfigurar"
-                android:layout_width="@dimen/cv_fixed_size"
-                android:layout_height="@dimen/cv_fixed_size"
-                android:layout_margin="@dimen/cv_margin"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground"
-                app:cardElevation="@dimen/cv_elevation"
-                app:cardCornerRadius="@dimen/cv_corner_radius"
-                app:cardUseCompatPadding="true"
-                app:cardBackgroundColor="@color/cardScanBackground"
+            <TableLayout
+                android:id="@+id/tlConfigBtns"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:visibility="gone"
-                >
+                android:gravity="center" >
 
-                <LinearLayout
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center">
+
+                    <!-- CardView Configurar -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cvConfigurar"
+                        android:layout_width="@dimen/cv_config_size"
+                        android:layout_height="@dimen/cv_config_size"
+                        android:layout_margin="@dimen/_8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        app:cardElevation="@dimen/cv_elevation"
+                        app:cardCornerRadius="@dimen/cv_corner_radius"
+                        app:cardUseCompatPadding="true"
+                        app:cardBackgroundColor="@color/cardScanBackground"
+                        >
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:layout_margin="@dimen/_16dp">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="8"
+                                android:src="@drawable/ic_config"
+                                android:contentDescription="@string/cd_config_icon"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="2"
+                                android:gravity="center"
+                                android:text="@string/btn_configure"
+                                android:fontFamily="@font/rubik_bold"
+                                android:textColor="@color/colorIconBlue"/>
+
+                        </LinearLayout>
+
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Cardview Probar -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cvProbar"
+                        android:layout_width="@dimen/cv_config_size"
+                        android:layout_height="@dimen/cv_config_size"
+                        android:layout_margin="@dimen/cv_margin"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        app:cardElevation="@dimen/cv_elevation"
+                        app:cardCornerRadius="@dimen/cv_corner_radius"
+                        app:cardUseCompatPadding="true"
+                        app:cardBackgroundColor="@color/cardScanBackground"
+                        >
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:layout_margin="@dimen/_16dp">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="8"
+                                android:contentDescription="@string/cd_test_icon"
+                                android:src="@drawable/ic_probar" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="2"
+                                android:gravity="center"
+                                android:text="@string/btn_test"
+                                android:fontFamily="@font/rubik_bold"
+                                android:textColor="@color/colorIconBlue"/>
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </TableRow>
+
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:layout_margin="@dimen/cv_content_margin">
+                    android:layout_height="wrap_content"
+                    android:gravity="center">
 
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="8"
-                        android:src="@drawable/ic_config"
-                        android:contentDescription="@string/cd_config_icon"/>
+                    <!-- Cardview Update URL -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cvUpdate"
+                        android:layout_width="@dimen/cv_config_size"
+                        android:layout_height="@dimen/cv_config_size"
+                        android:layout_margin="@dimen/cv_margin"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        app:cardElevation="@dimen/cv_elevation"
+                        app:cardCornerRadius="@dimen/cv_corner_radius"
+                        app:cardUseCompatPadding="true"
+                        app:cardBackgroundColor="@color/cardScanBackground" >
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="2"
-                        android:gravity="center"
-                        android:text="@string/btn_configure"
-                        android:fontFamily="@font/rubik_bold"
-                        android:textColor="@color/colorIconBlue"/>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:layout_margin="@dimen/_16dp" >
 
-                </LinearLayout>
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="8"
+                                android:src="@drawable/ic_update"
+                                android:padding="@dimen/_6dp"
+                                android:contentDescription="@string/cd_close_lock"/>
 
-            </androidx.cardview.widget.CardView>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="2"
+                                android:gravity="center"
+                                android:text="@string/btn_update"
+                                android:fontFamily="@font/rubik_bold"
+                                android:textColor="@color/colorIconBlue"/>
 
-            <!-- Cardview Probar -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cvProbar"
-                android:layout_width="@dimen/cv_fixed_size"
-                android:layout_height="@dimen/cv_fixed_size"
-                android:layout_margin="@dimen/cv_margin"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground"
-                app:cardElevation="@dimen/cv_elevation"
-                app:cardCornerRadius="@dimen/cv_corner_radius"
-                app:cardUseCompatPadding="true"
-                app:cardBackgroundColor="@color/cardScanBackground"
-                android:visibility="gone"
-                >
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:layout_margin="@dimen/cv_content_margin">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="8"
-                        android:src="@drawable/ic_probar"
-                        android:contentDescription="@string/cd_test_icon"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="2"
-                        android:gravity="center"
-                        android:text="@string/btn_test"
-                        android:fontFamily="@font/rubik_bold"
-                        android:textColor="@color/colorIconBlue"/>
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </TableRow>
+            </TableLayout>
         </LinearLayout>
 
         <include

@@ -25,6 +25,7 @@
     <dimen name="cv_config_elevation">10dp</dimen>
     <dimen name="cv_rounded_corners">25dp</dimen>
     <dimen name="cv_lock_size">120dp</dimen>
+    <dimen name="cv_config_size">130dp</dimen>
 
     <!-- IMAGES VIEW's -->
     <dimen name="iv_config_width_height">50dp</dimen>
@@ -55,6 +56,9 @@
     <dimen name="margin_branding_layout">10dp</dimen>
 
     <!-- DEFAULT MARGIN VALUES -->
+    <dimen name="_6dp">6dp</dimen>
     <dimen name="_8dp">8dp</dimen>
+    <dimen name="_10dp">10dp</dimen>
+    <dimen name="_12dp">12dp</dimen>
     <dimen name="_16dp">16dp</dimen>
 </resources>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:gravity="center_vertical"
+    android:layout_gravity="center"
+    android:background="@drawable/gray_rounded_corners"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/_16dp"
+    android:paddingEnd="@dimen/_16dp"
+    android:theme="@style/CustomDialog">
+
+    <TextView
+        android:id="@+id/tvConfigSelectorTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/select_an_option"
+        android:textAlignment="center"
+        android:layout_marginTop="@dimen/_16dp"
+        android:fontFamily="@font/rubik_bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+    <TextView
+        android:id="@+id/tvConfigSelectorMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/how_to_configure_ip"
+        android:textAlignment="center"
+        android:layout_marginTop="@dimen/_16dp"
+        android:fontFamily="@font/rubik_light"
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintTop_toBottomOf="@+id/tvConfigSelectorTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvStaticIp"
+        android:layout_width="@dimen/cv_config_size"
+        android:layout_height="@dimen/cv_config_size"
+        android:layout_margin="@dimen/_6dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        app:layout_constraintTop_toBottomOf="@+id/tvConfigSelectorMessage"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/cvDynamicIp"
+        app:cardElevation="@dimen/cv_elevation"
+        app:cardCornerRadius="@dimen/cv_corner_radius"
+        app:cardUseCompatPadding="true"
+        app:cardBackgroundColor="@color/cardScanBackground">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_margin="@dimen/_16dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="8"
+                android:contentDescription="@string/cd_test_icon"
+                android:src="@drawable/ic_static_ip" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2"
+                android:fontFamily="@font/rubik_bold"
+                android:gravity="center"
+                android:textSize="@dimen/_12dp"
+                android:text="@string/static_ip"
+                android:textColor="@color/colorIconBlue" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvDynamicIp"
+        android:layout_width="@dimen/cv_config_size"
+        android:layout_height="@dimen/cv_config_size"
+        android:layout_margin="@dimen/_6dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/cvStaticIp"
+        app:layout_constraintTop_toBottomOf="@+id/tvConfigSelectorMessage"
+        app:cardElevation="@dimen/cv_elevation"
+        app:cardCornerRadius="@dimen/cv_corner_radius"
+        app:cardUseCompatPadding="true"
+        app:cardBackgroundColor="@color/cardScanBackground">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_margin="@dimen/_16dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="8"
+                android:contentDescription="@string/cd_test_icon"
+                android:src="@drawable/ic_dynamic_ip" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:textSize="@dimen/_12dp"
+                android:text="@string/dynamic_ip"
+                android:fontFamily="@font/rubik_bold"
+                android:textColor="@color/colorIconBlue"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

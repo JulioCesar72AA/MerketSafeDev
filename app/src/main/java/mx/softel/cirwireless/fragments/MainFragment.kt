@@ -34,7 +34,9 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
     private lateinit var ivMenu         : ImageView
     private lateinit var cvConfigure    : CardView
     private lateinit var cvTest         : CardView
+    private lateinit var cvUpdate       : CardView
     private lateinit var tlLockBtns     : TableLayout
+    private lateinit var tlConfigBtns   : TableLayout
     private lateinit var cvOpenLock     : CardView
     private lateinit var cvCloseLock    : CardView
     private lateinit var cvRechargeFridge:CardView
@@ -65,7 +67,9 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             tvMac           = findViewById(R.id.tvMacSelected)
             cvConfigure     = findViewById(R.id.cvConfigurar)
             cvTest          = findViewById(R.id.cvProbar)
+            cvUpdate        = findViewById(R.id.cvUpdate)
             tlLockBtns      = findViewById(R.id.tlLockContainer)
+            tlConfigBtns    = findViewById(R.id.tlConfigBtns)
             cvOpenLock      = findViewById(R.id.cvOpenLock)
             cvCloseLock     = findViewById(R.id.cvCloseLock)
             cvRechargeFridge= findViewById(R.id.cvRecharge)
@@ -91,6 +95,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
         ivMenu      .setOnClickListener(this)
         cvTest      .setOnClickListener(this)
         cvConfigure .setOnClickListener(this)
+        cvUpdate    .setOnClickListener(this)
         cvOpenLock  .setOnClickListener(this)
         cvCloseLock .setOnClickListener(this)
         cvRechargeFridge.setOnClickListener(this)
@@ -205,13 +210,15 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             // Se colocan las animaciones a los botones de la seccion de configuración
             cvConfigure.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
             cvTest.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
+            cvUpdate.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
 
             // Se colocan la visibilidad de los botones de la seccion de chapa
             tlLockBtns.visibility = visibilityForLockBtns
 
             // Se colocan la visibilidad de los botones de la seccion de configuracion
-            cvConfigure.visibility = visibilityForConfigBtns
-            cvTest.visibility = visibilityForConfigBtns
+            // cvConfigure.visibility = visibilityForConfigBtns
+            // cvTest.visibility = visibilityForConfigBtns
+            tlConfigBtns.visibility = visibilityForConfigBtns
 
             ivLockOrConfig.setImageResource(image)
 
@@ -230,7 +237,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             clickConfigure()
         else {
             toast(getString(R.string.updating_data))
-            root.cirService.setCurrentState(StateMachine.GET_AP)
+            root.cirService.setCurrentState(StateMachine.SHOW_CONFIG_MODES)
             /*
             root.apply {
                 CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!, root.bleMacBytes)

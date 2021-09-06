@@ -18,10 +18,7 @@ import mx.softel.bleservicelib.BleService
 import mx.softel.bleservicelib.enums.ConnState
 import mx.softel.bleservicelib.enums.DisconnectionReason
 import mx.softel.cirwireless.R
-import mx.softel.cirwireless.dialogs.ConfigInfoDialog
-import mx.softel.cirwireless.dialogs.PasswordDialog
-import mx.softel.cirwireless.dialogs.WifiNokDialog
-import mx.softel.cirwireless.dialogs.WifiOkDialog
+import mx.softel.cirwireless.dialogs.*
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.fragments.AccessPointsFragment
 import mx.softel.cirwireless.fragments.MainFragment
@@ -43,7 +40,8 @@ class RootActivity : AppCompatActivity(),
                      FragmentNavigation,
                      PasswordDialog.OnDialogClickListener,
                      WifiOkDialog.OnWifiDialogListener,
-                     BleService.OnBleConnection {
+                     BleService.OnBleConnection,
+                    ConfigSelectorDialog.OnDialogClickListener {
 
     private var firstTime               = true
 
@@ -169,7 +167,7 @@ class RootActivity : AppCompatActivity(),
     }
 
 
-    fun isACirWifiBeacon (beaconId: String) : Boolean = when (beaconId) {
+    private fun isACirWifiBeacon (beaconId: String) : Boolean = when (beaconId) {
         "0x000B" -> true
         "0x000C" -> true
         "0x000D" -> false
@@ -220,11 +218,21 @@ class RootActivity : AppCompatActivity(),
     }
 
 
+    /************************************************************************************************/
+    /**     ON CLICK                                                                                */
+    /************************************************************************************************/
+    /**
+     * ## dialogConfigSelector
+     * Se ejecutan de acuerdo a la IP seleccionada
+     *
+     */
+    override fun staticIpSelected() {
 
+    }
 
-
-
-
+    override fun dynamicIpSelected() {
+        cirService.setCurrentState(StateMachine.GET_AP)
+    }
 
 
 
@@ -897,6 +905,13 @@ class RootActivity : AppCompatActivity(),
                     }
                 }
                 cipStatusMode = -1
+            }
+
+            StateMachine.SHOW_CONFIG_MODES -> {
+                val dialog = ConfigSelectorDialog()
+                dialog.show(supportFragmentManager, TAG)
+                cirService.setCurrentState(StateMachine.POLING)
+
             }
 
             // STATUS DE MAC'S DE AP'S QUE EL DISPOSITIVO VE
