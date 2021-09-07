@@ -89,6 +89,8 @@
     <string name="updated_date">Date updated</string>
     <string name="error_date">Date couldn\'t be updated</string>
     <string name="unsupported_config_action">This device does not support this section</string>
+    <string name="error_ocurred">Configuration error ocurred, try again</string>
+
 
     <!-- POP UP CONFIG SELECTOR -->
     <string name="select_an_option">Select an option</string>
@@ -103,4 +105,10 @@
     <string name="gateway">Gateway</string>
     <string name="example_gateway">Example: 192.168.1.1</string>
     <string name="accept">Accept</string>
+    <string name="invalid_ip_address">Invalid IP Address</string>
+    <string name="invalid_mask_address">Invalid Mask Address</string>
+    <string name="invalid_gateway">Invalid Gateway</string>
+    <string name="cancel">Cancel</string>
+    <string name="wait_a_moment">Wait a moment</string>
+
 </resources>

@@ -105,4 +105,10 @@
     <string name="gateway">Puerta de enlace</string>
     <string name="example_gateway">Ejemplo: 192.168.1.1</string>
     <string name="accept">Aceptar</string>
+    <string name="invalid_ip_address">La dirección IP no es valida</string>
+    <string name="invalid_mask_address">La dirección de subred no es válida</string>
+    <string name="invalid_gateway">La dirección de la puerta de enlace no es valida</string>
+    <string name="cancel">Cancelar</string>
+    <string name="wait_a_moment">Espera por favor</string>
+    <string name="error_ocurred">Error en la configuración, vuelve a intentarlo</string>
 </resources>

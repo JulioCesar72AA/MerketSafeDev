@@ -52,6 +52,8 @@ class BleManager(private var appContext: Context,
         "0x000C" -> true
         "0x000D" -> true
         "0x000E" -> true
+        "0x0013" -> true
+        "0x0014" -> true
         else -> false
     }
 

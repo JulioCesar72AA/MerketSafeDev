@@ -127,6 +127,22 @@ object CommandUtils {
         return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
+    fun setStaticIpCmd (mac: ByteArray) : ByteArray {
+        val atCommand = "AT+CWDHCP=0,1".toByteArray()
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
+    }
+
+    fun setDynamicIpCmd (mac: ByteArray) : ByteArray {
+        val atCommand = "AT+CWDHCP=1,1".toByteArray()
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
+    }
+
+    fun setStaticIpValuesCmd (ipAddress: String, gateway: String, maskAddress: String, mac: ByteArray) : ByteArray {
+        val atCommand = "AT+CIPSTA=\"${ipAddress}\",\"${gateway}\",\"${maskAddress}\"".toByteArray()
+        // Log.e(TAG, "Command IP Values: ${"AT+CIPSTA=\"${ipAddress}\",\"${gateway}\",\"${maskAddress}\""}")
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
+    }
+
     fun initialCmd(mac: ByteArray): ByteArray {
         val atCommand = "S_T_R_T".toByteArray()
         return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)

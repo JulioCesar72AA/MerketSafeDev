@@ -117,6 +117,8 @@ class BleDevice(scanResult: ScanResult,
         "0x000C" -> "CIR Wireless"
         "0x000D" -> "CIR RS232"
         "0x000E" -> "CIR RS232"
+        "0x0013" -> "CIR RS232"
+        "0x0014" -> "CIR RS232"
         else -> "NO AVAILABLE"
     }
 

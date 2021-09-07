@@ -18,6 +18,7 @@
         android:layout_height="wrap_content"
         android:text="@string/enter_parameters"
         android:fontFamily="@font/rubik_bold"
+        android:textAlignment="center"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -30,15 +31,18 @@
         android:text="@string/ipv4_address"
         android:layout_marginTop="@dimen/_16dp"
         app:layout_constraintTop_toBottomOf="@+id/tvIpConfigTitle"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <EditText
         android:id="@+id/etIpAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/example_ipv4"
+        android:maxLines="1"
         app:layout_constraintTop_toBottomOf="@+id/tvIpAddress"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
     <TextView
@@ -48,15 +52,18 @@
         android:text="@string/subnetwork_mask"
         android:layout_marginTop="@dimen/_16dp"
         app:layout_constraintTop_toBottomOf="@+id/etIpAddress"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <EditText
         android:id="@+id/etMaskAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/example_subnetwork_mask"
+        android:maxLines="1"
         app:layout_constraintTop_toBottomOf="@+id/tvMaskAddress"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
     <TextView
@@ -66,15 +73,18 @@
         android:text="@string/gateway"
         android:layout_marginTop="@dimen/_16dp"
         app:layout_constraintTop_toBottomOf="@+id/etMaskAddress"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <EditText
         android:id="@+id/etGatewayAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/example_gateway"
+        android:maxLines="1"
         app:layout_constraintTop_toBottomOf="@+id/tvGatewayAddress"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 
     <androidx.cardview.widget.CardView
@@ -100,4 +110,5 @@
             android:fontFamily="@font/rubik_light"
             android:textColor="@android:color/white"/>
     </androidx.cardview.widget.CardView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

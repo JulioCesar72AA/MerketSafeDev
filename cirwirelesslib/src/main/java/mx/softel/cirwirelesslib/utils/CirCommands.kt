@@ -229,6 +229,24 @@ object CirCommands {
                   mac               : ByteArray)
             = service.writeToCharacteristic(CommandUtils.readDate(mac), characteristic)
 
+    fun setStaticIp (service: BleService,
+                     characteristic: BluetoothGattCharacteristic,
+                     mac: ByteArray)
+            = service.writeToCharacteristic(CommandUtils.setStaticIpCmd(mac), characteristic)
+
+    fun setDyanmicIp (service: BleService,
+                      characteristic: BluetoothGattCharacteristic,
+                      mac: ByteArray)
+            = service.writeToCharacteristic(CommandUtils.setDynamicIpCmd(mac), characteristic)
+
+    fun setStaticIpValues (ipAddress: String,
+                           maskAddress: String,
+                           gateway: String,
+                           service: BleService,
+                           characteristic: BluetoothGattCharacteristic,
+                           mac: ByteArray)
+            = service.writeToCharacteristic(CommandUtils.setStaticIpValuesCmd(ipAddress, maskAddress, gateway, mac), characteristic)
+
     /*
     0x19
      */

@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -28,6 +29,7 @@ import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.hexStringToByteArray
 import mx.softel.cirwirelesslib.extensions.toCharString
+import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.utils.BleCirWireless
 import mx.softel.cirwirelesslib.utils.CirCommands
 import mx.softel.cirwirelesslib.utils.CirWirelessParser
@@ -41,7 +43,8 @@ class RootActivity : AppCompatActivity(),
                      PasswordDialog.OnDialogClickListener,
                      WifiOkDialog.OnWifiDialogListener,
                      BleService.OnBleConnection,
-                    ConfigSelectorDialog.OnDialogClickListener {
+                     ConfigSelectorDialog.OnDialogClickListener,
+                     IpConfigValuesDialog.OnDialogClickListener {
 
     private var firstTime               = true
 
@@ -61,6 +64,7 @@ class RootActivity : AppCompatActivity(),
     internal var rssiAssigned       : String        = ""
     internal var pingAssigned       : Boolean       = false
     internal var dataAssigned       : Boolean       = false
+    private  var staticIp           : Boolean       = false
 
     // SERVICE CONNECTIONS / FLAGS
     internal var service            : BleService?    = null
@@ -80,9 +84,15 @@ class RootActivity : AppCompatActivity(),
     private  val wifiFragment       : AccessPointsFragment  = AccessPointsFragment.getInstance()
 
     // HANDLERS / RUNNABLES
-    private val handler               = Handler()
+    private val handler               = Handler(Looper.getMainLooper())
     private val disconnectionRunnable = Runnable { finishAndDisconnectActivity(disconnectionReason.status) }
 
+    // DIALOGOS
+    private lateinit var waitDialog             : WaitDialog
+    private lateinit var ipConfigValuesDialog   : IpConfigValuesDialog
+
+    // IP STATIC
+    private lateinit var ipConfigValues : IpConfigModel
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -224,16 +234,44 @@ class RootActivity : AppCompatActivity(),
     /**
      * ## dialogConfigSelector
      * Se ejecutan de acuerdo a la IP seleccionada
-     *
      */
     override fun staticIpSelected() {
-
+        staticIp = true
+        cirService.setCurrentState(StateMachine.SHOW_PARAMETERS_STATIC_IP)
     }
 
     override fun dynamicIpSelected() {
-        cirService.setCurrentState(StateMachine.GET_AP)
+        staticIp = false
+        cirService.setCurrentState(StateMachine.SETTING_MODE_IP_CONFIG)
+        showWaitDialog()
     }
 
+
+    private fun showWaitDialog () {
+        runOnUiThread {
+            waitDialog = WaitDialog()
+            waitDialog.show(supportFragmentManager, TAG)
+        }
+    }
+
+
+    private fun dismissWaitDialog () {
+        if (waitDialog.isVisible) waitDialog.dismiss()
+    }
+
+
+    /************************************************************************************************/
+    /**     ON CLICK                                                                                */
+    /************************************************************************************************/
+    /**
+     * ## ipConfigDialog
+     * Se obtienen los valores de la IP
+     */
+    override fun staticIpValues (ipValues: IpConfigModel) {
+        ipConfigValues = ipValues
+        cirService.setCurrentState(StateMachine.SETTING_MODE_IP_CONFIG)
+        showWaitDialog()
+    }
 
 
     /************************************************************************************************/
@@ -326,6 +364,70 @@ class RootActivity : AppCompatActivity(),
             ReceivedCmd.AT_READY -> parseStatus(response)
             else -> {
                 CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+            }
+        }
+    }
+
+    private fun isIpModeConfigOk (response: ByteArray, command: ReceivedCmd) {
+        if (command == ReceivedCmd.POLEO) {
+            if (staticIp)
+                CirCommands.setStaticIp(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+
+            else
+                CirCommands.setDyanmicIp(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+
+        } else if (command == ReceivedCmd.AT_OK) {
+            CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+
+        } else if (command == ReceivedCmd.AT_READY) {
+            val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
+            val response = decResponse.toCharString()
+            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
+            if (response.contains(AT_CMD_OK)) {
+                if (staticIp)
+                    cirService.setCurrentState(StateMachine.SETTING_STATIC_IP_VALUES)
+
+                else {
+                    cirService.setCurrentState(StateMachine.GET_AP)
+                    dismissWaitDialog()
+                }
+
+            } else if (response.contains(AT_CMD_ERROR)) {
+                dismissWaitDialog()
+                cirService.setCurrentState(StateMachine.POLING)
+                toast(getString(R.string.error_ocurred))
+            }
+        }
+    }
+
+    private fun areIpConfigValuesOk (response: ByteArray, command: ReceivedCmd) {
+        if (command == ReceivedCmd.POLEO) {
+
+            CirCommands.setStaticIpValues(
+                ipConfigValues.ipAddress(),
+                ipConfigValues.maskAddress(),
+                ipConfigValues.gateway(),
+                service!!,
+                cirService.getCharacteristicWrite()!!,
+                bleMacBytes)
+
+        } else if (command == ReceivedCmd.AT_OK) {
+            CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+
+        } else if (command == ReceivedCmd.AT_READY) {
+
+            val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
+            val response = decResponse.toCharString()
+            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
+            if (response.contains(AT_CMD_OK))
+                cirService.setCurrentState(StateMachine.GET_AP)
+
+            else if (response.contains(AT_CMD_ERROR)) {
+                dismissWaitDialog()
+                cirService.setCurrentState(StateMachine.POLING)
+                toast(getString(R.string.error_ocurred))
             }
         }
     }
@@ -775,7 +877,7 @@ class RootActivity : AppCompatActivity(),
     /**     BLE SERVICE                                                                             */
     /************************************************************************************************/
     override fun characteristicChanged(characteristic: BluetoothGattCharacteristic) {
-        //Log.d(TAG, "characteristicChanged: ${characteristic.value.toCharString()}")
+        Log.d(TAG, "characteristicChanged: ${characteristic.value.toCharString()}")
 
         commandState(
             cirService.getCurrentState(),
@@ -791,23 +893,27 @@ class RootActivity : AppCompatActivity(),
         val value : ByteArray = characteristic.value
 
         if (uuidCharacteristic == BleConstants.QUICK_COMMANDS_CHARACTERISTIC) {
-            if (cirService.getCurrentState() == StateMachine.RELOADING_FRIDGE) {
-                wasReloadSuccess(
-                    cirService.getCurrentState(),
-                    value
-                )
-            } else if (cirService.getCurrentState() == StateMachine.UPDATING_DATE) {
-                wasUpdatedSuccess(
-                    cirService.getCurrentState(),
-                    value
-                )
+            when {
+                cirService.getCurrentState() == StateMachine.RELOADING_FRIDGE -> {
+                    wasReloadSuccess(
+                        cirService.getCurrentState(),
+                        value
+                    )
+                }
+                cirService.getCurrentState() == StateMachine.UPDATING_DATE -> {
+                    wasUpdatedSuccess(
+                        cirService.getCurrentState(),
+                        value
+                    )
 
-            } else {
-                wasLockSuccess(
-                    cirService.getCurrentState(),
-                    value
-                )
+                }
+                else -> {
+                    wasLockSuccess(
+                        cirService.getCurrentState(),
+                        value
+                    )
 
+                }
             }
         } else {
             cirService.extractFirmwareData(
@@ -883,7 +989,8 @@ class RootActivity : AppCompatActivity(),
     private fun commandState(state: StateMachine,
                              response: ByteArray,
                              command: ReceivedCmd) {
-        // Log.d(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toHex()}")
+        Log.e(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toHex()}")
+
         when (state) {
 
             // STATUS DE POLEO
@@ -907,12 +1014,29 @@ class RootActivity : AppCompatActivity(),
                 cipStatusMode = -1
             }
 
+            // SE MUESTRA QUE TIPO DE CONFIGURACION SE DESEA REALIZAR
             StateMachine.SHOW_CONFIG_MODES -> {
                 val dialog = ConfigSelectorDialog()
                 dialog.show(supportFragmentManager, TAG)
                 cirService.setCurrentState(StateMachine.POLING)
 
             }
+
+            StateMachine.SHOW_PARAMETERS_STATIC_IP -> {
+                val dialog = IpConfigValuesDialog()
+                dialog.show(supportFragmentManager, TAG)
+                cirService.setCurrentState(StateMachine.POLING)
+            }
+
+            StateMachine.SETTING_MODE_IP_CONFIG -> {
+                isIpModeConfigOk(response, command)
+            }
+
+
+            StateMachine.SETTING_STATIC_IP_VALUES -> {
+                areIpConfigValuesOk(response, command)
+            }
+
 
             // STATUS DE MAC'S DE AP'S QUE EL DISPOSITIVO VE
             StateMachine.GET_AP -> {
@@ -925,6 +1049,8 @@ class RootActivity : AppCompatActivity(),
                 if (command == ReceivedCmd.GET_AP) {
                     // Casteamos el resultado y navegamos al fragmento de AP's
                     deviceMacList = CirCommands.fromResponseGetMacList(response)
+
+                    dismissWaitDialog()
 
                     // Log.e(TAG, "DEVICE_MAC_LIST: $deviceMacList")
                     if (actualFragment != wifiFragment) navigateTo(wifiFragment, true, null)

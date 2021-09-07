@@ -7,15 +7,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.DialogFragment
 import mx.softel.cirwireless.R
+import mx.softel.cirwireless.extensions.toast
 
-class ConfigSelectorDialog : DialogFragment (), View.OnClickListener {
-
-    private lateinit var cvStaticIp     : CardView
-    private lateinit var cvDynamicIp    : CardView
-
+class WaitDialog : DialogFragment() {
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -23,14 +21,7 @@ class ConfigSelectorDialog : DialogFragment (), View.OnClickListener {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.pop_up_config_selector, container, false)
-        view.apply {
-            // Conectamos las vistas
-            cvStaticIp  = findViewById(R.id.cvStaticIp)
-            cvDynamicIp = findViewById(R.id.cvDynamicIp)
-
-            setOnClickListeners()
-        }
+        val view = inflater.inflate(R.layout.pop_up_wait_dialog, container, false)
         return view
     }
 
@@ -42,37 +33,12 @@ class ConfigSelectorDialog : DialogFragment (), View.OnClickListener {
     }
 
 
-    private fun setOnClickListeners () {
-        cvStaticIp.setOnClickListener(this)
-        cvDynamicIp.setOnClickListener(this)
-    }
-
-
-    override fun onClick(v: View?) {
-        val parent = activity as (OnDialogClickListener)
-
-        when (v!!.id) {
-            R.id.cvStaticIp     -> parent.staticIpSelected()
-            R.id.cvDynamicIp    -> parent.dynamicIpSelected()
-        }
-        dismiss()
-    }
-
-
-    interface OnDialogClickListener {
-        fun staticIpSelected ()
-
-        fun dynamicIpSelected ()
-    }
-
-
     /************************************************************************************************/
     /**     COMPANION OBJECT                                                                        */
     /************************************************************************************************/
     companion object {
-        private val TAG = ConfigSelectorDialog::class.java.simpleName
+        private val TAG = WaitDialog::class.java.simpleName
 
         fun getInstance() = PasswordDialog()
     }
-
 }

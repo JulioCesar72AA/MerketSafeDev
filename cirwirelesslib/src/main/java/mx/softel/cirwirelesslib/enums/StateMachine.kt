@@ -5,6 +5,9 @@ enum class StateMachine {
     POLING,         // Estatus base
     WIFI_CONFIG,    // Configurando el WIFI en el CIR WIRELESS
     SHOW_CONFIG_MODES, // Muestra las formas de configurar la CIR WIRELESS
+    SHOW_PARAMETERS_STATIC_IP, // Se muestra el cuando de dialogo
+    SETTING_MODE_IP_CONFIG, // Se configura el tipo de IP - DHCP o estatica
+    SETTING_STATIC_IP_VALUES, // Se configuran los valores de la ip estatica en la CIR
     GET_AP,         // Obteniendo MAC's de AP que el dispositivo detecta
     SET_MODE,       // Obteniendo confirmación de que se configuró correctamente
     GET_CONFIG_AP,  // Obteniendo el SSID configurado

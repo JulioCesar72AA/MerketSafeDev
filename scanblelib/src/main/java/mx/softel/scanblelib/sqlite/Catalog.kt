@@ -6,7 +6,7 @@ object Catalog {
 
     // BASE DE DATOS
     const val DATABASE_NAME                 = "beacons_db"
-    const val DATABASE_VERSION              = 1
+    const val DATABASE_VERSION              = 2
 
     // TABLAS
     const val TABLE_BEACONS_NAME            = "beacon"
@@ -32,6 +32,12 @@ object Catalog {
     const val BEACON_TYPE_000A              = "0x000a"
     const val BEACON_TYPE_000B              = "0x000b"
     const val BEACON_TYPE_000C              = "0x000c"
+    const val BEACON_TYPE_000D              = "0x000d"
+    const val BEACON_TYPE_000E              = "0x000e"
+    const val BEACON_TYPE_000F              = "0x000f"
+    const val BEACON_TYPE_0013              = "0x0013"
+    const val BEACON_TYPE_0014              = "0x0014"
+
 
     const val BEACON_DESCRIPTION_0000       = "BootLoader"
     const val BEACON_DESCRIPTION_0001       = "Cir 2017"
@@ -46,6 +52,11 @@ object Catalog {
     const val BEACON_DESCRIPTION_000A       = "Cir 2017 1.3.9"
     const val BEACON_DESCRIPTION_000B       = "Cir Wireless"
     const val BEACON_DESCRIPTION_000C       = "Cir Wireless Blocked"
+    const val BEACON_DESCRIPTION_000D       = "CIR RS"
+    const val BEACON_DESCRIPTION_000E       = "CIR RSB"
+    const val BEACON_DESCRIPTION_000F       = "Sanitizador"
+    const val BEACON_DESCRIPTION_0013       = "Cir RS"
+    const val BEACON_DESCRIPTION_0014       = "Cir RS"
 
     // VALORES DEFAULT
     const val NULL_STRING                   = "null"
@@ -87,7 +98,12 @@ object Catalog {
             ($NULL_STRING, '$BEACON_TYPE_0009', '$BEACON_DESCRIPTION_0009', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED ),
             ($NULL_STRING, '$BEACON_TYPE_000A', '$BEACON_DESCRIPTION_000A', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED ),
             ($NULL_STRING, '$BEACON_TYPE_000B', '$BEACON_DESCRIPTION_000B', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED),
-            ($NULL_STRING, '$BEACON_TYPE_000C', '$BEACON_DESCRIPTION_000C', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED)
+            ($NULL_STRING, '$BEACON_TYPE_000C', '$BEACON_DESCRIPTION_000C', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED),
+            ($NULL_STRING, '$BEACON_TYPE_000D', '$BEACON_DESCRIPTION_000D', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED),
+            ($NULL_STRING, '$BEACON_TYPE_000E', '$BEACON_DESCRIPTION_000E', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED),
+            ($NULL_STRING, '$BEACON_TYPE_000F', '$BEACON_DESCRIPTION_000F', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED),
+            ($NULL_STRING, '$BEACON_TYPE_0013', '$BEACON_DESCRIPTION_0013', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED),
+            ($NULL_STRING, '$BEACON_TYPE_0014', '$BEACON_DESCRIPTION_0014', $DEVICE_IS_ENCRYPTED, $DEVICE_COULD_BE_COLLECTED)
         """
 
     // Selección de beacons por tipo "recolectables"
