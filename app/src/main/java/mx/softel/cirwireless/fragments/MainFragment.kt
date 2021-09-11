@@ -117,6 +117,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             R.id.ivBack         -> root.finishAndDisconnectActivity(DisconnectionReason.UNKNOWN.status)
             R.id.ivMenuUpdate   -> createMenu()
             R.id.cvConfigurar   -> clickConfigure()
+            R.id.cvUpdate       -> updateRepositoryUrl()
             R.id.cvProbar       -> clickTest()
             R.id.cvConfigurationOrLock -> showConfigOrLockBtns()
             R.id.cvRecharge     -> sendReloadCommand()
@@ -238,6 +239,22 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
         else {
             toast(getString(R.string.updating_data))
             root.cirService.setCurrentState(StateMachine.SHOW_CONFIG_MODES)
+            /*
+            root.apply {
+                CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!, root.bleMacBytes)
+                cirService.setCurrentState(StateMachine.GET_AP)
+            }
+            */
+        }
+    }
+
+
+    private fun updateRepositoryUrl () {
+        if (root.cirService.getCharacteristicWrite() == null)
+            clickConfigure()
+        else {
+            toast(getString(R.string.updating_data))
+            root.cirService.setCurrentState(StateMachine.GET_CLIENT)
             /*
             root.apply {
                 CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!, root.bleMacBytes)

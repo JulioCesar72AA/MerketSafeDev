@@ -19,6 +19,7 @@ import mx.softel.bleservicelib.BleService
 import mx.softel.bleservicelib.enums.ConnState
 import mx.softel.bleservicelib.enums.DisconnectionReason
 import mx.softel.cirwireless.R
+import mx.softel.cirwireless.RepositoryModel
 import mx.softel.cirwireless.dialogs.*
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.fragments.AccessPointsFragment
@@ -93,6 +94,9 @@ class RootActivity : AppCompatActivity(),
 
     // IP STATIC
     private lateinit var ipConfigValues : IpConfigModel
+
+    // REPOSITORY URL
+    private lateinit var repositoryModel: RepositoryModel
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -368,6 +372,79 @@ class RootActivity : AppCompatActivity(),
         }
     }
 
+    private fun isRepositoryUrlUpdated (response: ByteArray, command: ReceivedCmd) {
+        if (command == ReceivedCmd.POLEO) {
+            CirCommands.setRepositoryUrl(repositoryModel.repositoryUrl(), repositoryModel.port(), service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+
+        } else if (command == ReceivedCmd.AT_OK) {
+            CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+
+        } else if (command == ReceivedCmd.AT_READY) {
+            val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
+            val response    = decResponse.toCharString()
+            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
+            if (response.contains(AT_CMD_OK)) {
+
+                cirService.setCurrentState(StateMachine.SETTING_FIRMWARE_PATH)
+
+            } else if (response.contains(AT_CMD_ERROR)) {
+                dismissWaitDialog()
+                cirService.setCurrentState(StateMachine.POLING)
+                runOnUiThread { toast(getString(R.string.error_ocurred)) }
+            }
+        }
+    }
+
+    private fun isFirmwarePathUpdated (response: ByteArray, command: ReceivedCmd) {
+        if (command == ReceivedCmd.POLEO) {
+            CirCommands.setFirmwarePath(repositoryModel.path(), repositoryModel.imagePrefix(), service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+
+        } else if (command == ReceivedCmd.AT_OK) {
+            CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+
+        } else if (command == ReceivedCmd.AT_READY) {
+            val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
+            val response    = decResponse.toCharString()
+            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
+            if (response.contains(AT_CMD_OK)) {
+
+                cirService.setCurrentState(StateMachine.SETTING_FIRMWARE_VERSION)
+
+            } else if (response.contains(AT_CMD_ERROR)) {
+                dismissWaitDialog()
+                cirService.setCurrentState(StateMachine.POLING)
+                runOnUiThread { toast(getString(R.string.error_ocurred)) }
+            }
+        }
+    }
+
+    private fun isFirmwareVersionUpdated (response: ByteArray, command: ReceivedCmd) {
+        if (command == ReceivedCmd.POLEO) {
+            CirCommands.setFirmwareVersion(repositoryModel.imageVersion(), service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+
+        } else if (command == ReceivedCmd.AT_OK) {
+            CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+
+        } else if (command == ReceivedCmd.AT_READY) {
+            val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
+            val response    = decResponse.toCharString()
+            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
+            if (response.contains(AT_CMD_OK)) {
+                dismissWaitDialog()
+                cirService.setCurrentState(StateMachine.POLING)
+                runOnUiThread { toast(getString(R.string.success)) }
+
+            } else if (response.contains(AT_CMD_ERROR)) {
+                dismissWaitDialog()
+                cirService.setCurrentState(StateMachine.POLING)
+                runOnUiThread { toast(getString(R.string.error_ocurred)) }
+            }
+        }
+    }
+
     private fun isIpModeConfigOk (response: ByteArray, command: ReceivedCmd) {
         if (command == ReceivedCmd.POLEO) {
             if (staticIp)
@@ -396,7 +473,7 @@ class RootActivity : AppCompatActivity(),
             } else if (response.contains(AT_CMD_ERROR)) {
                 dismissWaitDialog()
                 cirService.setCurrentState(StateMachine.POLING)
-                toast(getString(R.string.error_ocurred))
+                runOnUiThread { toast(getString(R.string.error_ocurred)) }
             }
         }
     }
@@ -421,13 +498,15 @@ class RootActivity : AppCompatActivity(),
             val response = decResponse.toCharString()
             Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
-            if (response.contains(AT_CMD_OK))
-                cirService.setCurrentState(StateMachine.GET_AP)
+            if (response.contains(AT_CMD_OK)) {
 
-            else if (response.contains(AT_CMD_ERROR)) {
+                cirService.setCurrentState(StateMachine.GET_AP)
+                runOnUiThread { toast(getString(R.string.success)) }
+
+            } else if (response.contains(AT_CMD_ERROR)) {
                 dismissWaitDialog()
                 cirService.setCurrentState(StateMachine.POLING)
-                toast(getString(R.string.error_ocurred))
+                runOnUiThread { toast(getString(R.string.error_ocurred)) }
             }
         }
     }
@@ -1012,6 +1091,26 @@ class RootActivity : AppCompatActivity(),
                     }
                 }
                 cipStatusMode = -1
+            }
+
+            StateMachine.GET_CLIENT -> {
+                showWaitDialog()
+                cirService.setCurrentState(StateMachine.SETTING_REPOSITORY_URL)
+                repositoryModel = RepositoryModel(1) // Esto se debe de cambiar por el cliente que nos de la tarjeta
+                // TODO("IMPLEMENTAR OBTENER CLIENTE MEDIANTE EL PROTOCOLO DE POLEO")
+            }
+
+            StateMachine.SETTING_REPOSITORY_URL -> {
+                isRepositoryUrlUpdated(response, command)
+            }
+
+
+            StateMachine.SETTING_FIRMWARE_PATH -> {
+                isFirmwarePathUpdated(response, command)
+            }
+
+            StateMachine.SETTING_FIRMWARE_VERSION -> {
+                isFirmwareVersionUpdated(response, command)
             }
 
             // SE MUESTRA QUE TIPO DE CONFIGURACION SE DESEA REALIZAR

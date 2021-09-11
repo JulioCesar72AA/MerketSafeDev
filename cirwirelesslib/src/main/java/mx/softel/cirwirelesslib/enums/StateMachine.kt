@@ -3,7 +3,12 @@ package mx.softel.cirwirelesslib.enums
 enum class StateMachine {
     UNKNOWN,        // OTRO
     POLING,         // Estatus base
+    GET_FIRMWARE,   // Se obtiene u
     WIFI_CONFIG,    // Configurando el WIFI en el CIR WIRELESS
+    GET_CLIENT,     // Obtiene el cliente del dispositivo
+    SETTING_REPOSITORY_URL, // Se actualiza la url del repositorio
+    SETTING_FIRMWARE_PATH, // Se actualiza la ruta del archivo que esta en el servidor
+    SETTING_FIRMWARE_VERSION, // Se actualiza la version de firmware a descargar
     SHOW_CONFIG_MODES, // Muestra las formas de configurar la CIR WIRELESS
     SHOW_PARAMETERS_STATIC_IP, // Se muestra el cuando de dialogo
     SETTING_MODE_IP_CONFIG, // Se configura el tipo de IP - DHCP o estatica

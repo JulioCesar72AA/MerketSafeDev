@@ -90,6 +90,7 @@
     <string name="error_date">Date couldn\'t be updated</string>
     <string name="unsupported_config_action">This device does not support this section</string>
     <string name="error_ocurred">Configuration error ocurred, try again</string>
+    <string name="success">Successful configuration</string>
 
 
     <!-- POP UP CONFIG SELECTOR -->

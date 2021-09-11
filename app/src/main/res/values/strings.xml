@@ -9,6 +9,7 @@
     <string name="tst_scanning" tools:ignore="Typos">Espere un momento… Escaneando</string>
     <string name="locking">Cerrando chapa</string>
     <string name="unlocking">Abriendo chapa</string>
+    <string name="success">Configuración exitosa</string>
 
     <!-- HINT's -->
     <string name="hint_password">Contraseña</string>

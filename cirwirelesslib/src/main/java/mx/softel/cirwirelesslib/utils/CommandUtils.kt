@@ -137,6 +137,27 @@ object CommandUtils {
         return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
     }
 
+    fun setRepositoryUrl (url: String, port: String, mac: ByteArray) : ByteArray {
+        // Log.e(TAG, "URL_REPOSITORY: AT+OTAHOSTPORT=\"${url}\",${port}")
+        val atCommand = "AT+OTAHOSTPORT=\"${url}\",${port}".toByteArray()
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
+    }
+
+    fun setImagePath (path: String, imagePrefix: String, mac: ByteArray) : ByteArray {
+        val atCommand = "AT+OTAPATHIMAGE=\"$path\",\"$imagePrefix\"".toByteArray()
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
+    }
+
+    fun setImageVersion (version: String, mac: ByteArray) : ByteArray {
+        val atCommand = "AT+OTAUPDATE=$version".toByteArray()
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
+    }
+
+    fun getFirmware (mac: ByteArray) : ByteArray {
+        val atCommand = "AT+SFTLIMGINFO?".toByteArray()
+        return getCompleteEncryptedCommand(AT_GENERIC, atCommand, mac)
+    }
+
     fun setStaticIpValuesCmd (ipAddress: String, gateway: String, maskAddress: String, mac: ByteArray) : ByteArray {
         val atCommand = "AT+CIPSTA=\"${ipAddress}\",\"${gateway}\",\"${maskAddress}\"".toByteArray()
         // Log.e(TAG, "Command IP Values: ${"AT+CIPSTA=\"${ipAddress}\",\"${gateway}\",\"${maskAddress}\""}")
@@ -175,7 +196,6 @@ object CommandUtils {
 
         return getCompleteEncryptedCommand(reloadFridgeCmd, mac)
     }
-
 
     fun setDate (mac: ByteArray): ByteArray {
         val date = getDateFormat()

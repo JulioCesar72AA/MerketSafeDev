@@ -247,6 +247,30 @@ object CirCommands {
                            mac: ByteArray)
             = service.writeToCharacteristic(CommandUtils.setStaticIpValuesCmd(ipAddress, maskAddress, gateway, mac), characteristic)
 
+    fun setRepositoryUrl (urlRepository: String,
+                          port: String, service: BleService,
+                          characteristic: BluetoothGattCharacteristic,
+                          mac: ByteArray)
+            = service.writeToCharacteristic(CommandUtils.setRepositoryUrl(urlRepository, port, mac), characteristic)
+
+    fun setFirmwarePath (path: String, imagePrefix: String,
+                         service: BleService,
+                         characteristic: BluetoothGattCharacteristic,
+                         mac: ByteArray)
+            = service.writeToCharacteristic(CommandUtils.setImagePath(path, imagePrefix, mac), characteristic)
+
+    // AT+OTAUPDATE=1,"0.2.0-3"
+    fun setFirmwareVersion (firmwareVersion: String,
+                            service: BleService,
+                            characteristic: BluetoothGattCharacteristic,
+                            mac: ByteArray)
+            = service.writeToCharacteristic(CommandUtils.setImageVersion(firmwareVersion, mac), characteristic)
+
+    fun getFirmwareWiFiModule (service: BleService,
+                               characteristic: BluetoothGattCharacteristic,
+                               mac: ByteArray)
+            = service.writeToCharacteristic(CommandUtils.getFirmware(mac), characteristic)
+
     /*
     0x19
      */
