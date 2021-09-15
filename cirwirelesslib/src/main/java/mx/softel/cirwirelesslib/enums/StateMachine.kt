@@ -3,7 +3,7 @@ package mx.softel.cirwirelesslib.enums
 enum class StateMachine {
     UNKNOWN,        // OTRO
     POLING,         // Estatus base
-    GET_FIRMWARE,   // Se obtiene u
+    GET_FIRMWARE_WIFI_MODULE, // Se obtiene el firmware del modulo WiFi
     WIFI_CONFIG,    // Configurando el WIFI en el CIR WIRELESS
     GET_CLIENT,     // Obtiene el cliente del dispositivo
     SETTING_REPOSITORY_URL, // Se actualiza la url del repositorio

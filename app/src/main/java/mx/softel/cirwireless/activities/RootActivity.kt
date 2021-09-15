@@ -47,7 +47,11 @@ class RootActivity : AppCompatActivity(),
                      ConfigSelectorDialog.OnDialogClickListener,
                      IpConfigValuesDialog.OnDialogClickListener {
 
-    private var firstTime               = true
+    private var firstTime                       = true
+    private var firmwareRepositoryUpdated       = false
+    private var firmwarePathUpdated             = false
+    private var firmwarePathVersionUpdated      = false
+
 
     // BLUETOOTH DEVICE
     internal lateinit var bleDevice     : BluetoothDevice
@@ -359,7 +363,9 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun checkStatus(response: ByteArray, command: ReceivedCmd) {
-        Log.d(TAG, "CHECK STATUS")
+        // Log.e(TAG, "CHECK STATUS")
+        // Log.e(TAG, "cipStatusMode: $cipStatusMode")
+
         if (cipStatusMode == -1) {
             CirCommands.checkCipStatusCmd(service!!, cirService.getCharacteristicWrite()!!,bleMacBytes)
             cipStatusMode = -2
@@ -372,17 +378,29 @@ class RootActivity : AppCompatActivity(),
         }
     }
 
+    /***********************************************************************************************
+     * UPDATE FIRMWARE ROUTES
+     *
+     * Actualiza las rutas de los firmwares almacenados en la nube
+     ***********************************************************************************************/
     private fun isRepositoryUrlUpdated (response: ByteArray, command: ReceivedCmd) {
-        if (command == ReceivedCmd.POLEO) {
+        if (command == ReceivedCmd.POLEO && !firmwareRepositoryUpdated) {
+
             CirCommands.setRepositoryUrl(repositoryModel.repositoryUrl(), repositoryModel.port(), service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+            firmwareRepositoryUpdated = true
+
+            Handler(mainLooper).postDelayed({
+                firmwareRepositoryUpdated = false
+            }, 1_000)
 
         } else if (command == ReceivedCmd.AT_OK) {
+
             CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
 
         } else if (command == ReceivedCmd.AT_READY) {
             val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
             val response    = decResponse.toCharString()
-            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+            // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
 
@@ -397,16 +415,22 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun isFirmwarePathUpdated (response: ByteArray, command: ReceivedCmd) {
-        if (command == ReceivedCmd.POLEO) {
+        if (command == ReceivedCmd.POLEO && !firmwarePathUpdated) {
             CirCommands.setFirmwarePath(repositoryModel.path(), repositoryModel.imagePrefix(), service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+            firmwarePathUpdated = true
+
+            Handler(mainLooper).postDelayed({
+                firmwarePathUpdated = false
+            }, 1_000)
 
         } else if (command == ReceivedCmd.AT_OK) {
+
             CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
 
         } else if (command == ReceivedCmd.AT_READY) {
             val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
             val response    = decResponse.toCharString()
-            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+            // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
 
@@ -421,16 +445,22 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun isFirmwareVersionUpdated (response: ByteArray, command: ReceivedCmd) {
-        if (command == ReceivedCmd.POLEO) {
+        if (command == ReceivedCmd.POLEO && !firmwarePathVersionUpdated) {
             CirCommands.setFirmwareVersion(repositoryModel.imageVersion(), service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+            firmwarePathVersionUpdated = true
+
+            Handler(mainLooper).postDelayed({
+                firmwarePathVersionUpdated = false
+            }, 1_000)
 
         } else if (command == ReceivedCmd.AT_OK) {
+
             CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
 
         } else if (command == ReceivedCmd.AT_READY) {
             val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
             val response    = decResponse.toCharString()
-            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+            // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
                 dismissWaitDialog()
@@ -438,9 +468,10 @@ class RootActivity : AppCompatActivity(),
                 runOnUiThread { toast(getString(R.string.success)) }
 
             } else if (response.contains(AT_CMD_ERROR)) {
+
                 dismissWaitDialog()
                 cirService.setCurrentState(StateMachine.POLING)
-                runOnUiThread { toast(getString(R.string.error_ocurred)) }
+                runOnUiThread { toast(getString(R.string.card_updated_or_error)) }
             }
         }
     }
@@ -454,12 +485,13 @@ class RootActivity : AppCompatActivity(),
                 CirCommands.setDyanmicIp(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
 
         } else if (command == ReceivedCmd.AT_OK) {
+
             CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
 
         } else if (command == ReceivedCmd.AT_READY) {
             val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
             val response = decResponse.toCharString()
-            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+            // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
                 if (staticIp)
@@ -490,13 +522,14 @@ class RootActivity : AppCompatActivity(),
                 bleMacBytes)
 
         } else if (command == ReceivedCmd.AT_OK) {
+
             CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
 
         } else if (command == ReceivedCmd.AT_READY) {
 
             val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
             val response = decResponse.toCharString()
-            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+            // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
 
@@ -1000,8 +1033,6 @@ class RootActivity : AppCompatActivity(),
                 cirService.getCharacteristicDeviceInfo()!!,
                 cirService.getNotificationDescriptor()!!
             )
-
-
         }
 
     }
@@ -1068,7 +1099,7 @@ class RootActivity : AppCompatActivity(),
     private fun commandState(state: StateMachine,
                              response: ByteArray,
                              command: ReceivedCmd) {
-        Log.e(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toHex()}")
+        // Log.e(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toHex()}")
 
         when (state) {
 
@@ -1179,6 +1210,7 @@ class RootActivity : AppCompatActivity(),
 
     private fun wasReloadSuccess (state: StateMachine, value: ByteArray) {
         // Log.e(TAG, "Value RELOAD: ${value.toHex()}")
+
         when (CirWirelessParser.reloadResponse(value)) {
             ReceivedCmd.RELOAD_OK -> {
                 runOnUiThread{ toast(getString(R.string.reload_enabled)) }

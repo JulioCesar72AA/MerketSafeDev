@@ -6,7 +6,7 @@ object Catalog {
 
     // BASE DE DATOS
     const val DATABASE_NAME                 = "beacons_db"
-    const val DATABASE_VERSION              = 2
+    const val DATABASE_VERSION              = 3
 
     // TABLAS
     const val TABLE_BEACONS_NAME            = "beacon"

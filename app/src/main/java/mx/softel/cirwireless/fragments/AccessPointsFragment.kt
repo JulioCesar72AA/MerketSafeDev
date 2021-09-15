@@ -107,7 +107,7 @@ class AccessPointsFragment: Fragment(),
 
         override fun onReceive(context: Context?, intent: Intent?) {
             wifiResults = wifiManager.scanResults
-            Log.e(TAG, "WIFI_RESULTS: $wifiResults")
+            // Log.e(TAG, "WIFI_RESULTS: $wifiResults")
             root.unregisterReceiver(this)
 
             // Rellena la lista para mostrar en la pantalla estándar

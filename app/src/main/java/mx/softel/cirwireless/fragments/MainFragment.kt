@@ -138,6 +138,14 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
         }
     }
 
+    private fun getFirmwareWiFiModule () {
+        if (root.cirService.getCharacteristicWrite() != null)
+            root.apply {
+                CirCommands.getFirmwareWiFiModule(service!!, cirService.getCharacteristicWrite()!!, root.bleMacBytes)
+                root.cirService.setCurrentState(StateMachine.GET_FIRMWARE_WIFI_MODULE)
+            }
+    }
+
 
     private fun sendReloadCommand () {
         if (root.cirService.getQuickCommandsCharacteristic() == null)

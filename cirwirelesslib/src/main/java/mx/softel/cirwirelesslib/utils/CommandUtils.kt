@@ -262,7 +262,6 @@ object CommandUtils {
         // Log.e(TAG, "${response.toHex()} -> ${response.toCharString()}")
         // Log.e(TAG, "${noHeader.toHex()} -> ${noHeader.toCharString()}")
         // Log.e(TAG, "${result.toHex()} -> ${result.toCharString()}")
-
         // Respuesta desencriptada
         return result
     }

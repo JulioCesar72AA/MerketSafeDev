@@ -245,7 +245,7 @@ object CirCommands {
                            service: BleService,
                            characteristic: BluetoothGattCharacteristic,
                            mac: ByteArray)
-            = service.writeToCharacteristic(CommandUtils.setStaticIpValuesCmd(ipAddress, maskAddress, gateway, mac), characteristic)
+            = service.writeToCharacteristic(CommandUtils.setStaticIpValuesCmd(ipAddress, gateway, maskAddress, mac), characteristic)
 
     fun setRepositoryUrl (urlRepository: String,
                           port: String, service: BleService,

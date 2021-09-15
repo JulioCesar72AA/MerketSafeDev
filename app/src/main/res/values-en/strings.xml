@@ -9,6 +9,7 @@
     <string name="tst_scanning" tools:ignore="Typos">Wait a moment … scanning</string>
     <string name="locking">Locking</string>
     <string name="unlocking">Unlocking</string>
+    <string name="card_updated_or_error">El dispositivo ya está actualizado o hay un error en la URL</string>
 
     <!-- HINT's -->
     <string name="hint_password">Passcode</string>
