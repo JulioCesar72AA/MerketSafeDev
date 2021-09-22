@@ -40,6 +40,8 @@ class MainActivity: AppCompatActivity(),
                                  getColor(R.color.colorIconBlue),
                                  getColor(R.color.colorPrimary))
         }
+        bleDevices.clear()
+
         setScanningUI()
         setOnClick()
     }

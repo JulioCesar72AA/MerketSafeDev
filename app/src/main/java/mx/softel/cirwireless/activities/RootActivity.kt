@@ -48,9 +48,7 @@ class RootActivity : AppCompatActivity(),
                      IpConfigValuesDialog.OnDialogClickListener {
 
     private var firstTime                       = true
-    private var firmwareRepositoryUpdated       = false
-    private var firmwarePathUpdated             = false
-    private var firmwarePathVersionUpdated      = false
+    private var commandSent                     = false
 
 
     // BLUETOOTH DEVICE
@@ -93,7 +91,7 @@ class RootActivity : AppCompatActivity(),
     private val disconnectionRunnable = Runnable { finishAndDisconnectActivity(disconnectionReason.status) }
 
     // DIALOGOS
-    private lateinit var waitDialog             : WaitDialog
+    private var waitDialog = WaitDialog()
     private lateinit var ipConfigValuesDialog   : IpConfigValuesDialog
 
     // IP STATIC
@@ -257,7 +255,6 @@ class RootActivity : AppCompatActivity(),
 
     private fun showWaitDialog () {
         runOnUiThread {
-            waitDialog = WaitDialog()
             waitDialog.show(supportFragmentManager, TAG)
         }
     }
@@ -358,22 +355,34 @@ class RootActivity : AppCompatActivity(),
             else -> {
                 // Log.e("Reading AT", "Writing command AT")
                 CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+
             }
         }
     }
 
     private fun checkStatus(response: ByteArray, command: ReceivedCmd) {
-        // Log.e(TAG, "CHECK STATUS")
         // Log.e(TAG, "cipStatusMode: $cipStatusMode")
 
         if (cipStatusMode == -1) {
-            CirCommands.checkCipStatusCmd(service!!, cirService.getCharacteristicWrite()!!,bleMacBytes)
-            cipStatusMode = -2
+            Log.e(TAG, "SENDING_STATUS_COMMAND")
+            if (command == ReceivedCmd.POLEO && !commandSent) {
+                CirCommands.checkCipStatusCmd(service!!, cirService.getCharacteristicWrite()!!,bleMacBytes)
+                cipStatusMode = -2
+                commandSent = true
+                timeoutResendCommand(30_000)
+            }
         }
+
         when (command) {
-            ReceivedCmd.AT_READY -> parseStatus(response)
+            ReceivedCmd.AT_READY -> {
+                commandSent = false
+                parseStatus(response)
+            }
             else -> {
-                CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+                if (command == ReceivedCmd.POLEO) {
+                    CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+                    Log.e(TAG, "READIN_CHAR GG")
+                }
             }
         }
     }
@@ -384,16 +393,13 @@ class RootActivity : AppCompatActivity(),
      * Actualiza las rutas de los firmwares almacenados en la nube
      ***********************************************************************************************/
     private fun isRepositoryUrlUpdated (response: ByteArray, command: ReceivedCmd) {
-        if (command == ReceivedCmd.POLEO && !firmwareRepositoryUpdated) {
+        if (command == ReceivedCmd.POLEO && !commandSent) {
 
             CirCommands.setRepositoryUrl(repositoryModel.repositoryUrl(), repositoryModel.port(), service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
-            firmwareRepositoryUpdated = true
+            commandSent = true
+            timeoutResendCommand(60_000)
 
-            Handler(mainLooper).postDelayed({
-                firmwareRepositoryUpdated = false
-            }, 1_000)
-
-        } else if (command == ReceivedCmd.AT_OK) {
+        } else if (command == ReceivedCmd.POLEO || command == ReceivedCmd.AT_OK) {
 
             CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
 
@@ -403,7 +409,7 @@ class RootActivity : AppCompatActivity(),
             // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
-
+                commandSent = false
                 cirService.setCurrentState(StateMachine.SETTING_FIRMWARE_PATH)
 
             } else if (response.contains(AT_CMD_ERROR)) {
@@ -415,15 +421,12 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun isFirmwarePathUpdated (response: ByteArray, command: ReceivedCmd) {
-        if (command == ReceivedCmd.POLEO && !firmwarePathUpdated) {
+        if (command == ReceivedCmd.POLEO && !commandSent) {
             CirCommands.setFirmwarePath(repositoryModel.path(), repositoryModel.imagePrefix(), service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
-            firmwarePathUpdated = true
+            commandSent = true
+            timeoutResendCommand(30_000)
 
-            Handler(mainLooper).postDelayed({
-                firmwarePathUpdated = false
-            }, 1_000)
-
-        } else if (command == ReceivedCmd.AT_OK) {
+        } else if (command == ReceivedCmd.AT_OK || command == ReceivedCmd.POLEO) {
 
             CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
 
@@ -433,7 +436,7 @@ class RootActivity : AppCompatActivity(),
             // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
-
+                commandSent = false
                 cirService.setCurrentState(StateMachine.SETTING_FIRMWARE_VERSION)
 
             } else if (response.contains(AT_CMD_ERROR)) {
@@ -445,15 +448,12 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun isFirmwareVersionUpdated (response: ByteArray, command: ReceivedCmd) {
-        if (command == ReceivedCmd.POLEO && !firmwarePathVersionUpdated) {
+        if (command == ReceivedCmd.POLEO && !commandSent) {
             CirCommands.setFirmwareVersion(repositoryModel.imageVersion(), service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
-            firmwarePathVersionUpdated = true
+            commandSent = true
+            timeoutResendCommand(30_000)
 
-            Handler(mainLooper).postDelayed({
-                firmwarePathVersionUpdated = false
-            }, 1_000)
-
-        } else if (command == ReceivedCmd.AT_OK) {
+        } else if (command == ReceivedCmd.AT_OK || command == ReceivedCmd.POLEO) {
 
             CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
 
@@ -463,6 +463,7 @@ class RootActivity : AppCompatActivity(),
             // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
+                commandSent = false
                 dismissWaitDialog()
                 cirService.setCurrentState(StateMachine.POLING)
                 runOnUiThread { toast(getString(R.string.success)) }
@@ -477,14 +478,17 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun isIpModeConfigOk (response: ByteArray, command: ReceivedCmd) {
-        if (command == ReceivedCmd.POLEO) {
+        if (command == ReceivedCmd.POLEO && !commandSent) {
             if (staticIp)
                 CirCommands.setStaticIp(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
 
             else
                 CirCommands.setDyanmicIp(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
 
-        } else if (command == ReceivedCmd.AT_OK) {
+            commandSent = true
+            timeoutResendCommand(30_000)
+
+        } else if (command == ReceivedCmd.AT_OK || command == ReceivedCmd.POLEO) {
 
             CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
 
@@ -494,13 +498,15 @@ class RootActivity : AppCompatActivity(),
             // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
+                commandSent = false
+
                 if (staticIp)
                     cirService.setCurrentState(StateMachine.SETTING_STATIC_IP_VALUES)
 
-                else {
+                else
                     cirService.setCurrentState(StateMachine.GET_AP)
-                    dismissWaitDialog()
-                }
+
+                dismissWaitDialog()
 
             } else if (response.contains(AT_CMD_ERROR)) {
                 dismissWaitDialog()
@@ -511,7 +517,7 @@ class RootActivity : AppCompatActivity(),
     }
 
     private fun areIpConfigValuesOk (response: ByteArray, command: ReceivedCmd) {
-        if (command == ReceivedCmd.POLEO) {
+        if (command == ReceivedCmd.POLEO && !commandSent) {
 
             CirCommands.setStaticIpValues(
                 ipConfigValues.ipAddress(),
@@ -521,7 +527,10 @@ class RootActivity : AppCompatActivity(),
                 cirService.getCharacteristicWrite()!!,
                 bleMacBytes)
 
-        } else if (command == ReceivedCmd.AT_OK) {
+            commandSent = true
+            timeoutResendCommand(30_000)
+
+        } else if (command == ReceivedCmd.AT_OK || command == ReceivedCmd.POLEO) {
 
             CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
 
@@ -532,7 +541,7 @@ class RootActivity : AppCompatActivity(),
             // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
-
+                commandSent = false
                 cirService.setCurrentState(StateMachine.GET_AP)
                 runOnUiThread { toast(getString(R.string.success)) }
 
@@ -567,7 +576,13 @@ class RootActivity : AppCompatActivity(),
 
     private fun getSsidFromResponse(response: ByteArray, command: ReceivedCmd) {
         when (command) {
-            ReceivedCmd.WAIT_AP     -> CirCommands.getInternalWifiCmd(service!!,cirService.getCharacteristicWrite()!!, bleMacBytes)
+            ReceivedCmd.WAIT_AP     -> {
+                if (!commandSent) {
+                    CirCommands.getInternalWifiCmd(service!!,cirService.getCharacteristicWrite()!!, bleMacBytes)
+                    commandSent     = true
+                    timeoutResendCommand(10_000)
+                }
+            }
             ReceivedCmd.AT_READY    -> parseSsidResponse(response)
             else                    -> CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
         }
@@ -582,8 +597,17 @@ class RootActivity : AppCompatActivity(),
      */
     private fun getIpFromAt(response: ByteArray, command: ReceivedCmd) {
         when (command) {
-            ReceivedCmd.WAIT_AP     -> CirCommands.sendIpAtCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
-            ReceivedCmd.AT_READY    -> parseIpResponse(response)
+            ReceivedCmd.WAIT_AP     -> {
+                if (!commandSent) {
+                    CirCommands.sendIpAtCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+                    commandSent     = true
+                    timeoutResendCommand(10_000)
+                }
+            }
+            ReceivedCmd.AT_READY    -> {
+                commandSent     = false
+                parseIpResponse(response)
+            }
             else                    -> CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
         }
     }
@@ -598,8 +622,17 @@ class RootActivity : AppCompatActivity(),
      */
     private fun getApStatusFromAT(response: ByteArray, command: ReceivedCmd) {
         when (command) {
-            ReceivedCmd.WAIT_AP     -> CirCommands.sendApConnectionCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
-            ReceivedCmd.AT_READY    -> parseApResponse(response)
+            ReceivedCmd.WAIT_AP     -> {
+                if (!commandSent) {
+                    CirCommands.sendApConnectionCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+                    commandSent     = true
+                    timeoutResendCommand(10_000)
+                }
+            }
+            ReceivedCmd.AT_READY    -> {
+                commandSent = false
+                parseApResponse(response)
+            }
             else                    -> CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
         }
     }
@@ -614,8 +647,17 @@ class RootActivity : AppCompatActivity(),
      */
     private fun getPing(response: ByteArray, command: ReceivedCmd) {
         when (command) {
-            ReceivedCmd.WAIT_AP     -> CirCommands.sendPing(service!!, cirService.getCharacteristicWrite()!!, "www.google.com", bleMacBytes)
-            ReceivedCmd.AT_READY    -> parsePingResponse(response)
+            ReceivedCmd.WAIT_AP     -> {
+                if (!commandSent) {
+                    CirCommands.sendPing(service!!, cirService.getCharacteristicWrite()!!, "www.google.com", bleMacBytes)
+                    commandSent     = true
+                    timeoutResendCommand(10_000)
+                }
+            }
+            ReceivedCmd.AT_READY    -> {
+                commandSent = false
+                parsePingResponse(response)
+            }
             else                    -> CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
         }
     }
@@ -631,18 +673,36 @@ class RootActivity : AppCompatActivity(),
      */
     private fun getDataConnection(response: ByteArray, command: ReceivedCmd, step: Int) {
         when (command) {
-            ReceivedCmd.AT_OK       -> CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
-            ReceivedCmd.AT_READY    -> parseDataResponse(response, step)
+            ReceivedCmd.AT_OK       -> {
+                if (!commandSent) {
+                    CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+                    commandSent     = true
+                    timeoutResendCommand(10_000)
+                }
+
+            }
+            ReceivedCmd.AT_READY    -> {
+                commandSent = false
+                parseDataResponse(response, step)
+            }
             ReceivedCmd.WAIT_AP     -> {
                 when (step) {
-                    0 -> CirCommands.closeAtSocketCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
-                    3 -> CirCommands.sendStatusWifiCmd(service!!, cirService.getCharacteristicWrite()!!)
+                    0 -> {
+                        CirCommands.closeAtSocketCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+                    }
+                    3 -> {
+                        CirCommands.sendStatusWifiCmd(service!!, cirService.getCharacteristicWrite()!!)
+                    }
                 }
             }
             else -> {
                 when (step) {
-                    3       -> CirCommands.sendStatusWifiCmd(service!!, cirService.getCharacteristicWrite()!!)
-                    else    -> CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+                    3       -> {
+                        CirCommands.sendStatusWifiCmd(service!!, cirService.getCharacteristicWrite()!!)
+                    }
+                    else    -> {
+                        CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+                    }
                 }
             }
         }
@@ -694,7 +754,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
         val response = decResponse.toCharString()
-        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        // Log.e(TAG, "parseOkWifiConfigured: ${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         if (response.contains(AT_CMD_OK)) {
             when (nextStep) {
@@ -705,13 +765,30 @@ class RootActivity : AppCompatActivity(),
                             = if (isWifiConnected) WifiOkDialog.getInstance()
                               else WifiNokDialog.getInstance()
                     dialog.show(supportFragmentManager, null)
+
                 }
-                100 -> CirCommands.resetWifiCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
-                1   -> CirCommands.setInternalWifiCmd(service!!, cirService.getCharacteristicWrite()!!, ssidSelected, passwordTyped, AT_NO_SEND_SSID, bleMacBytes)
-                101 -> CirCommands.setAutoConnCmd(service!!, cirService.getCharacteristicWrite()!!, 1, bleMacBytes)
-                2   -> CirCommands.sendConfigureWifiCmd(service!!, cirService.getCharacteristicWrite()!!, ssidSelected, passwordTyped, bleMacBytes)
+
+                100 -> {
+                    CirCommands.resetWifiCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+                }
+
+                1   -> {
+                    CirCommands.setInternalWifiCmd(service!!, cirService.getCharacteristicWrite()!!, ssidSelected, passwordTyped, AT_NO_SEND_SSID, bleMacBytes)
+
+                }
+
+                101 -> {
+                    CirCommands.setAutoConnCmd(service!!, cirService.getCharacteristicWrite()!!, 1, bleMacBytes)
+
+                }
+
+                2   -> {
+                    CirCommands.sendConfigureWifiCmd(service!!, cirService.getCharacteristicWrite()!!, ssidSelected, passwordTyped, bleMacBytes)
+                }
             }
+
             wifiStep = nextStep
+
         } else {
             wifiStep = 0
             parseOkWifiConfigured(dataResponse, wifiStep)
@@ -722,7 +799,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
         val response = decResponse.toCharString()
-        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         if (response.contains(AT_CMD_STATUS)) {
 
@@ -1170,6 +1247,7 @@ class RootActivity : AppCompatActivity(),
 
             // STATUS DE MAC'S DE AP'S QUE EL DISPOSITIVO VE
             StateMachine.GET_AP -> {
+                // Log.e(TAG, "getAp: $getApLaunched")
 
                 if (!getApLaunched) {
                     CirCommands.getMacListCmd(service!!, cirService.getCharacteristicWrite()!!)
@@ -1180,14 +1258,14 @@ class RootActivity : AppCompatActivity(),
                     // Casteamos el resultado y navegamos al fragmento de AP's
                     deviceMacList = CirCommands.fromResponseGetMacList(response)
 
-                    dismissWaitDialog()
-
                     // Log.e(TAG, "DEVICE_MAC_LIST: $deviceMacList")
                     if (actualFragment != wifiFragment) navigateTo(wifiFragment, true, null)
 
                     else wifiFragment.scanWifi()
 
                     actualFragment = wifiFragment
+
+                    dismissWaitDialog()
                 }
             }
 
@@ -1339,6 +1417,14 @@ class RootActivity : AppCompatActivity(),
         }
     }
 
+    private fun timeoutResendCommand (timeInMillis: Long) {
+        Handler(mainLooper).postDelayed({
+            commandSent = false
+        }, timeInMillis)
+
+    }
+
+
     /**
      * ## connectedDevice
      * Notifica en pantalla que el dispositivo fue correctamente conectado.
@@ -1349,7 +1435,6 @@ class RootActivity : AppCompatActivity(),
         runOnUiThread { toast(getString(R.string.device_connected)) }
         service!!.discoverDeviceServices()
     }
-
 
 
     /************************************************************************************************/
