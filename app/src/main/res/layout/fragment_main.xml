@@ -386,6 +386,7 @@
                         app:cardElevation="@dimen/cv_elevation"
                         app:cardCornerRadius="@dimen/cv_corner_radius"
                         app:cardUseCompatPadding="true"
+                        android:visibility="gone"
                         app:cardBackgroundColor="@color/cardScanBackground" >
 
                         <LinearLayout

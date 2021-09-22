@@ -381,7 +381,7 @@ class RootActivity : AppCompatActivity(),
             else -> {
                 if (command == ReceivedCmd.POLEO) {
                     CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
-                    Log.e(TAG, "READIN_CHAR GG")
+                    // Log.e(TAG, "READIN_CHAR GG")
                 }
             }
         }

@@ -246,7 +246,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
             clickConfigure()
         else {
             toast(getString(R.string.updating_data))
-            root.cirService.setCurrentState(StateMachine.SHOW_CONFIG_MODES)
+            root.cirService.setCurrentState(StateMachine.GET_AP)
             /*
             root.apply {
                 CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!, root.bleMacBytes)
