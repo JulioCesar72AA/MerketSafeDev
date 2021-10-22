@@ -49,7 +49,8 @@ class RepositoryModel (val idClient: Int) {
 
     private fun decideImageVersion () : String {
         return when (idClient) {
-            1 -> "1,\"0.2.0-3\""
+            // 1 -> "1,\"0.2.0-3\""
+            1 -> "1,\"0.2.0-4\""
             else -> NA
         }
     }
