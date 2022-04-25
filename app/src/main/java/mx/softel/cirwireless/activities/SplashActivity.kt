@@ -7,6 +7,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import mx.softel.cirwireless.R
+import mx.softel.cirwirelesslib.extensions.hexStringToByteArray
+import mx.softel.cirwirelesslib.extensions.toHex
+import mx.softel.cirwirelesslib.utils.CirCommands
+import mx.softel.cirwirelesslib.utils.CommandUtils
 
 class SplashActivity : AppCompatActivity() {
 
@@ -27,6 +31,7 @@ class SplashActivity : AppCompatActivity() {
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
             }, 2000)
+
         } else {
             Log.d(TAG, "Esperando a que el usuario encienda el Bluetooth")
             enableBle()
