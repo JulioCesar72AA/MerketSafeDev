@@ -47,6 +47,8 @@ class RootActivity : AppCompatActivity(),
                      ConfigSelectorDialog.OnDialogClickListener,
                      IpConfigValuesDialog.OnDialogClickListener {
 
+    private var maxTimes = 0
+
     private var firstTime                       = true
     private var commandSent                     = false
 
@@ -190,6 +192,7 @@ class RootActivity : AppCompatActivity(),
         "0x000E" -> false
         else -> false
     }
+
 
     /**
      * ## initFragment
@@ -364,7 +367,7 @@ class RootActivity : AppCompatActivity(),
         // Log.e(TAG, "cipStatusMode: $cipStatusMode")
 
         if (cipStatusMode == -1) {
-            Log.e(TAG, "SENDING_STATUS_COMMAND")
+            // Log.e(TAG, "SENDING_STATUS_COMMAND")
             if (command == ReceivedCmd.POLEO && !commandSent) {
                 CirCommands.checkCipStatusCmd(service!!, cirService.getCharacteristicWrite()!!,bleMacBytes)
                 cipStatusMode = -2
@@ -799,7 +802,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
         val response = decResponse.toCharString()
-        Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         if (response.contains(AT_CMD_STATUS)) {
 
@@ -1090,10 +1093,27 @@ class RootActivity : AppCompatActivity(),
                     )
                 }
                 cirService.getCurrentState() == StateMachine.UPDATING_DATE -> {
-                    wasUpdatedSuccess(
+                    val updated = wasUpdatedSuccess(
                         cirService.getCurrentState(),
                         value
                     )
+
+                    when {
+                        updated -> {
+                            runOnUiThread{ toast(getString(R.string.updated_date)) }
+                            cirService.setCurrentState(StateMachine.POLING)
+                            maxTimes = 0
+                        }
+
+                        maxTimes < 5 -> {
+                            (actualFragment as MainFragment).updateCirDate()
+                        }
+
+                        else -> {
+                            runOnUiThread{ toast(getString(R.string.error_date)) }
+                            cirService.setCurrentState(StateMachine.POLING)
+                        }
+                    }
 
                 }
                 else -> {
@@ -1304,17 +1324,20 @@ class RootActivity : AppCompatActivity(),
         cirService.setCurrentState(StateMachine.POLING)
     }
 
-    private fun wasUpdatedSuccess (state: StateMachine, value: ByteArray) {
+    private fun wasUpdatedSuccess (state: StateMachine, value: ByteArray) : Boolean {
         // Log.e(TAG, "Value DATE: ${value.toHex()}")
+        var updated = false
         when (CirWirelessParser.dateUpdateResponse(value)) {
             ReceivedCmd.DATE_UPDATED -> {
-                runOnUiThread{ toast(getString(R.string.updated_date)) }
+                updated = true
             }
 
-            else -> { runOnUiThread{ toast(getString(R.string.error_date)) } }
+            else -> {
+                updated = false
+            }
         }
 
-        cirService.setCurrentState(StateMachine.POLING)
+        return updated
     }
 
 

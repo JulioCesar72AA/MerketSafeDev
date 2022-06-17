@@ -127,12 +127,17 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
     }
 
 
-    private fun updateCirDate () {
+    public fun updateCirDate () {
         if (root.cirService.getQuickCommandsCharacteristic() == null)
             updateCirDate()
         else {
             root.apply {
+                val macBytes = byteArrayOf(0xB4.toByte(), 0xA2.toByte(), 0xEB.toByte(), 0x42.toByte(), 0x01.toByte(), 0xF5.toByte())
+                CirCommands.updateDate(service!!, cirService.getQuickCommandsCharacteristic()!!, macBytes)
+                CirCommands.readDate(service!!, cirService.getQuickCommandsCharacteristic()!!, macBytes)
+
                 CirCommands.updateDate(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
+                CirCommands.readDate(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
                 cirService.setCurrentState(StateMachine.UPDATING_DATE)
             }
         }

@@ -199,15 +199,17 @@ object CommandUtils {
 
     fun setDate (mac: ByteArray): ByteArray {
         val date = getDateFormat()
+        // Log.e(TAG, "DATE: ${date.toHex()}")
+        // Log.e(TAG, "MAC: ${mac.toHex()}")
         val datePackage: ByteArray = byteArrayOf((PASSCODE.size + 2 + date.size).toByte(), SET_DATE.toByte()) + PASSCODE + date
-        Log.e(TAG, "Command setDate: ${getCompleteEncryptedCommand(datePackage, mac).toHex()}")
+        // Log.e(TAG, "Command setDate: ${datePackage.toHex()}")
         return getCompleteEncryptedCommand(datePackage, mac)
     }
 
     fun readDate (mac: ByteArray): ByteArray {
         val readDate = byteArrayOf((PASSCODE.size + 2).toByte(), READ_DATE.toByte()) + PASSCODE
-        Log.e(TAG, "Commnad readDate withouth encryption: $readDate")
-        Log.e(TAG, "Command readDate with encryption: ${getCompleteEncryptedCommand(readDate, mac).toHex()}")
+        // Log.e(TAG, "readDate: Commnad readDate withouth encryption: ${readDate.toHex()}")
+        // Log.e(TAG, "readDate: Command readDate with encryption: ${getCompleteEncryptedCommand(readDate, mac).toHex()}")
         return getCompleteEncryptedCommand(readDate, mac)
     }
 
@@ -221,6 +223,11 @@ object CommandUtils {
         val month = (calendar.get(Calendar.MONTH) + 1).toByte()
         val yearStr = calendar.get(Calendar.YEAR).toString()
         val year = ("${yearStr[2]}${yearStr[3]}").toInt().toByte()
+        // Log.e(TAG, "seconds: $seconds")
+        // Log.e(TAG, "minutes: $minutes")
+        // Log.e(TAG, "hour: $hour")
+        // Log.e(TAG, "(seconds, minutes, hour, dayOfMonth, dayOfWeek, month, year): ${byteArrayOf(seconds, minutes, hour, dayOfMonth, dayOfWeek, month, year).toHex()}")
+
         return byteArrayOf(seconds, minutes, hour, dayOfMonth, dayOfWeek, month, year)
     }
 
@@ -259,12 +266,12 @@ object CommandUtils {
     }
 
     fun decryptResponse(response: ByteArray, mac: ByteArray): ByteArray {
-        val noCrc = response.dropLast(2).toByteArray()
-        val noHeader = noCrc.drop(5).toByteArray()
-        val result = wrapper.getDec(mac, noHeader, null)
-         Log.e(TAG, "${response.toHex()} -> ${response.toCharString()}")
-         Log.e(TAG, "${noHeader.toHex()} -> ${noHeader.toCharString()}")
-         Log.e(TAG, "${result.toHex()} -> ${result.toCharString()}")
+        val noCrc       = response.dropLast(2).toByteArray()
+        val noHeader    = noCrc.drop(5).toByteArray()
+        val result      = wrapper.getDec(mac, noHeader, null)
+        // Log.e(TAG, "${response.toHex()} -> ${response.toCharString()}")
+        // Log.e(TAG, "${noHeader.toHex()} -> ${noHeader.toCharString()}")
+        // Log.e(TAG, "${result.toHex()} -> ${result.toCharString()}")
         // Respuesta desencriptada
         return result
     }
