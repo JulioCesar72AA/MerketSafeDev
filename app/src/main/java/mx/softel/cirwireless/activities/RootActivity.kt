@@ -1196,7 +1196,8 @@ class RootActivity : AppCompatActivity(),
     private fun commandState(state: StateMachine,
                              response: ByteArray,
                              command: ReceivedCmd) {
-        // Log.e(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toHex()}")
+        Log.e(TAG, "macBytes: ${bleMacBytes.toHex()}")
+        Log.e(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toHex()}")
 
         when (state) {
 
@@ -1267,14 +1268,11 @@ class RootActivity : AppCompatActivity(),
 
             // STATUS DE MAC'S DE AP'S QUE EL DISPOSITIVO VE
             StateMachine.GET_AP -> {
-                // Log.e(TAG, "getAp: $getApLaunched")
-
-                if (!getApLaunched) {
-                    CirCommands.getMacListCmd(service!!, cirService.getCharacteristicWrite()!!)
-                    getApLaunched = true
-                }
+                Log.e(TAG, "getAp: $getApLaunched")
 
                 if (command == ReceivedCmd.GET_AP) {
+                    getApLaunched = true
+
                     // Casteamos el resultado y navegamos al fragmento de AP's
                     deviceMacList = CirCommands.fromResponseGetMacList(response)
 
@@ -1286,6 +1284,11 @@ class RootActivity : AppCompatActivity(),
                     actualFragment = wifiFragment
 
                     dismissWaitDialog()
+                }
+
+                if (command == ReceivedCmd.POLEO && !getApLaunched) {
+                    Log.e(TAG, "GETTING_AP: COMMAND: ${CommandUtils.getAccessPointsCmd().toHex()}")
+                    CirCommands.getMacListCmd(service!!, cirService.getCharacteristicWrite()!!)
                 }
             }
 
