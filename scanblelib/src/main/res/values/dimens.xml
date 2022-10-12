@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cir Prototype layout -->
+    <dimen name="text_size"></dimen>
+
+    <!-- Progress bar's dimensions-->
+    <dimen name="pb_courtain_width">40dp</dimen>
+    <dimen name="pb_courtain_height">40dp</dimen>
+
+    <!-- Scanning Activity -->
+    <dimen name="ll_devices_margin_top">20dp</dimen>
+    <dimen name="ll_devices_margin_start">35dp</dimen>
+    <dimen name="ll_devices_margin_end">35dp</dimen>
+    <dimen name="ll_devices_height_max">350dp</dimen>
+    <dimen name="tv_swipe_refresh_message_text_size">11dp</dimen>
+    <dimen name="tv_swipe_refresh_message_margin_bottom">36dp</dimen>
+    <dimen name="iv_scanning_swipe_icon_height">40dp</dimen>
+    <dimen name="iv_scannning_uv_logo_margin_top">35dp</dimen>
+    <dimen name="iv_scannning_uv_logo_height_max">80dp</dimen>
+
+    <!-- Connection dialog -->
+    <dimen name="iv_connection_dialog_height">100dp</dimen>
+
+    <!-- login_error_dialog -->
+    <dimen name="btn_width_login_error_dialog">120dp</dimen>
+    <dimen name="btn_height_login_error_dialog">35dp</dimen>
+
+    <!-- Standard sizes -->
+    <dimen name="_5dp">5dp</dimen>
+    <dimen name="_8dp">8dp</dimen>
+    <dimen name="_10dp">10dp</dimen>
+    <dimen name="_12dp">12dp</dimen>
+    <dimen name="_15dp">15dp</dimen>
+    <dimen name="_18dp">18dp</dimen>
+    <dimen name="_20dp">20dp</dimen>
+    <dimen name="_25dp">25dp</dimen>
+    <dimen name="_30dp">30dp</dimen>
+    <dimen name="_35dp">35dp</dimen>
+</resources>

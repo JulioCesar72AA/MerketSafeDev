@@ -3,4 +3,73 @@
 
     <!-- TEXT VIEWS -->
     <string name="tv_rssi">RSSI</string>
+    <string name="accept">Aceptar</string>
+
+
+    <!-- Toast's messages -->
+    <string name="permissions_ungranted">Se necesitan los permisos para continuar</string>
+    <string name="press_again_exit">Presiona de nuevo para salir</string>
+    <string name="scanning">Buscando dispositivos</string>
+    <string name="none_scanned_ble_devices">Ningún dispositivo encontrado</string>
+    <string name="bluetooth_needed">Necesitas encender el bluetooth</string>
+    <string name="location_services_off">Servicios de localización desactivados, no podrás escanear</string>
+    <string name="retry_connection">Reintentando conexión</string>
+    <string name="device_disconnected">Dispositivo desconectado</string>
+    <string name="successfully_changed_bootloader_mode">Hemos cambiado a modo Bootloader</string>
+    <string name="no_data_found">Datos del usuario no encontrados</string>
+    <string name="invalid_info">El correo es incorrecto</string>
+    <string name="service_not_available">El servicio no está disponible</string>
+    <string name="access_granted">Acceso concedido</string>
+    <string name="something_went_wrong">Ha ocurrido un error de comunicación</string>
+    <string name="checking_info">Revisando información</string>
+    <string name="login_is_neccesary">Es necesario que inicies sesión</string>
+    <string name="network_connection_neccessary">Es necesario una conexión a internet</string>
+    <string name="permission_needed_to_continue">Es necesario aceptar para continuar</string>
+    <string name="file_selection_is_mandatory">Debes seleccionar un archivo</string>
+    <string name="invalid_cyacd_file">El archivo seleccionado es inválido</string>
+
+
+    <!-- Generic icon dialog -->
+    <string name="connecting_device">Conectando dispositivo</string>
+    <string name="changing_bootloader_mode">Cambiando a modo bootloader</string>
+    <string name="wait">Espere un momento</string>
+    <string name="installing_files">Instalando archivos</string>
+    <string name="wait_for_device">Espere que el dispositivo instale los archivos</string>
+    <string name="installation_done">Instalación finalizada</string>
+    <string name="installation_successfully">Los archivos han sido instalados correctamente</string>
+    <string name="installation_in_progress">La instalación está en progreso, espere.</string>
+    <string name="error_services_not_found_title">Servicios no encontrados</string>
+    <string name="error_services_not_found_message">Los servicios BLE no han sido encontrados./nReintente conectarse de nuevo.</string>
+    <string name="error_mtu_set_title_dialog">MTU Error</string>
+    <string name="error_mtu_set_message_dialog">Ha ocurrido un error al configurar el MTU</string>
+    <string name="error_initialization_service_title">Error de Inicialización</string>
+    <string name="error_initialization_service_message">Error al inicializar el servicio</string>
+    <string name="timeout_connection_title">Conexión perdida</string>
+    <string name="timeout_connection_message">No ha sido posible conectarse con el dispositivo</string>
+    <string name="installing_bootloader_title">Instalando Bootloader</string>
+    <string name="installing_bootloader_progress">-----</string>
+    <string name="installing_app_title">Instalando Aplicación</string>
+    <string name="installing_app_message">-----</string>
+
+
+    <!-- Dialog texts -->
+    <string name="email">Correo electrónico</string>
+    <string name="login">Inicia sesión</string>
+    <string name="access_ungranted">Acceso denegado</string>
+    <string name="contact_administrator">No tienes autorización a esta aplicación,\ncontacta a tu administrador</string>
+    <string name="active_session">Tu sesión ya está activa en otro dispositivo,\ncontacta a tu administrador</string>
+    <string name="permission_needed">Permisos necesarios</string>
+    <string name="localitation_needed">La localización es necesaria</string>
+    <string name="select_zip_file">Selecciona un archivo ZIP</string>
+    <string name="zip_file_name_message">Nombre del archivo a descargar</string>
+    <string name="select_a_file">Seleccionar archivo</string>
+    <string name="none_services_found">Error ocurred: services not found</string>
+    <string name="we_are_programming">Espera a que termine la programación</string>
+    <string name="try_connect_again">Intenta conectarte nuevamente</string>
+    <string name="zip_file_error">Ha ocurrido un error, revisa tu archivo .zip</string>
+    <string name="zip_file_error_title">Error en archivo ZIP</string>
+    <string name="zip_file_error_message">Parece que tu archivo ZIP no ha sido correctamente generado</string>
+    <string name="wait_we_are_trying">Espera, seguimos intentando</string>
+    <string name="wrong_file_title">Archivo Incompatible</string>
+    <string name="wrong_file_message">El archivo que has seleccionado no es compatible con este chip, por favor cambia el archivo e intenta de nuevo</string>
 </resources>

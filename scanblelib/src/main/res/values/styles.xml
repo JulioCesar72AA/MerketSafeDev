@@ -1,0 +1,47 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPink</item>
+        <item name="colorPrimaryDark">@color/colorBlack</item>
+        <item name="colorAccent">@color/colorRed</item>
+    </style>
+
+    <!-- Text views prototype -->
+    <style name="AppTheme.CirPrototypeTextViews" parent="@style/Theme.AppCompat">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/_15dp</item>
+        <item name="android:fontFamily">@font/nunito_regular</item>
+    </style>
+
+    <!-- Common text view -->
+    <style name="AppTheme.DefaultTextView" parent="@style/Theme.AppCompat">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:fontFamily">@font/nunito_regular</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <!-- Common progress bars -->
+    <style name="AppTheme.DefaultProgressBar" parent="@style/Theme.AppCompat">
+        <item name="android:layout_width">@dimen/pb_courtain_width</item>
+        <item name="android:layout_height">@dimen/pb_courtain_height</item>
+        <item name="colorAccent">@color/colorPink</item>
+        <item name="android:indeterminateTint">@color/colorPink</item>
+    </style>
+
+
+    <style name="AppTheme.DefaultGenericDialogContainer" >
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">@dimen/_35dp</item>
+        <item name="android:layout_marginEnd">@dimen/_35dp</item>
+        <item name="android:paddingTop">@dimen/_25dp</item>
+        <item name="android:paddingBottom">@dimen/_25dp</item>
+        <item name="android:background">@drawable/rounded_corners_background_black</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+</resources>
