@@ -9,7 +9,8 @@
     <string name="tst_scanning" tools:ignore="Typos">Wait a moment … scanning</string>
     <string name="locking">Locking</string>
     <string name="unlocking">Unlocking</string>
-    <string name="card_updated_or_error">El dispositivo ya está actualizado o hay un error en la URL</string>
+    <string name="card_updated_or_error">The device is already up to date or there is an error in the URL</string>
+    <string name="scan_permissions_cloud">Verificando permisos de conexión</string>
 
     <!-- HINT's -->
     <string name="hint_password">Passcode</string>

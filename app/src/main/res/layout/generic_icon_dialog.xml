@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/AppTheme.DefaultGenericDialogContainer"
+    android:paddingStart="@dimen/_35dp"
+    android:paddingEnd="@dimen/_35dp">
+
+    <ImageView
+        android:id="@+id/iv_generic_icon_dialog_icon"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/iv_connection_dialog_height"
+        android:scaleType="fitCenter"
+        tools:src="@drawable/ic_chip" />
+
+
+    <TextView
+        android:id="@+id/tv_generic_icon_dialog_title"
+        style="@style/AppTheme.DefaultTextView"
+        android:fontFamily="@font/nunito_bold"
+        android:layout_marginTop="@dimen/_10dp"
+        tools:text="Puerta abierta"/>
+
+
+    <TextView
+        android:id="@+id/tv_generic_icon_dialog_message"
+        style="@style/AppTheme.DefaultTextView"
+        android:layout_marginTop="@dimen/_5dp"
+        tools:text="Por favor toma las bolsas de hielo que deseas comprar, al terminar cierra la puerta"
+        />
+
+</LinearLayout>

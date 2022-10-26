@@ -1,18 +1,29 @@
 package mx.softel.cirwireless.log_in_module.web_service;
 
 
-import mx.softel.cirwireless.log_in_module.web_service.web_service_enums.LoginAvailableUrl;
+import mx.softel.cirwireless.log_in_module.web_service.web_service_enums.AvailableUrl;
 
 public class URLModel {
-    private static final String LOGIN_URL_INSTALLATION  = "https://auth-app-refri-iot-dot-refrigeracioniot.uc.r.appspot.com/appAuthInstall";
-    private static final String LOGIN_URL_EXECUTION     = "https://auth-app-refri-iot-dot-refrigeracioniot.uc.r.appspot.com/appAuthExec";
+    private static final String LOGIN_URL_SOLKOS_BASE   = "https://cir-wifi-interface-b7agk5thba-uc.a.run.app";
+    private static final String LOGIN_URL_SOLKOS_LOGIN  = "https://cir-wifi-interface-b7agk5thba-uc.a.run.app/login";
+    private static final String SCAN_URL_SOLKOS_FRIDGES = "https://cir-wifi-interface-b7agk5thba-uc.a.run.app/assets/scan";
 
     private String urlStr;
-    private LoginAvailableUrl url;
+    private AvailableUrl url;
 
-    public URLModel (LoginAvailableUrl url) {
+    public URLModel (AvailableUrl url) {
         this.url    =  url;
-        this.urlStr = (url ==  LoginAvailableUrl.INSTALLATION_URL) ?  LOGIN_URL_INSTALLATION : LOGIN_URL_EXECUTION;
+        switch (url) {
+            case LOGIN_URL:
+                this.urlStr = LOGIN_URL_SOLKOS_LOGIN;
+                break;
+
+            case SCAN_ALLOWED_FRIDGES:
+                this.urlStr = SCAN_URL_SOLKOS_FRIDGES;
+                break;
+
+            default: break;
+        }
     }
 
 
@@ -20,6 +31,6 @@ public class URLModel {
     public String getUrlStr() { return urlStr; }
 
 
-    public LoginAvailableUrl getUrl() { return url; }
+    public AvailableUrl getUrl() { return url; }
     // -----------------------------------------------------
 }

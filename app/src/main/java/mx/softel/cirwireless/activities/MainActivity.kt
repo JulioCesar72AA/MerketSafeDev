@@ -3,6 +3,7 @@ package mx.softel.cirwireless.activities
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
@@ -14,9 +15,13 @@ import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.adapters.ScanRecyclerAdapter
 import mx.softel.cirwireless.extensions.toast
+import mx.softel.cirwireless.log_in_module.web_service.ScanPermission
+import mx.softel.cirwireless.wifi_db.WifiDatabase
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
+import org.json.JSONArray
+import org.json.JSONObject
 
 
 class MainActivity: AppCompatActivity(),
@@ -27,6 +32,10 @@ class MainActivity: AppCompatActivity(),
 
     private var bleDevices = ArrayList<BleDevice>()
     private var isScanning = false
+    private var checkingCloudPermissions = false
+
+    private var db: WifiDatabase? = null
+
 
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
@@ -40,8 +49,10 @@ class MainActivity: AppCompatActivity(),
                                  getColor(R.color.colorIconBlue),
                                  getColor(R.color.colorPrimary))
         }
-        bleDevices.clear()
 
+        db = WifiDatabase(this)
+
+        bleDevices.clear()
         setScanningUI()
         setOnClick()
     }
@@ -76,7 +87,12 @@ class MainActivity: AppCompatActivity(),
         when (v!!.id) {
             R.id.scanMask -> {
                 // Ignoramos el click para bloquear los demás elementos
-                toast(R.string.tst_scanning)
+                if (checkingCloudPermissions)
+                    toast(R.string.scan_permissions_cloud)
+
+                else
+                    toast(R.string.tst_scanning)
+
             }
             R.id.ivMenu -> createMenu()
         }
@@ -116,6 +132,8 @@ class MainActivity: AppCompatActivity(),
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
     override fun onScanClickListener(position: Int) {
+
+
         val intent = Intent(this, RootActivity::class.java)
         intent.apply {
             val dev = bleDevices[position]
@@ -141,6 +159,14 @@ class MainActivity: AppCompatActivity(),
         tvNoDevices.visibility  = View.GONE
     }
 
+
+    private fun setPermissionScanUI () {
+        pbScanning.visibility   = View.VISIBLE
+        scanMask.visibility     = View.VISIBLE
+        tvNoDevices.visibility  = View.GONE
+    }
+
+
     private fun setScanningUI() {
         pbScanning.visibility   = View.VISIBLE
         scanMask.visibility     = View.VISIBLE
@@ -149,9 +175,9 @@ class MainActivity: AppCompatActivity(),
 
     private fun setRecyclerUI() {
         rvBleList.apply {
-            val manager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
-            layoutManager = manager
-            adapter = ScanRecyclerAdapter(bleDevices, this@MainActivity)
+            val manager     = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
+            layoutManager   = manager
+            adapter         = ScanRecyclerAdapter(bleDevices, this@MainActivity)
         }
 
         initUI()
@@ -171,16 +197,36 @@ class MainActivity: AppCompatActivity(),
         isScanning = true
         val bleManager = BleManager(this, TIMEOUT)
         bleDevices.clear()
-        bleManager.scanBleDevices {
-            bleDevices = it
+        bleManager.scanBleDevices { devices ->
+            bleDevices = devices
             if (bleDevices.isEmpty()) {
                 isScanning = false
                 setNoDataUI()
             } else {
+
                 isScanning = false
-                for (dev in it) {
-                    setRecyclerUI()
+//                for (dev in devices) {
+//                    setRecyclerUI()
+//                }
+                checkingCloudPermissions = true
+                setPermissionScanUI()
+                db!!.getUserToken {
+                    val token = it as String
+                    val scanPermission = ScanPermission(token)
+                    val macsArray = JSONArray()
+                    for (device in devices) {
+                        Log.e(TAG, "MAC: ${device.getMac()}")
+                        macsArray.put(device.getMac())
+                    }
+                    val body = JSONObject()
+                    body.put("macs", macsArray)
+                    Log.e(TAG, body.toString())
+                    val response = scanPermission.checkMacsPermission(body.toString())
+                    Log.e(TAG, response?.networkResponse.toString())
+                    Log.e(TAG, response?.message.toString())
+
                 }
+
             }
         }
     }

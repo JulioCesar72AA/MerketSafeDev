@@ -10,7 +10,9 @@
     <string name="locking">Cerrando chapa</string>
     <string name="unlocking">Abriendo chapa</string>
     <string name="success">Configuración exitosa</string>
-    <string name="card_updated_or_error">The device is already up to date or there is an error in the URL</string>
+    <string name="card_updated_or_error">El dispositivo ya está actualizado o hay un error en la URL</string>
+    <string name="scan_permissions_cloud">Verificando permisos de conexión</string>
+
 
     <!-- HINT's -->
     <string name="hint_password">Contraseña</string>

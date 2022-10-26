@@ -18,6 +18,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import java.net.NetworkInterface;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -59,7 +60,7 @@ public class Utils {
     public static String getUUID () { return UUID.randomUUID().toString().toUpperCase(); }
 
 
-    public static SimpleDateFormat getDefaultDateFormat () { return new SimpleDateFormat("dd/M/yyyy hh:mm:ss"); }
+    public static SimpleDateFormat getDefaultDateFormat () { return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); }
 
 
     public static String getTimeandDate () {

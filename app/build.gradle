@@ -1,16 +1,14 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "mx.softel.cirwireless"
         minSdkVersion 23
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 31
         versionName "1.5.1.9"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -47,4 +45,10 @@ dependencies {
     implementation project(':cirwirelesslib')
     implementation project(':scanblelib')
     implementation project(':bleservicelib-1.0.0')
+
+    // Web services
+    implementation 'com.squareup.retrofit2:retrofit:2.7.1'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+
 }

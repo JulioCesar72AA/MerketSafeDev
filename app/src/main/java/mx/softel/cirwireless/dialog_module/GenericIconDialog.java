@@ -16,8 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import mx.softel.bootloadermanual.R;
-import mx.softel.bootloadermanual.dialog_module.dialog_models.IconDialogModel;
+import mx.softel.cirwireless.R;
+import mx.softel.cirwireless.dialog_module.dialog_models.IconDialogModel;
 
 public class GenericIconDialog extends DialogFragment {
 

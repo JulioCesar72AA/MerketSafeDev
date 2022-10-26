@@ -1,6 +1,7 @@
 package mx.softel.cirwireless.log_in_module.web_service;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.json.JSONObject;
 
@@ -16,10 +17,11 @@ public class LoginWebService extends AsyncTask<Void, Void, Void> {
 
     private static final String TAG                     = "LoginWebService";
 
+    private int                 responseCode;
 
     private URLModel            urlModel;
-    private JSONObject jsonData;
-    private JSONObject response;
+    private JSONObject          jsonData;
+    private JSONObject          response;
     private IServerConnectable  iServerConnectable;
 
     public LoginWebService(URLModel urlModel, JSONObject jsonData, IServerConnectable iServerConnectable) {
@@ -33,6 +35,7 @@ public class LoginWebService extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... voids) {
 
         try {
+            Log.e(TAG, "url: " + urlModel.getUrlStr());
 
             URL url = new URL(urlModel.getUrlStr());
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -46,8 +49,8 @@ public class LoginWebService extends AsyncTask<Void, Void, Void> {
             os.flush();
             os.close();
 
-            // Log.e(TAG, "JSON DATA: " + jsonData.toString());
-            int responseCode = conn.getResponseCode();
+            Log.e(TAG, "JSON DATA: " + jsonData.toString());
+            responseCode = conn.getResponseCode();
 
             if (responseCode == HttpsURLConnection.HTTP_OK) {
 
@@ -59,10 +62,16 @@ public class LoginWebService extends AsyncTask<Void, Void, Void> {
                     responseStr.append(line);
 
                 response = new JSONObject(responseStr.toString());
+                Log.e(TAG, "response: " + response);
+
             }
 
-            // Log.e(TAG, "RESPONSE CODE: " + conn.getResponseCode());
-            // Log.e(TAG, "RESPONSE_MESSAGE: " + conn.getResponseMessage());
+            else if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST) response = null;
+
+            else if (responseCode == HttpsURLConnection.HTTP_INTERNAL_ERROR) response = null;
+
+            Log.e(TAG, "RESPONSE CODE: " + conn.getResponseCode());
+            Log.e(TAG, "RESPONSE_MESSAGE: " + conn.getResponseMessage());
 
             conn.disconnect();
 
@@ -82,14 +91,14 @@ public class LoginWebService extends AsyncTask<Void, Void, Void> {
         super.onPostExecute(aVoid);
 
         if (response != null)
-            iServerConnectable.serverOk(response, urlModel);
+            iServerConnectable.serverOk(response, urlModel, responseCode);
 
         else
             iServerConnectable.serverError();
     }
 
     public interface IServerConnectable {
-        void serverOk(JSONObject response, URLModel urlModel);
+        void serverOk(JSONObject response, URLModel urlModel, int responseCode);
 
         void serverError();
     }

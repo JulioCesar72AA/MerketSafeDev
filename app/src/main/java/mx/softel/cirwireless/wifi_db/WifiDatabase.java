@@ -1,4 +1,4 @@
-package mx.softel.cirwireless.bootloader_db;
+package mx.softel.cirwireless.wifi_db;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -8,8 +8,10 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import mx.softel.cirwireless.log_in_module.SolkosServerResponse;
 
-public class BootloaderDatabase extends SQLiteOpenHelper {
+
+public class WifiDatabase extends SQLiteOpenHelper {
 
     private static final String TAG = "BootloaderDatabase";
 
@@ -17,10 +19,10 @@ public class BootloaderDatabase extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "nfc_db";
 
-    private static int DATA_BASE_VERSION = 2;
+    private static int DATA_BASE_VERSION = 3;
     private static int STATIC_MEMORY_SECTION = 1;
 
-    public BootloaderDatabase(@NonNull Context mContext) {
+    public WifiDatabase(@NonNull Context mContext) {
         super(mContext, DATABASE_NAME, null, DATA_BASE_VERSION);
         this.mContext = mContext;
     }
@@ -44,7 +46,7 @@ public class BootloaderDatabase extends SQLiteOpenHelper {
         SQLiteDatabase mDatabase = this.getWritableDatabase();
 
         try {
-            String insertQuery = String.format(Queries.INSERT_MAC_SMARTPHONE,
+            String insertQuery = String.format(Queries.INSERT_CELLPHONE_ID,
                     macSmartphone);
 
             // Log.e(TAG, "insertTemplate: " + mInsertQuery);
@@ -60,18 +62,25 @@ public class BootloaderDatabase extends SQLiteOpenHelper {
     }
 
 
-    public void insertUser (UserModel user, IDBWritable idbWritable) {
+    public void insertUser (UserModel user, SolkosServerResponse userAccessInfo, IDBWritable idbWritable) {
         SQLiteDatabase mDatabase = this.getWritableDatabase();
         boolean wasSaved = false;
 
         try {
-            String insertQuery = String.format(Queries.INSERT_USER,
+            String insertQuery = String.format(Queries.INSERT_USER_DATA,
+                    user.getCode(),
+                    userAccessInfo.getToken(),
+                    userAccessInfo.getOrganizationId(),
+                    userAccessInfo.getOrganizationName(),
+                    userAccessInfo.getOrganizationType(),
+                    userAccessInfo.getUserId(),
                     user.getEmail(),
-                    user.getAccessDate(),
-                    user.getMacWifi(),
-                    user.getCode());
+                    userAccessInfo.getName(),
+                    userAccessInfo.getPermissionsStr(),
+                    userAccessInfo.getTokenCreation()
+                    );
 
-            // Log.e(TAG, "insertTemplate: " + mInsertQuery);
+            Log.e(TAG, "insertTemplate: " + insertQuery);
 
             mDatabase.execSQL(insertQuery);
             wasSaved = true;
@@ -131,6 +140,32 @@ public class BootloaderDatabase extends SQLiteOpenHelper {
     /***********************************************************************************************
      *                                        SELECT QUERIES                                       *
      ***********************************************************************************************/
+     public void getUserToken (IDBReadable idbReadable) {
+        String token = null;
+        SQLiteDatabase database = this.getWritableDatabase();
+
+        try {
+            String selectQuery = Queries.SQL_SELECT_USER_TOKEN;
+            Cursor cursor = database.rawQuery(selectQuery, null);
+
+            if (cursor != null) {
+                if (cursor.getCount() != 0) {
+                    cursor.moveToFirst();
+                    token = cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_TOKEN));
+                }
+
+                cursor.close();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+            token = null;
+        }
+
+        idbReadable.readableResult(token);
+        database.close();
+    }
+
+
     public String getMacWifiSmartphone () {
         String macWifiSmartphone = null;
         SQLiteDatabase database = this.getWritableDatabase();
@@ -142,7 +177,7 @@ public class BootloaderDatabase extends SQLiteOpenHelper {
             if (cursor != null) {
                 if (cursor.getCount() != 0) {
                     cursor.moveToFirst();
-                    macWifiSmartphone = cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_MAC_WIFI_SMARTPHONE));
+                    macWifiSmartphone = cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_CELLPHONE_ID));
                 }
 
                 cursor.close();
@@ -194,7 +229,7 @@ public class BootloaderDatabase extends SQLiteOpenHelper {
             if (cursor != null) {
                 if (cursor.getCount() != 0) {
                     cursor.moveToFirst();
-                    accessDate = cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_USER_ACCESS_DATE));
+                    accessDate = cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_TOKEN_CREATION));
                 }
 
                 cursor.close();
@@ -207,8 +242,6 @@ public class BootloaderDatabase extends SQLiteOpenHelper {
         idbReadable.readableResult(accessDate);
         database.close();
     }
-
-
 
 
     public void getUser (IDBReadable idbReadable) {
@@ -227,9 +260,9 @@ public class BootloaderDatabase extends SQLiteOpenHelper {
 
                     userModel = new UserModel(
                             cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_USER_EMAIL)),
-                            cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_USER_ACCESS_DATE)),
-                            cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_MAC_WIFI_SMARTPHONE)),
-                            cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_SESSION_CODE))
+                            cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_TOKEN_CREATION)),
+                            cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_CELLPHONE_ID)),
+                            cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_TOKEN))
                     );
                 }
 

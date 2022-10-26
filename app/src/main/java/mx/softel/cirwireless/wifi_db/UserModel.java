@@ -1,4 +1,4 @@
-package mx.softel.cirwireless.bootloader_db;
+package mx.softel.cirwireless.wifi_db;
 
 public class UserModel {
 

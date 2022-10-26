@@ -29,8 +29,8 @@
     <style name="AppTheme.DefaultProgressBar" parent="@style/Theme.AppCompat">
         <item name="android:layout_width">@dimen/pb_courtain_width</item>
         <item name="android:layout_height">@dimen/pb_courtain_height</item>
-        <item name="colorAccent">@color/colorPink</item>
-        <item name="android:indeterminateTint">@color/colorPink</item>
+        <item name="colorAccent">#0045C2</item>
+        <item name="android:indeterminateTint">#0045C2</item>
     </style>
 
 
