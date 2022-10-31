@@ -17,13 +17,13 @@ import mx.softel.cirwireless.CirDevice
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.adapters.ScanRecyclerAdapter
 import mx.softel.cirwireless.extensions.toast
-import mx.softel.cirwireless.log_in_module.web_service.ApiClient
-import mx.softel.cirwireless.log_in_module.web_service.ScanPostResponse
+import mx.softel.cirwireless.web_services_module.web_service.ApiClient
+import mx.softel.cirwireless.web_services_module.web_service.ScanPostResponse
+import mx.softel.cirwireless.utils.Utils
 import mx.softel.cirwireless.wifi_db.WifiDatabase
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -38,6 +38,8 @@ class MainActivity: AppCompatActivity(),
                     View.OnClickListener,
                     ScanRecyclerAdapter.OnScanClickListener,
                     PopupMenu.OnMenuItemClickListener {
+
+    private lateinit var token : String
 
     private var bleDevices                  = ArrayList<BleDevice>()
     private var cirDevice                   = ArrayList <CirDevice> ()
@@ -144,19 +146,32 @@ class MainActivity: AppCompatActivity(),
     /************************************************************************************************/
     override fun onScanClickListener(position: Int) {
 
+        if (position == -1)
+            Utils.showToastLong(this, getString(R.string.connection_not_allowed))
 
-        val intent = Intent(this, RootActivity::class.java)
-        intent.apply {
-            val dev = bleDevices[position]
-            putExtra(EXTRA_DEVICE,              dev.getBleDevice())
-            putExtra(EXTRA_NAME,                dev.getName())
-            putExtra(EXTRA_MAC,                 dev.getMac())
-            putExtra(EXTRA_BEACON,              dev.getBeaconDeviceString())
-            putExtra(EXTRA_BEACON_BYTES,        dev.getScanRecord()?.bytes)
-            putExtra(EXTRA_BEACON_ENCRYPTED,    dev.getDeviceBeaconIsEncrypted())
-            putExtra(EXTRA_BEACON_TYPE,         dev.getBeaconType())
-            putExtra(EXTRA_IS_ENCRYPTED,        dev.isEncrypted())
-            startActivity(this)
+        else {
+            val intent = Intent(this, RootActivity::class.java)
+            intent.apply {
+                val dev = bleDevices[position]
+                val cir = cirDevice[position]
+                putExtra(EXTRA_DEVICE,              dev.getBleDevice())
+                putExtra(EXTRA_NAME,                dev.getName())
+                putExtra(EXTRA_MAC,                 dev.getMac())
+                putExtra(EXTRA_BEACON,              dev.getBeaconDeviceString())
+                putExtra(EXTRA_BEACON_BYTES,        dev.getScanRecord()?.bytes)
+                putExtra(EXTRA_BEACON_ENCRYPTED,    dev.getDeviceBeaconIsEncrypted())
+                putExtra(EXTRA_BEACON_TYPE,         dev.getBeaconType())
+                putExtra(EXTRA_IS_ENCRYPTED,        dev.isEncrypted())
+
+                // Solkos' flags
+                putExtra(TOKEN, token)
+                putExtra(TRANSMITION, cir.getScanPostResponse()!!.isTransmitting)
+                putExtra(SERIAL_NUMBER, cir.getScanPostResponse()!!.serialNumber)
+                putExtra(ASSET_TYPE, cir.getScanPostResponse()!!.assetType)
+                putExtra(ASSET_MODEL, cir.getScanPostResponse()!!.assetModel)
+
+                startActivity(this)
+            }
         }
     }
 
@@ -188,7 +203,7 @@ class MainActivity: AppCompatActivity(),
         rvBleList.apply {
             val manager     = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
             layoutManager   = manager
-            adapter         = ScanRecyclerAdapter(cirDevice, this@MainActivity)
+            adapter         = ScanRecyclerAdapter(applicationContext, cirDevice, this@MainActivity)
         }
 
         initUI()
@@ -224,7 +239,7 @@ class MainActivity: AppCompatActivity(),
                 checkingCloudPermissions    = true
                 setPermissionScanUI()
                 db!!.getUserToken {
-                    val token = it as String
+                    token = it as String
                     val macsArray = JSONArray()
 
                     if (BuildConfig.DEBUG) {
@@ -268,15 +283,26 @@ class MainActivity: AppCompatActivity(),
                 override fun onResponse(call: Call<List <ScanPostResponse>>, response: Response <List <ScanPostResponse>>) {
                     // Handle function to display posts
                     Log.e(TAG, "onResponse: ${response.body()}")
-                    val respList = response.body()
-
+                    val respList    = response.body()
+                    val testArray   = arrayOf("")
                     if (respList != null) {
-                        for (dev in bleDevices) {
-                           setRecyclerUI()
+                        for (device in bleDevices) {
+                            val cir = CirDevice(device)
+
+                            for (scanPostRes in respList) {
+                                if (scanPostRes.mac == device.getMac()) {
+                                    cir.setScanPostResponse(scanPostRes)
+                                    break
+                                }
+                                cir.setScanPostResponse(scanPostRes)
+
+                            }
+
+                            cirDevice.add(cir)
                         }
 
-                        for (scanPostRes in respList) {
-
+                        for (dev in bleDevices) {
+                            setRecyclerUI()
                         }
                     }
                 }

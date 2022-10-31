@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.*
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -12,32 +11,41 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.bleservicelib.BleService
 import mx.softel.bleservicelib.enums.ConnState
 import mx.softel.bleservicelib.enums.DisconnectionReason
+import mx.softel.cirwireless.CirDevice
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.RepositoryModel
+import mx.softel.cirwireless.dialog_module.GenericDialogButtons
+import mx.softel.cirwireless.dialog_module.dialog_interfaces.DialogInteractor
+import mx.softel.cirwireless.dialog_module.dialog_models.BaseDialogModel
 import mx.softel.cirwireless.dialogs.*
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.fragments.AccessPointsFragment
 import mx.softel.cirwireless.fragments.MainFragment
 import mx.softel.cirwireless.fragments.TesterFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
+import mx.softel.cirwireless.web_services_module.ui_login.log_in_dialog.DialogButtonsModel
+import mx.softel.cirwireless.web_services_module.web_service.ApiClient
+import mx.softel.cirwireless.web_services_module.web_service.LinkPostResponse
+import mx.softel.cirwireless.web_services_module.web_service.ScanPostResponse
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.hexStringToByteArray
 import mx.softel.cirwirelesslib.extensions.toCharString
-import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.utils.BleCirWireless
 import mx.softel.cirwirelesslib.utils.CirCommands
 import mx.softel.cirwirelesslib.utils.CirWirelessParser
 import mx.softel.cirwirelesslib.utils.CommandUtils
 import mx.softel.scanblelib.extensions.toHexValue
+import retrofit2.Call
+import retrofit2.Response
 import java.util.*
-import kotlin.collections.ArrayList
 
 class RootActivity : AppCompatActivity(),
                      FragmentNavigation,
@@ -52,6 +60,7 @@ class RootActivity : AppCompatActivity(),
     private var firstTime                       = true
     private var commandSent                     = false
 
+    internal lateinit var token         : String
 
     // BLUETOOTH DEVICE
     internal lateinit var bleDevice     : BluetoothDevice
@@ -61,6 +70,13 @@ class RootActivity : AppCompatActivity(),
     internal lateinit var ssidSelected  : String
     private  lateinit var passwordTyped : String
     internal lateinit var bleMacBytes   : ByteArray
+
+    internal var isTransmiting          : Boolean = false
+    internal lateinit var serialNumber  : String
+    internal lateinit var assetType     : String
+    internal lateinit var assetMode     : String
+
+
 
     // VALORES PARA FRAGMENT DE TESTER
     internal var ipAssigned         : String        = ""
@@ -178,6 +194,12 @@ class RootActivity : AppCompatActivity(),
         bleDevice       = data[EXTRA_DEVICE] as BluetoothDevice
         bleMac          = data.getString(EXTRA_MAC)!!
         bleMacBytes     = bleMac.hexStringToByteArray()
+        isTransmiting   = data.getBoolean(TRANSMITION)
+        serialNumber    = data.getString(SERIAL_NUMBER)!!
+        assetType       = data.getString(ASSET_TYPE)!!
+        assetMode       = data.getString(ASSET_MODEL)!!
+        token           = data.getString(TOKEN)!!
+        Log.e(TAG, "TOKEN: ${token}")
 
         val beaconBytes = data[EXTRA_BEACON_BYTES] as ByteArray
         val beaconId    = "0x${byteArrayOf(beaconBytes[5], beaconBytes[6]).toHexValue().toUpperCase(Locale.ROOT)}"
@@ -763,7 +785,7 @@ class RootActivity : AppCompatActivity(),
             when (nextStep) {
                 0 -> {
                     cirService.setCurrentState(StateMachine.POLING)
-                    runOnUiThread { setStandardUI() }
+                    runOnUiThread{ setStandardUI() }
                     val dialog: DialogFragment
                             = if (isWifiConnected) WifiOkDialog.getInstance()
                               else WifiNokDialog.getInstance()
@@ -1103,6 +1125,7 @@ class RootActivity : AppCompatActivity(),
                             runOnUiThread{ toast(getString(R.string.updated_date)) }
                             cirService.setCurrentState(StateMachine.POLING)
                             maxTimes = 0
+                            fetchLinkPost()
                         }
 
                         maxTimes < 5 -> {
@@ -1217,6 +1240,7 @@ class RootActivity : AppCompatActivity(),
                     if (firstTime && actualFragment == mainFragment) {
                         (actualFragment as MainFragment).deviceConnected()
                         firstTime = false
+
                     }
                 }
                 cipStatusMode = -1
@@ -1341,6 +1365,87 @@ class RootActivity : AppCompatActivity(),
         }
 
         return updated
+    }
+
+
+    private fun fetchLinkPost () {
+        val apiClient = ApiClient()
+        val mac = "B4:A2:EB:4F:00:49".replace(":", "")
+        Log.e(TAG, "mac: ${mac}")
+        // Pass the token as parameter
+        apiClient.getApiService(this).fetchLinkPost(token = "Bearer $token", mac) // bleMac)
+            .enqueue(object : retrofit2.Callback <LinkPostResponse> {
+                override fun onFailure(call: Call<LinkPostResponse>, t: Throwable) {
+                    Log.e(TAG, "onFailure")
+                }
+
+                override fun onResponse(call: Call<LinkPostResponse>, response: Response<LinkPostResponse>) {
+                    Log.e(TAG, "onResponse: ${response.body()}")
+                    val body = response.body()
+                    if (body != null) {
+                        Log.e(TAG, "onResponse: ${response.body()!!.status}")
+                        val status = body.status
+                        if (status == "OK") {
+                            showTransmitionOkDialog()
+                        } else {
+
+                        }
+                    }
+
+                }
+            })
+    }
+
+
+    private fun showTransmitionOkDialog () {
+        val baseDialogModel: BaseDialogModel = DialogButtonsModel(
+            R.layout.login_error_dialog, -1,
+            getString(R.string.right_config),
+            getString(R.string.well_configured_message),
+            getString(R.string.accept),
+            getString(R.string.accept),
+            View.GONE,
+            View.VISIBLE
+        )
+
+
+        val dialog = GenericDialogButtons(
+            this@RootActivity,
+            baseDialogModel,
+            object : DialogInteractor {
+                override fun positiveClick(dialog: GenericDialogButtons) {}
+                override fun negativeClick(dialog: GenericDialogButtons) {
+                    dialog.dismiss()
+                }
+            })
+
+        dialog.show()
+    }
+
+
+    private fun showTransmitionNotOkDialog () {
+        val baseDialogModel: BaseDialogModel = DialogButtonsModel(
+            R.layout.login_error_dialog, -1,
+            getString(R.string.bad_config),
+            getString(R.string.config_needed),
+            getString(R.string.config),
+            getString(R.string.config),
+            View.GONE,
+            View.VISIBLE
+        )
+
+
+        val dialog = GenericDialogButtons(
+            this@RootActivity,
+            baseDialogModel,
+            object : DialogInteractor {
+                override fun positiveClick(dialog: GenericDialogButtons) {}
+                override fun negativeClick(dialog: GenericDialogButtons) {
+                    dialog.dismiss()
+                }
+            })
+
+        dialog.show()
     }
 
 

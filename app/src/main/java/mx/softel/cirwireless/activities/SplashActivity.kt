@@ -5,11 +5,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import mx.softel.cirwireless.R
-import mx.softel.cirwireless.log_in_module.ui_login.LoginActivity
+import mx.softel.cirwireless.web_services_module.ui_login.LoginActivity
 import mx.softel.cirwireless.utils.Permissions
 import mx.softel.cirwireless.utils.Utils
 

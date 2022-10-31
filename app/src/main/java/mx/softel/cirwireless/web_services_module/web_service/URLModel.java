@@ -1,7 +1,7 @@
-package mx.softel.cirwireless.log_in_module.web_service;
+package mx.softel.cirwireless.web_services_module.web_service;
 
 
-import mx.softel.cirwireless.log_in_module.web_service.web_service_enums.AvailableUrl;
+import mx.softel.cirwireless.web_services_module.web_service.web_service_enums.AvailableUrl;
 
 public class URLModel {
     private static final String LOGIN_URL_SOLKOS_BASE   = "https://cir-wifi-interface-b7agk5thba-uc.a.run.app";

@@ -1,4 +1,4 @@
-package mx.softel.cirwireless.log_in_module.web_service
+package mx.softel.cirwireless.web_services_module.web_service
 
 import android.content.Context
 import okhttp3.Interceptor

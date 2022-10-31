@@ -1,8 +1,11 @@
-package mx.softel.cirwireless.log_in_module.web_service
+package mx.softel.cirwireless.web_services_module.web_service
 
 import com.google.gson.annotations.SerializedName
 
 data class ScanPostResponse (
+    @SerializedName("mac")
+    var mac: String,
+
     @SerializedName("serial_number")
     var serialNumber: String,
 

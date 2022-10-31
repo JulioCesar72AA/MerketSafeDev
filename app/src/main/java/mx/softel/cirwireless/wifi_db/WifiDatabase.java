@@ -8,7 +8,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import mx.softel.cirwireless.log_in_module.SolkosServerResponse;
+import mx.softel.cirwireless.web_services_module.SolkosServerResponse;
 
 
 public class WifiDatabase extends SQLiteOpenHelper {

@@ -38,8 +38,8 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/rubik_bold"
         android:layout_marginTop="@dimen/_8dp"
-        app:layout_constraintTop_toBottomOf="@+id/tvDeviceSerial"
-        app:layout_constraintStart_toStartOf="@id/tvDeviceSerial"
+        app:layout_constraintTop_toBottomOf="@+id/tvScanMac"
+        app:layout_constraintStart_toStartOf="@id/tvScanMac"
         tools:text="CIR Wireless"/>
 
     <TextView
@@ -48,8 +48,37 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/rubik_bold"
         android:layout_marginTop="@dimen/_8dp"
-        android:text="@string/serial_number"
-        app:layout_constraintTop_toBottomOf="@+id/tvScanMac"
-        app:layout_constraintStart_toStartOf="@id/tvScanMac"
-        tools:text="Serial number:"/>
+        app:layout_constraintTop_toBottomOf="@+id/tvDeviceModel"
+        app:layout_constraintStart_toStartOf="@id/tvDeviceModel"
+        tools:text="@string/serial_number_solkos"/>
+
+    <TextView
+        android:id="@+id/tvDeviceType"
+        android:layout_width="@dimen/no_dimen"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/rubik_bold"
+        android:layout_marginTop="@dimen/_8dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvDeviceSerial"
+        app:layout_constraintStart_toStartOf="@id/tvDeviceSerial"
+        tools:text="@string/type_solkos"/>
+
+    <TextView
+        android:id="@+id/tvDeviceSolkosModel"
+        android:layout_width="@dimen/no_dimen"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/rubik_bold"
+        android:layout_marginTop="@dimen/_8dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvDeviceType"
+        app:layout_constraintStart_toStartOf="@id/tvDeviceType"
+        tools:text="@string/model_solkos"/>
+
+    <TextView
+        android:id="@+id/tvDeviceTransmition"
+        android:layout_width="@dimen/no_dimen"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/rubik_bold"
+        android:layout_marginTop="@dimen/_8dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvDeviceSolkosModel"
+        app:layout_constraintStart_toStartOf="@id/tvDeviceSolkosModel"
+        tools:text="@string/transmition_solkos"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

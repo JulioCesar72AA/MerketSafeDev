@@ -118,6 +118,17 @@
     <string name="invalid_gateway">Invalid Gateway</string>
     <string name="cancel">Cancel</string>
     <string name="wait_a_moment">Wait a moment</string>
-    <string name="serial_number">Serial number:</string>
+    <string name="connection_not_allowed">You do not have permissions to connect to this device</string>
+    <string name="type_solkos">Type:</string>
+    <string name="model_solkos">Model:</string>
+    <string name="transmition_solkos">Transmission:</string>
+    <string name="serial_number_solkos">Serial number:</string>
+    <string name="transmitting">Transmitting</string>
+    <string name="no_transmission">No transmission</string>
+    <string name="right_config">Correct configuration</string>
+    <string name="well_configured_message">CIR Wireless is configured correctly</string>
+    <string name="bad_config">Configuration failure</string>
+    <string name="config_needed">Equipment does not transmit data correctly, it is necessary to configure it</string>
+    <string name="config">Configure </string>
 
 </resources>

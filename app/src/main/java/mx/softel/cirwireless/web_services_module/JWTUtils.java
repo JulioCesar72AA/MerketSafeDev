@@ -1,4 +1,4 @@
-package mx.softel.cirwireless.log_in_module;
+package mx.softel.cirwireless.web_services_module;
 
 import android.util.Base64;
 import android.util.Log;

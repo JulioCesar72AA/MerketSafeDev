@@ -1,9 +1,8 @@
-package mx.softel.cirwireless.log_in_module.ui_login;
+package mx.softel.cirwireless.web_services_module.ui_login;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,25 +13,23 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONObject;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import mx.softel.cirwireless.R;
 import mx.softel.cirwireless.activities.MainActivity;
-import mx.softel.cirwireless.log_in_module.SolkosServerResponse;
+import mx.softel.cirwireless.web_services_module.SolkosServerResponse;
 import mx.softel.cirwireless.wifi_db.WifiDatabase;
 import mx.softel.cirwireless.wifi_db.UserModel;
 import mx.softel.cirwireless.dialog_module.GenericDialogButtons;
 import mx.softel.cirwireless.dialog_module.dialog_interfaces.DialogInteractor;
 import mx.softel.cirwireless.dialog_module.dialog_models.BaseDialogModel;
-import mx.softel.cirwireless.log_in_module.ui_login.log_in_dialog.DialogButtonsModel;
-import mx.softel.cirwireless.log_in_module.web_service.LoginWebService;
-import mx.softel.cirwireless.log_in_module.web_service.LoginWebServiceUtils;
-import mx.softel.cirwireless.log_in_module.web_service.URLModel;
-import mx.softel.cirwireless.log_in_module.web_service.web_service_enums.AvailableUrl;
-import mx.softel.cirwireless.log_in_module.web_service.web_service_enums.WebServiceStatusInstallationCodes;
+import mx.softel.cirwireless.web_services_module.ui_login.log_in_dialog.DialogButtonsModel;
+import mx.softel.cirwireless.web_services_module.web_service.LoginWebService;
+import mx.softel.cirwireless.web_services_module.web_service.LoginWebServiceUtils;
+import mx.softel.cirwireless.web_services_module.web_service.URLModel;
+import mx.softel.cirwireless.web_services_module.web_service.web_service_enums.AvailableUrl;
+import mx.softel.cirwireless.web_services_module.web_service.web_service_enums.WebServiceStatusInstallationCodes;
 import mx.softel.cirwireless.utils.ElapsedDate;
 import mx.softel.cirwireless.utils.Utils;
 

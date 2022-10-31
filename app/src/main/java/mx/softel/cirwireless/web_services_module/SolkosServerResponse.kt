@@ -1,8 +1,6 @@
-package mx.softel.cirwireless.log_in_module
+package mx.softel.cirwireless.web_services_module
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import org.json.JSONArray
 import org.json.JSONObject
 

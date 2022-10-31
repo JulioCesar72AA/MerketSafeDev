@@ -19,7 +19,7 @@ import java.util.Objects;
 import mx.softel.cirwireless.R;
 import mx.softel.cirwireless.dialog_module.dialog_interfaces.DialogInteractor;
 import mx.softel.cirwireless.dialog_module.dialog_models.BaseDialogModel;
-import mx.softel.cirwireless.log_in_module.ui_login.log_in_dialog.DialogButtonsModel;
+import mx.softel.cirwireless.web_services_module.ui_login.log_in_dialog.DialogButtonsModel;
 
 
 public class GenericDialogButtons extends Dialog {

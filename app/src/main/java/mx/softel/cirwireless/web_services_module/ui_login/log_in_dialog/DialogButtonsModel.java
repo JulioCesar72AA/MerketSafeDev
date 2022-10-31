@@ -1,4 +1,4 @@
-package mx.softel.cirwireless.log_in_module.ui_login.log_in_dialog;
+package mx.softel.cirwireless.web_services_module.ui_login.log_in_dialog;
 
 
 import mx.softel.cirwireless.dialog_module.dialog_models.BaseDialogModel;

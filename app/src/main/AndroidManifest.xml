@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="mx.softel.cirwireless">
 
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -26,7 +27,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".log_in_module.ui_login.LoginActivity" />
+        <activity android:name=".web_services_module.ui_login.LoginActivity" />
 
         <activity android:name=".activities.RootActivity" />
 

@@ -10,6 +10,12 @@ const val EXTRA_BEACON_TYPE         = "beacon_type"
 const val EXTRA_IS_ENCRYPTED        = "is_encrypted"
 const val EXTRA_DEVICE              = "device"
 
+const val TOKEN                     = "token"
+const val TRANSMITION               = "transmition"
+const val SERIAL_NUMBER             = "serial_number"
+const val ASSET_TYPE                = "asset_type"
+const val ASSET_MODEL               = "asset_model"
+
 
 // Intent Filters para Broadcast Receiver
 const val BLE_SERVICE_BROADCAST_FILTER  = "mx.softel.cirwirelesslib.BLE_SERVICE"
