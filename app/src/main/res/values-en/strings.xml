@@ -11,6 +11,11 @@
     <string name="unlocking">Unlocking</string>
     <string name="card_updated_or_error">The device is already up to date or there is an error in the URL</string>
     <string name="scan_permissions_cloud">Verificando permisos de conexión</string>
+    <string name="request_error">Request error</string>
+    <string name="user_not_found">User not found</string>
+    <string name="already_session">User already logged on another device!, contact support for assistance</string>
+    <string name="internal_server_error">Internal server error</string>
+
 
     <!-- HINT's -->
     <string name="hint_password">Passcode</string>
@@ -113,5 +118,6 @@
     <string name="invalid_gateway">Invalid Gateway</string>
     <string name="cancel">Cancel</string>
     <string name="wait_a_moment">Wait a moment</string>
+    <string name="serial_number">Serial number:</string>
 
 </resources>

@@ -227,8 +227,29 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void serverError() {
+            public void serverError(int responseCode) {
                 uiHideCourtain();
+
+                switch (responseCode) {
+                    case HttpsURLConnection.HTTP_BAD_REQUEST :
+                        Utils.showToastShort(getApplicationContext(), getString(R.string.request_error));
+                        break;
+
+                    case HttpsURLConnection.HTTP_NOT_FOUND :
+
+                        Utils.showToastShort(getApplicationContext(), getString(R.string.user_not_found));
+                        break;
+
+                    case HttpsURLConnection.HTTP_CONFLICT :
+
+                        Utils.showToastShort(getApplicationContext(), getString(R.string.already_session));
+                        break;
+
+                    case HttpsURLConnection.HTTP_INTERNAL_ERROR:
+
+                        Utils.showToastShort(getApplicationContext(), getString(R.string.internal_server_error));
+                        break;
+                }
                 Utils.showToastShort(LoginActivity.this, getString(R.string.service_not_available));
             }
         }).execute();

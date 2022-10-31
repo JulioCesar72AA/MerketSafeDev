@@ -4,11 +4,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.scan_devices_prototype.view.*
+import mx.softel.cirwireless.CirDevice
 import mx.softel.cirwireless.R
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.extensions.inflate
 
-class ScanRecyclerAdapter (private val devicesList: List<BleDevice>,
+class ScanRecyclerAdapter (private val devicesList: List<CirDevice>,
                            private val onScanClickListener: OnScanClickListener)
     : RecyclerView.Adapter<ScanRecyclerAdapter.ScanViewHolder>() {
 
@@ -35,9 +36,10 @@ class ScanRecyclerAdapter (private val devicesList: List<BleDevice>,
             onScanClick = onScanClickListener
         }
 
-        fun bind(device: BleDevice) = with(itemView) {
-            tvScanMac.text = device.getMac()
-            tvDeviceModel.text = device.getDeviceModelName()
+        fun bind(device: CirDevice) = with(itemView) {
+            tvScanMac.text      = device.bleDevice.getMac()
+            tvDeviceSerial.text = device.scanPostResponse.serialNumber
+            tvDeviceModel.text  = device.bleDevice.getDeviceModelName()
         }
 
         override fun onClick(v: View?) {

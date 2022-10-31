@@ -12,16 +12,25 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.scanning_mask.*
+import mx.softel.cirwireless.BuildConfig
+import mx.softel.cirwireless.CirDevice
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.adapters.ScanRecyclerAdapter
 import mx.softel.cirwireless.extensions.toast
-import mx.softel.cirwireless.log_in_module.web_service.ScanPermission
+import mx.softel.cirwireless.log_in_module.web_service.ApiClient
+import mx.softel.cirwireless.log_in_module.web_service.ScanPostResponse
 import mx.softel.cirwireless.wifi_db.WifiDatabase
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Response
 
 
 class MainActivity: AppCompatActivity(),
@@ -30,9 +39,10 @@ class MainActivity: AppCompatActivity(),
                     ScanRecyclerAdapter.OnScanClickListener,
                     PopupMenu.OnMenuItemClickListener {
 
-    private var bleDevices = ArrayList<BleDevice>()
-    private var isScanning = false
-    private var checkingCloudPermissions = false
+    private var bleDevices                  = ArrayList<BleDevice>()
+    private var cirDevice                   = ArrayList <CirDevice> ()
+    private var isScanning                  = false
+    private var checkingCloudPermissions    = false
 
     private var db: WifiDatabase? = null
 
@@ -53,6 +63,7 @@ class MainActivity: AppCompatActivity(),
         db = WifiDatabase(this)
 
         bleDevices.clear()
+        cirDevice.clear()
         setScanningUI()
         setOnClick()
     }
@@ -177,7 +188,7 @@ class MainActivity: AppCompatActivity(),
         rvBleList.apply {
             val manager     = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
             layoutManager   = manager
-            adapter         = ScanRecyclerAdapter(bleDevices, this@MainActivity)
+            adapter         = ScanRecyclerAdapter(cirDevice, this@MainActivity)
         }
 
         initUI()
@@ -195,42 +206,82 @@ class MainActivity: AppCompatActivity(),
     /************************************************************************************************/
     private fun scanDevices() {
         isScanning = true
+
         val bleManager = BleManager(this, TIMEOUT)
         bleDevices.clear()
+        cirDevice.clear()
+
         bleManager.scanBleDevices { devices ->
             bleDevices = devices
+
             if (bleDevices.isEmpty()) {
+
                 isScanning = false
                 setNoDataUI()
             } else {
 
-                isScanning = false
-//                for (dev in devices) {
-//                    setRecyclerUI()
-//                }
-                checkingCloudPermissions = true
+                isScanning                  = false
+                checkingCloudPermissions    = true
                 setPermissionScanUI()
                 db!!.getUserToken {
                     val token = it as String
-                    val scanPermission = ScanPermission(token)
                     val macsArray = JSONArray()
-                    for (device in devices) {
-                        Log.e(TAG, "MAC: ${device.getMac()}")
-                        macsArray.put(device.getMac())
+
+                    if (BuildConfig.DEBUG) {
+                        macsArray.put("B4:A2:EB:4F:00:49")
+                        macsArray.put("B4:A2:EB:4F:06:FC")
+                    } else {
+                        for (device in devices) {
+                            Log.e(TAG, "MAC: ${device.getMac()}")
+                            macsArray.put(device.getMac())
+                        }
                     }
+
                     val body = JSONObject()
                     body.put("macs", macsArray)
+                    val mediaType = "application/json; charset=utf-8".toMediaType()
+                    val requestBody = body.toString().toRequestBody(mediaType)
                     Log.e(TAG, body.toString())
-                    val response = scanPermission.checkMacsPermission(body.toString())
-                    Log.e(TAG, response?.networkResponse.toString())
-                    Log.e(TAG, response?.message.toString())
-
+                    fetchMacs(token, requestBody)
                 }
 
             }
         }
     }
 
+
+    /**
+     * Function to fetch posts
+     */
+    private fun fetchMacs(token : String, macs : RequestBody) {
+        val apiClient = ApiClient()
+
+        // Pass the token as parameter
+        apiClient.getApiService(this).fetchScanPost(token = "Bearer $token", macs)
+            .enqueue(object : retrofit2.Callback< List <ScanPostResponse> > {
+                override fun onFailure(call: Call<List <ScanPostResponse>>, t: Throwable) {
+                    // Error fetching posts
+                    Log.e(TAG, "onFailure: ${t.message}")
+
+                }
+
+                override fun onResponse(call: Call<List <ScanPostResponse>>, response: Response <List <ScanPostResponse>>) {
+                    // Handle function to display posts
+                    Log.e(TAG, "onResponse: ${response.body()}")
+                    val respList = response.body()
+
+                    if (respList != null) {
+                        for (dev in bleDevices) {
+                           setRecyclerUI()
+                        }
+
+                        for (scanPostRes in respList) {
+
+                        }
+                    }
+                }
+            })
+    }
 
 
     /************************************************************************************************/

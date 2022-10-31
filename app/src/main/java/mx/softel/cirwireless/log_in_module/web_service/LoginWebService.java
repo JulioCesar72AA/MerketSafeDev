@@ -68,6 +68,11 @@ public class LoginWebService extends AsyncTask<Void, Void, Void> {
 
             else if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST) response = null;
 
+            else if (responseCode == HttpsURLConnection.HTTP_NOT_FOUND) response = null;
+
+            else if (responseCode == HttpsURLConnection.HTTP_CONFLICT) response = null;
+
+
             else if (responseCode == HttpsURLConnection.HTTP_INTERNAL_ERROR) response = null;
 
             Log.e(TAG, "RESPONSE CODE: " + conn.getResponseCode());
@@ -94,12 +99,12 @@ public class LoginWebService extends AsyncTask<Void, Void, Void> {
             iServerConnectable.serverOk(response, urlModel, responseCode);
 
         else
-            iServerConnectable.serverError();
+            iServerConnectable.serverError(responseCode);
     }
 
     public interface IServerConnectable {
         void serverOk(JSONObject response, URLModel urlModel, int responseCode);
 
-        void serverError();
+        void serverError(int responseCode);
     }
 }

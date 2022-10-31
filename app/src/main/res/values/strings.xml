@@ -12,7 +12,10 @@
     <string name="success">Configuración exitosa</string>
     <string name="card_updated_or_error">El dispositivo ya está actualizado o hay un error en la URL</string>
     <string name="scan_permissions_cloud">Verificando permisos de conexión</string>
-
+    <string name="request_error">Error en la petición</string>
+    <string name="user_not_found">Usuario no encontrado</string>
+    <string name="already_session">Ya hay una sesión iniciada</string>
+    <string name="internal_server_error">Error interno en el servidor</string>
 
     <!-- HINT's -->
     <string name="hint_password">Contraseña</string>
@@ -115,4 +118,6 @@
     <string name="cancel">Cancelar</string>
     <string name="wait_a_moment">Espera por favor</string>
     <string name="error_ocurred">Error en la configuración, vuelve a intentarlo</string>
+    <string name="serial_number">Numero de serie:</string>
+
 </resources>
