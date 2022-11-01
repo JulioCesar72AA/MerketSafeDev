@@ -23,7 +23,8 @@ import mx.softel.cirwirelesslib.utils.CirCommands
 class AccessPointsFragment: Fragment(),
                             AdapterView.OnItemClickListener,
                             SwipeRefreshLayout.OnRefreshListener,
-                            View.OnClickListener {
+                            View.OnClickListener,
+                            RootActivity.RootEvents {
 
     // ROOT MANAGERS
     private lateinit var root           : RootActivity
@@ -211,6 +212,30 @@ class AccessPointsFragment: Fragment(),
     }
 
 
+    private fun clickTest() {
+        if (root.cirService.getCharacteristicWrite() == null)
+            clickTest()
+        else {
+            toast(getString(R.string.getting_device_data))
+            root.apply{
+                setScanningUI()
+
+                // CirCommands.initCmd(service!!, cirService.getCharacteristicWrite()!!, root.bleMacBytes)
+
+                cirService.setCurrentState(StateMachine.UNKNOWN)
+
+                if (actualFragment != testerFragment) {
+                    actualFragment = testerFragment
+                }
+
+                runOnUiThread {
+                    navigateTo(testerFragment, true, null)
+                    setScanningUI()
+                }
+            }
+        }
+    }
+
     /************************************************************************************************/
     /**     COMPANION OBJECT                                                                        */
     /************************************************************************************************/
@@ -221,6 +246,18 @@ class AccessPointsFragment: Fragment(),
          * Singleton access to [AccessPointsFragment]
          */
         @JvmStatic fun getInstance() = AccessPointsFragment()
+    }
+
+    override fun deviceConnected() {
+        TODO("Not yet implemented")
+    }
+
+    override fun updateHotspot() {
+        TODO("Not yet implemented")
+    }
+
+    override fun testConnection() {
+        clickTest()
     }
 
 }

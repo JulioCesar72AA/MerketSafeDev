@@ -127,7 +127,13 @@
     <string name="no_transmission">Sin transmisión</string>
     <string name="right_config">Configuración correcta</string>
     <string name="well_configured_message">CIR Wireless está correctamente configurada</string>
-    <string name="bad_config">Mala configuración</string>
-    <string name="config_needed">Equipo no transmite datos de manera correcta, en necesario configurarlo</string>
+    <string name="bad_config">Falla en configuración</string>
+    <string name="config_needed">El equipo no transmite datos de manera correcta, en necesario configurarlo</string>
     <string name="config">Configurar</string>
+    <string name="ok_wifi">Configuración exitosa</string>
+    <string name="nok_wifi">Configuración fallida</string>
+    <string name="probe">Probar</string>
+    <string name="test_connection">¿Deseas probar la conexión?</string>
+    <string name="click_to_probe">Da click para probar la conexión</string>
+
 </resources>

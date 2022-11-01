@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -66,6 +67,36 @@ public class GenericDialogButtons extends Dialog {
                 btnErrorAccept.setOnClickListener(view -> this.dialogInteractor.negativeClick(this));
 
                 setAnimation(ctx, clLoginDialogContainer, R.anim.scale);
+                break;
+
+            case R.layout.generic_dialog_two_btns :
+                ConstraintLayout container              = (ConstraintLayout) findViewById(R.id.clGenericDialog);
+                ImageView ivIcon                        = (ImageView) findViewById(R.id.ivIcon);
+                TextView tvTitle                        = (TextView) findViewById(R.id.tvTitle);
+                TextView tvMessage                      = (TextView) findViewById(R.id.tvMessage);
+                Button btnAccept                        = (Button) findViewById(R.id.btnGenAccept);
+                Button btnCancel                        = (Button) findViewById(R.id.btnGenCancel);
+
+                DialogButtonsModel dialogModel    = (DialogButtonsModel) baseDialogModel;
+                tvTitle.setText(dialogModel.getTitle());
+
+                if (dialogModel.getIdImgResource() != -1)
+                    ivIcon.setImageResource(dialogModel.getIdImgResource());
+                else
+                    ivIcon.setVisibility(View.GONE);
+
+                tvMessage.setText(dialogModel.getMessage());
+
+                btnAccept.setText(dialogModel.getPositiveBtnText());
+                btnCancel.setText(dialogModel.getNegativeBtnText());
+
+                btnAccept.setVisibility(dialogModel.getBtnPositiveVisibility());
+                btnCancel.setVisibility(dialogModel.getBtnNegativeVisibility());
+
+                btnCancel.setOnClickListener(view -> this.dialogInteractor.negativeClick(this));
+                btnAccept.setOnClickListener(view -> this.dialogInteractor.positiveClick(this));
+
+                setAnimation(ctx, container, R.anim.scale);
                 break;
         }
     }

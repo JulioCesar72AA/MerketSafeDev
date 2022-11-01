@@ -242,15 +242,15 @@ class MainActivity: AppCompatActivity(),
                     token = it as String
                     val macsArray = JSONArray()
 
-                    if (BuildConfig.DEBUG) {
-                        macsArray.put("B4:A2:EB:4F:00:49")
-                        macsArray.put("B4:A2:EB:4F:06:FC")
-                    } else {
+//                    if (BuildConfig.DEBUG) {
+//                        macsArray.put("B4:A2:EB:4F:00:49")
+//                        macsArray.put("B4:A2:EB:4F:06:FC")
+//                    } else {
                         for (device in devices) {
                             Log.e(TAG, "MAC: ${device.getMac()}")
                             macsArray.put(device.getMac())
                         }
-                    }
+//                    }
 
                     val body = JSONObject()
                     body.put("macs", macsArray)

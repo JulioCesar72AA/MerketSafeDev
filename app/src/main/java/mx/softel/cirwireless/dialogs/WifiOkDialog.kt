@@ -70,4 +70,8 @@ class WifiOkDialog: DialogFragment(), View.OnClickListener {
         fun getInstance() = WifiOkDialog()
     }
 
+
+    interface IWifiOkDialog {
+        fun okButtonPressed ()
+    }
 }

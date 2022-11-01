@@ -21,7 +21,7 @@ import mx.softel.cirwirelesslib.utils.CirCommands
 /**
  * A simple [Fragment] subclass.
  */
-class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClickListener, RootActivity.RootEvents {
+    class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClickListener, RootActivity.RootEvents {
 
     private var lockOptionsEnabled       : Boolean = true
 
@@ -335,5 +335,13 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
     override fun deviceConnected() {
         tvBleStatusConnection.text = getString(R.string.tv_selected_device_status_connected)
         updateCirDate()
+    }
+
+    override fun updateHotspot() {
+        clickConfigure()
+    }
+
+    override fun testConnection() {
+        // clickTest()
     }
 }

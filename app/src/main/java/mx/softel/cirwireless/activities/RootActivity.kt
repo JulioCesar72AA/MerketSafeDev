@@ -18,7 +18,6 @@ import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.bleservicelib.BleService
 import mx.softel.bleservicelib.enums.ConnState
 import mx.softel.bleservicelib.enums.DisconnectionReason
-import mx.softel.cirwireless.CirDevice
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.RepositoryModel
 import mx.softel.cirwireless.dialog_module.GenericDialogButtons
@@ -33,7 +32,6 @@ import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwireless.web_services_module.ui_login.log_in_dialog.DialogButtonsModel
 import mx.softel.cirwireless.web_services_module.web_service.ApiClient
 import mx.softel.cirwireless.web_services_module.web_service.LinkPostResponse
-import mx.softel.cirwireless.web_services_module.web_service.ScanPostResponse
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.hexStringToByteArray
@@ -785,11 +783,16 @@ class RootActivity : AppCompatActivity(),
             when (nextStep) {
                 0 -> {
                     cirService.setCurrentState(StateMachine.POLING)
-                    runOnUiThread{ setStandardUI() }
-                    val dialog: DialogFragment
-                            = if (isWifiConnected) WifiOkDialog.getInstance()
-                              else WifiNokDialog.getInstance()
-                    dialog.show(supportFragmentManager, null)
+
+                    runOnUiThread {
+                        setStandardUI()
+
+                        if (isWifiConnected)
+                            showWifiOkDialog()
+                        else
+                            showWifiBadDialog()
+                    }
+
 
                 }
 
@@ -1370,25 +1373,23 @@ class RootActivity : AppCompatActivity(),
 
     private fun fetchLinkPost () {
         val apiClient = ApiClient()
-        val mac = "B4:A2:EB:4F:00:49".replace(":", "")
-        Log.e(TAG, "mac: ${mac}")
         // Pass the token as parameter
-        apiClient.getApiService(this).fetchLinkPost(token = "Bearer $token", mac) // bleMac)
+        apiClient.getApiService(this).fetchLinkPost(token = "Bearer $token", bleMac)
             .enqueue(object : retrofit2.Callback <LinkPostResponse> {
                 override fun onFailure(call: Call<LinkPostResponse>, t: Throwable) {
                     Log.e(TAG, "onFailure")
                 }
 
                 override fun onResponse(call: Call<LinkPostResponse>, response: Response<LinkPostResponse>) {
-                    Log.e(TAG, "onResponse: ${response.body()}")
+//                    Log.e(TAG, "onResponse: ${response.body()}")
                     val body = response.body()
                     if (body != null) {
-                        Log.e(TAG, "onResponse: ${response.body()!!.status}")
+//                        Log.e(TAG, "onResponse: ${response.body()!!.status}")
                         val status = body.status
                         if (status == "OK") {
                             showTransmitionOkDialog()
                         } else {
-
+                            showTransmitionNotOkDialog()
                         }
                     }
 
@@ -1402,6 +1403,88 @@ class RootActivity : AppCompatActivity(),
             R.layout.login_error_dialog, -1,
             getString(R.string.right_config),
             getString(R.string.well_configured_message),
+            getString(R.string.accept),
+            getString(R.string.accept),
+            View.GONE,
+            View.VISIBLE
+        )
+
+
+        val dialog = GenericDialogButtons(
+            this@RootActivity,
+            baseDialogModel,
+            object : DialogInteractor {
+                override fun positiveClick(dialog: GenericDialogButtons) {}
+                override fun negativeClick(dialog: GenericDialogButtons) {
+                    dialog.dismiss()
+                }
+            })
+
+        dialog.show()
+    }
+
+
+    private fun showWifiProbeConfig () {
+        val baseDialogModel: BaseDialogModel = DialogButtonsModel(
+            R.layout.generic_dialog_two_btns, R.drawable.ic_chip,
+            getString(R.string.test_connection),
+            getString(R.string.click_to_probe),
+            getString(R.string.probe),
+            getString(R.string.cancel),
+            View.VISIBLE,
+            View.VISIBLE
+        )
+
+
+        val dialog = GenericDialogButtons(
+            this@RootActivity,
+            baseDialogModel,
+            object : DialogInteractor {
+                override fun positiveClick(dialog: GenericDialogButtons) {
+                    (actualFragment as AccessPointsFragment).testConnection()
+                    dialog.dismiss() }
+                override fun negativeClick(dialog: GenericDialogButtons) {
+                    dialog.dismiss()
+                }
+            })
+
+        dialog.show()
+    }
+
+
+    private fun showWifiOkDialog () {
+        val baseDialogModel: BaseDialogModel = DialogButtonsModel(
+            R.layout.generic_dialog_two_btns, R.drawable.ic_img_lock,
+            getString(R.string.ok_wifi),
+            getString(R.string.tv_wifi_ok),
+            getString(R.string.accept),
+            getString(R.string.accept),
+            View.GONE,
+            View.VISIBLE
+        )
+
+
+        val dialog = GenericDialogButtons(
+            this@RootActivity,
+            baseDialogModel,
+            object : DialogInteractor {
+                override fun positiveClick(dialog: GenericDialogButtons) {}
+                override fun negativeClick(dialog: GenericDialogButtons) {
+                    showWifiProbeConfig()
+                    dialog.dismiss()
+                }
+            })
+
+        dialog.show()
+    }
+
+
+    private fun showWifiBadDialog () {
+        val baseDialogModel: BaseDialogModel = DialogButtonsModel(
+            R.layout.generic_dialog_two_btns,
+            R.drawable.ic_img_lock_red,
+            getString(R.string.nok_wifi),
+            getString(R.string.tv_wifi_nok),
             getString(R.string.accept),
             getString(R.string.accept),
             View.GONE,
@@ -1439,8 +1522,9 @@ class RootActivity : AppCompatActivity(),
             this@RootActivity,
             baseDialogModel,
             object : DialogInteractor {
-                override fun positiveClick(dialog: GenericDialogButtons) {}
+                override fun positiveClick(dialog: GenericDialogButtons) { }
                 override fun negativeClick(dialog: GenericDialogButtons) {
+                    (actualFragment as MainFragment).updateHotspot()
                     dialog.dismiss()
                 }
             })
@@ -1608,6 +1692,10 @@ class RootActivity : AppCompatActivity(),
     /************************************************************************************************/
     interface RootEvents {
         fun deviceConnected ()
+
+        fun updateHotspot ()
+
+        fun testConnection ()
     }
 
 

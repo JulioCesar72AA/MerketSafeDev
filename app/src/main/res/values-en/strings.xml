@@ -130,5 +130,10 @@
     <string name="bad_config">Configuration failure</string>
     <string name="config_needed">Equipment does not transmit data correctly, it is necessary to configure it</string>
     <string name="config">Configure </string>
+    <string name="ok_wifi">Successful configuration</string>
+    <string name="nok_wifi">Failed configuration</string>
+    <string name="probe">Test</string>
+    <string name="test_connection">Do you want to test the connection?</string>
+    <string name="click_to_probe">Press to continue</string>
 
 </resources>
