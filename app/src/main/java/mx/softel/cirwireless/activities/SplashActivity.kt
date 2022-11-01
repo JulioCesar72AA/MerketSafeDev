@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import mx.softel.cirwireless.R
@@ -48,7 +49,6 @@ class SplashActivity : AppCompatActivity() {
         if (requestCode == Permissions.MULTIPLE_PERMISSIONS) {
             if (grantResults.size == Permissions.getDefaultPermissions().size) {
                 for (grantResult in grantResults) {
-
                     if (grantResult != PackageManager.PERMISSION_GRANTED) {
                         canContinue = false
                         break

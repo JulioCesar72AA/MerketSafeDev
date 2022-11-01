@@ -385,7 +385,7 @@ class MainActivity: AppCompatActivity(),
             .enqueue(object : retrofit2.Callback<LinkPostResponse> {
                 override fun onFailure(call: Call <LinkPostResponse>, t: Throwable) {
                     // Error fetching posts
-                    // Log.e(TAG, "onFailure: ${t.message}")
+                     Log.e(TAG, "onFailure: ${t.message}")
                     runOnUiThread { Utils.showToastShort(applicationContext, getString(R.string.link_device_error)) }
                     initUI()
 
@@ -393,7 +393,7 @@ class MainActivity: AppCompatActivity(),
 
                 override fun onResponse(call: Call<LinkPostResponse>, response: Response <LinkPostResponse>) {
                     // Handle function to display posts
-                    // Log.e(TAG, "onResponse: ${response.body()}")
+                     Log.e(TAG, "onResponse: ${response.body()}")
                     val body = response.body()
 
                     if (body != null) {
