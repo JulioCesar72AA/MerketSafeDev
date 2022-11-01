@@ -69,11 +69,7 @@ class ScanRecyclerAdapter (private val context: Context, private val devicesList
         }
 
         override fun onClick(v: View?) {
-            if (v?.tvDeviceSerial!!.isVisible)
-                onScanClick.onScanClickListener(adapterPosition)
-
-            else
-                onScanClick.onScanClickListener(-1)
+            onScanClick.onScanClickListener(adapterPosition, v?.tvDeviceSerial!!.isVisible)
         }
 
     }
@@ -83,7 +79,7 @@ class ScanRecyclerAdapter (private val context: Context, private val devicesList
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
     interface OnScanClickListener {
-        fun onScanClickListener(position: Int)
+        fun onScanClickListener(position: Int, allowedDevice: Boolean)
     }
 
 }

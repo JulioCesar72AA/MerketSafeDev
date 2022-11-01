@@ -1,25 +1,38 @@
 package mx.softel.cirwireless.activities
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.icu.util.TimeZone
+import android.location.*
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.scanning_mask.*
-import mx.softel.cirwireless.BuildConfig
 import mx.softel.cirwireless.CirDevice
 import mx.softel.cirwireless.R
+import mx.softel.cirwireless.UserPermissions
 import mx.softel.cirwireless.adapters.ScanRecyclerAdapter
+import mx.softel.cirwireless.dialog_module.GenericDialogButtons
+import mx.softel.cirwireless.dialog_module.dialog_interfaces.DialogInteractor
+import mx.softel.cirwireless.dialog_module.dialog_models.BaseDialogModel
 import mx.softel.cirwireless.extensions.toast
-import mx.softel.cirwireless.web_services_module.web_service.ApiClient
-import mx.softel.cirwireless.web_services_module.web_service.ScanPostResponse
 import mx.softel.cirwireless.utils.Utils
+import mx.softel.cirwireless.web_services_module.ui_login.log_in_dialog.DialogButtonsModel
+import mx.softel.cirwireless.web_services_module.web_service.ApiClient
+import mx.softel.cirwireless.web_services_module.web_service.LinkPostResponse
+import mx.softel.cirwireless.web_services_module.web_service.ScanPostResponse
 import mx.softel.cirwireless.wifi_db.WifiDatabase
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.scanblelib.ble.BleDevice
@@ -31,6 +44,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
+import java.time.ZoneId
+import java.util.*
 
 
 class MainActivity: AppCompatActivity(),
@@ -39,7 +54,8 @@ class MainActivity: AppCompatActivity(),
                     ScanRecyclerAdapter.OnScanClickListener,
                     PopupMenu.OnMenuItemClickListener {
 
-    private lateinit var token : String
+    private lateinit var token          : String
+    private lateinit var userPermissions: UserPermissions
 
     private var bleDevices                  = ArrayList<BleDevice>()
     private var cirDevice                   = ArrayList <CirDevice> ()
@@ -63,12 +79,36 @@ class MainActivity: AppCompatActivity(),
         }
 
         db = WifiDatabase(this)
-
         bleDevices.clear()
         cirDevice.clear()
+
+        checkLocation()
         setScanningUI()
         setOnClick()
     }
+
+
+    private fun checkLocation(){
+        val manager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) showAlertLocation()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    }
+
+
+    private fun showAlertLocation() {
+        val dialog = AlertDialog.Builder(this)
+        dialog.setMessage("Your location settings is set to Off, Please enable location to use this application")
+        dialog.setPositiveButton("Settings") { _, _ ->
+            val myIntent = Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            startActivity(myIntent)
+        }
+        dialog.setNegativeButton("Cancel") { _, _ ->
+            finish()
+        }
+        dialog.setCancelable(false)
+        dialog.show()
+    }
+
 
     override fun onResume() {
         super.onResume()
@@ -140,20 +180,82 @@ class MainActivity: AppCompatActivity(),
     }
 
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+//    private lateinit var locationRequest: LocationRequest
+//    private lateinit var locationCallback: LocationCallback
+
+
+    private fun showLinkDeviceDialog (mac: String) {
+        val baseDialogModel: BaseDialogModel = DialogButtonsModel(
+            R.layout.generic_dialog_two_btns, -1,
+            getString(R.string.link_device_title),
+            getString(R.string.link_device),
+            getString(R.string.link),
+            getString(R.string.cancel),
+            View.VISIBLE,
+            View.VISIBLE
+        )
+
+        val dialog = GenericDialogButtons(
+            this,
+            baseDialogModel,
+            object : DialogInteractor {
+                @SuppressLint("MissingPermission", "NewApi")
+                override fun positiveClick(dialog: GenericDialogButtons) {
+                    setPermissionScanUI()
+
+                    val tz: TimeZone = TimeZone.getDefault()
+                    System.out.println(
+                        "TimeZone   " + tz.getDisplayName(false, TimeZone.SHORT)
+                            .toString() + " Timezone id :: " + tz.getID()
+                    )
+                    val zone: ZoneId = ZoneId.systemDefault()
+
+                    fusedLocationClient.lastLocation
+                        .addOnSuccessListener { location: Location? ->
+                            val latitude =  location?.latitude
+                            val longitude = location?.longitude
+                            val body = JSONObject()
+
+                            body.put("mac", mac)
+                            body.put("latitude", latitude)
+                            body.put("longitude", longitude)
+                            body.put("timezone_id", zone.toString())
+
+                            val mediaType = "application/json; charset=utf-8".toMediaType()
+                            val requestBody = body.toString().toRequestBody(mediaType)
+                            Log.e(TAG, body.toString())
+                            fetchLink(token, requestBody)
+                            dialog.dismiss()
+                        }
+                }
+                override fun negativeClick(dialog: GenericDialogButtons) {
+                    dialog.dismiss()
+                }
+            }
+        )
+
+        dialog.show()
+    }
+
 
     /************************************************************************************************/
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
-    override fun onScanClickListener(position: Int) {
+    override fun onScanClickListener(position: Int, isAllowed: Boolean) {
+        val dev = bleDevices[position]
+        val cir = cirDevice[position]
 
-        if (position == -1)
-            Utils.showToastLong(this, getString(R.string.connection_not_allowed))
+        if (!isAllowed) {
+            if (userPermissions.isLinker || userPermissions.isAdmin) {
+                showLinkDeviceDialog(dev.getMac())
 
-        else {
+            } else
+                Utils.showToastLong(this, getString(R.string.connection_not_allowed))
+
+        } else {
             val intent = Intent(this, RootActivity::class.java)
             intent.apply {
-                val dev = bleDevices[position]
-                val cir = cirDevice[position]
                 putExtra(EXTRA_DEVICE,              dev.getBleDevice())
                 putExtra(EXTRA_NAME,                dev.getName())
                 putExtra(EXTRA_MAC,                 dev.getMac())
@@ -165,6 +267,7 @@ class MainActivity: AppCompatActivity(),
 
                 // Solkos' flags
                 putExtra(TOKEN, token)
+                putExtra(USER_PERMISSIONS, userPermissions)
                 putExtra(TRANSMITION, cir.getScanPostResponse()!!.isTransmitting)
                 putExtra(SERIAL_NUMBER, cir.getScanPostResponse()!!.serialNumber)
                 putExtra(ASSET_TYPE, cir.getScanPostResponse()!!.assetType)
@@ -238,30 +341,71 @@ class MainActivity: AppCompatActivity(),
                 isScanning                  = false
                 checkingCloudPermissions    = true
                 setPermissionScanUI()
-                db!!.getUserToken {
-                    token = it as String
-                    val macsArray = JSONArray()
+                db!!.getUserPermissionsAndToken {
+                    val tokenAndPermission = it as Array <String>
+
+                    token           = tokenAndPermission[0]
+                    userPermissions = UserPermissions(tokenAndPermission[1])
+                    val macsArray   = JSONArray()
+
+                    // Log.e(TAG, "PERMISSION: ${userPermissions.permissions}")
 
 //                    if (BuildConfig.DEBUG) {
 //                        macsArray.put("B4:A2:EB:4F:00:49")
 //                        macsArray.put("B4:A2:EB:4F:06:FC")
-//                    } else {
-                        for (device in devices) {
-                            Log.e(TAG, "MAC: ${device.getMac()}")
-                            macsArray.put(device.getMac())
-                        }
 //                    }
+                    for (device in devices) {
+                        // Log.e(TAG, "MAC: ${device.getMac()}")
+                        macsArray.put(device.getMac())
+                    }
 
                     val body = JSONObject()
                     body.put("macs", macsArray)
                     val mediaType = "application/json; charset=utf-8".toMediaType()
                     val requestBody = body.toString().toRequestBody(mediaType)
-                    Log.e(TAG, body.toString())
+                    // Log.e(TAG, body.toString())
                     fetchMacs(token, requestBody)
+
+//                    db!!.getUserToken {
+//                        token = it as String
+//
+//                    }
                 }
+
 
             }
         }
+    }
+
+
+    private fun fetchLink (token: String, infoMac: RequestBody) {
+        val apiClient = ApiClient()
+        // Log.e(TAG, "token ${token}")
+        apiClient.getApiService(this).fetchLinkPost(token = "Bearer $token", infoMac)
+            .enqueue(object : retrofit2.Callback<LinkPostResponse> {
+                override fun onFailure(call: Call <LinkPostResponse>, t: Throwable) {
+                    // Error fetching posts
+                    // Log.e(TAG, "onFailure: ${t.message}")
+                    runOnUiThread { Utils.showToastShort(applicationContext, getString(R.string.link_device_error)) }
+                    initUI()
+
+                }
+
+                override fun onResponse(call: Call<LinkPostResponse>, response: Response <LinkPostResponse>) {
+                    // Handle function to display posts
+                    // Log.e(TAG, "onResponse: ${response.body()}")
+                    val body = response.body()
+
+                    if (body != null) {
+                        runOnUiThread { Utils.showToastShort(applicationContext, getString(R.string.link_device_ok)) }
+
+                    } else {
+
+                        runOnUiThread { Utils.showToastShort(applicationContext, getString(R.string.link_device_error)) }
+                    }
+                    initUI()
+                }
+            })
     }
 
 
@@ -282,7 +426,7 @@ class MainActivity: AppCompatActivity(),
 
                 override fun onResponse(call: Call<List <ScanPostResponse>>, response: Response <List <ScanPostResponse>>) {
                     // Handle function to display posts
-                    Log.e(TAG, "onResponse: ${response.body()}")
+                    // Log.e(TAG, "onResponse: ${response.body()}")
                     val respList    = response.body()
                     val testArray   = arrayOf("")
                     if (respList != null) {

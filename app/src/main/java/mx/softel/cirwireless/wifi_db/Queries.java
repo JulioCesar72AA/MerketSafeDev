@@ -104,6 +104,14 @@ class Queries extends Definition {
                 TABLE_NAME_USER;
 
 
+    static final String SQL_SELECT_USER_PERMISSIONS_AND_TOKEN = "SELECT " +
+                TABLE_FIELD_TOKEN + ", " +
+                TABLE_FIELD_USER_PERMISSIONS + " " +
+            "FROM " +
+                TABLE_NAME_USER;
+
+
+
     static final String SQL_SELECT_USER_EMAIL = "SELECT " +
                 TABLE_FIELD_USER_EMAIL + " " +
             "FROM " +

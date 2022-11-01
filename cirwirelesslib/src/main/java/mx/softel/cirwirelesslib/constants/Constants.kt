@@ -11,6 +11,7 @@ const val EXTRA_IS_ENCRYPTED        = "is_encrypted"
 const val EXTRA_DEVICE              = "device"
 
 const val TOKEN                     = "token"
+const val USER_PERMISSIONS          = "permissions"
 const val TRANSMITION               = "transmition"
 const val SERIAL_NUMBER             = "serial_number"
 const val ASSET_TYPE                = "asset_type"

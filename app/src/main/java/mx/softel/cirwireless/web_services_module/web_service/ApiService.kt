@@ -9,7 +9,7 @@ private const val TAG = "ScanPermission"
 interface ApiService {
 
     @GET(URLs.LOGIN_URL)
-    fun fetchLoginPost(): Call <LinkPostResponse>
+    fun fetchLoginPost(): Call <LoginResponse>
 
 
     @Headers("Content-Type: application/json")
@@ -18,5 +18,10 @@ interface ApiService {
 
 
     @GET(URLs.STATUS_URL)
-    fun fetchLinkPost(@Header("Authorization") token: String, @Query("mac") mac: String): Call <LinkPostResponse>
+    fun fetchLinkPost(@Header("Authorization") token: String, @Query("mac") mac: String): Call <TransmitPostResponse>
+
+
+    @Headers("Content-Type: application/json")
+    @POST(URLs.LINK_URL)
+    fun fetchLinkPost(@Header("Authorization") token: String, @Body infoMac : RequestBody): Call<LinkPostResponse>
 }

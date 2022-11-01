@@ -80,7 +80,7 @@ public class WifiDatabase extends SQLiteOpenHelper {
                     userAccessInfo.getTokenCreation()
                     );
 
-            Log.e(TAG, "insertTemplate: " + insertQuery);
+            // Log.e(TAG, "insertTemplate: " + insertQuery);
 
             mDatabase.execSQL(insertQuery);
             wasSaved = true;
@@ -162,6 +162,38 @@ public class WifiDatabase extends SQLiteOpenHelper {
         }
 
         idbReadable.readableResult(token);
+        database.close();
+    }
+
+
+    public void getUserPermissionsAndToken(IDBReadable idbReadable) {
+        String token        = null;
+        String permissions  = null;
+
+        SQLiteDatabase database = this.getWritableDatabase();
+
+        try {
+            String selectQuery = Queries.SQL_SELECT_USER_PERMISSIONS_AND_TOKEN;
+            Cursor cursor = database.rawQuery(selectQuery, null);
+
+            if (cursor != null) {
+                if (cursor.getCount() != 0) {
+                    cursor.moveToFirst();
+                    token       = cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_TOKEN));
+                    permissions = cursor.getString(cursor.getColumnIndex(Queries.TABLE_FIELD_USER_PERMISSIONS));
+                }
+
+                cursor.close();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+            token = null;
+            permissions = null;
+        }
+
+        String [] values = new String [] {token, permissions};
+
+        idbReadable.readableResult(values);
         database.close();
     }
 

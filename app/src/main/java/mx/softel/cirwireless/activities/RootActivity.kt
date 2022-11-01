@@ -12,7 +12,6 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.bleservicelib.BleService
@@ -20,6 +19,7 @@ import mx.softel.bleservicelib.enums.ConnState
 import mx.softel.bleservicelib.enums.DisconnectionReason
 import mx.softel.cirwireless.R
 import mx.softel.cirwireless.RepositoryModel
+import mx.softel.cirwireless.UserPermissions
 import mx.softel.cirwireless.dialog_module.GenericDialogButtons
 import mx.softel.cirwireless.dialog_module.dialog_interfaces.DialogInteractor
 import mx.softel.cirwireless.dialog_module.dialog_models.BaseDialogModel
@@ -31,7 +31,7 @@ import mx.softel.cirwireless.fragments.TesterFragment
 import mx.softel.cirwireless.interfaces.FragmentNavigation
 import mx.softel.cirwireless.web_services_module.ui_login.log_in_dialog.DialogButtonsModel
 import mx.softel.cirwireless.web_services_module.web_service.ApiClient
-import mx.softel.cirwireless.web_services_module.web_service.LinkPostResponse
+import mx.softel.cirwireless.web_services_module.web_service.TransmitPostResponse
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.hexStringToByteArray
@@ -58,7 +58,8 @@ class RootActivity : AppCompatActivity(),
     private var firstTime                       = true
     private var commandSent                     = false
 
-    internal lateinit var token         : String
+    private lateinit var token              : String
+    internal var userPermissions            : UserPermissions? = null
 
     // BLUETOOTH DEVICE
     internal lateinit var bleDevice     : BluetoothDevice
@@ -197,7 +198,8 @@ class RootActivity : AppCompatActivity(),
         assetType       = data.getString(ASSET_TYPE)!!
         assetMode       = data.getString(ASSET_MODEL)!!
         token           = data.getString(TOKEN)!!
-        Log.e(TAG, "TOKEN: ${token}")
+        userPermissions = data.getSerializable(USER_PERMISSIONS) as UserPermissions
+        // Log.e(TAG, "TOKEN: ${token}")
 
         val beaconBytes = data[EXTRA_BEACON_BYTES] as ByteArray
         val beaconId    = "0x${byteArrayOf(beaconBytes[5], beaconBytes[6]).toHexValue().toUpperCase(Locale.ROOT)}"
@@ -1375,12 +1377,12 @@ class RootActivity : AppCompatActivity(),
         val apiClient = ApiClient()
         // Pass the token as parameter
         apiClient.getApiService(this).fetchLinkPost(token = "Bearer $token", bleMac)
-            .enqueue(object : retrofit2.Callback <LinkPostResponse> {
-                override fun onFailure(call: Call<LinkPostResponse>, t: Throwable) {
+            .enqueue(object : retrofit2.Callback <TransmitPostResponse> {
+                override fun onFailure(call: Call<TransmitPostResponse>, t: Throwable) {
                     Log.e(TAG, "onFailure")
                 }
 
-                override fun onResponse(call: Call<LinkPostResponse>, response: Response<LinkPostResponse>) {
+                override fun onResponse(call: Call<TransmitPostResponse>, response: Response<TransmitPostResponse>) {
 //                    Log.e(TAG, "onResponse: ${response.body()}")
                     val body = response.body()
                     if (body != null) {

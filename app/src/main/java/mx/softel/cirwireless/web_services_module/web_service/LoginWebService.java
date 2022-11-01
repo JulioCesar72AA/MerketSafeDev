@@ -35,7 +35,7 @@ public class LoginWebService extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... voids) {
 
         try {
-            Log.e(TAG, "url: " + urlModel.getUrlStr());
+            // Log.e(TAG, "url: " + urlModel.getUrlStr());
 
             URL url = new URL(urlModel.getUrlStr());
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -49,7 +49,7 @@ public class LoginWebService extends AsyncTask<Void, Void, Void> {
             os.flush();
             os.close();
 
-            Log.e(TAG, "JSON DATA: " + jsonData.toString());
+            // Log.e(TAG, "JSON DATA: " + jsonData.toString());
             responseCode = conn.getResponseCode();
 
             if (responseCode == HttpsURLConnection.HTTP_OK) {
@@ -62,7 +62,7 @@ public class LoginWebService extends AsyncTask<Void, Void, Void> {
                     responseStr.append(line);
 
                 response = new JSONObject(responseStr.toString());
-                Log.e(TAG, "response: " + response);
+                // Log.e(TAG, "response: " + response);
 
             }
 
@@ -75,8 +75,8 @@ public class LoginWebService extends AsyncTask<Void, Void, Void> {
 
             else if (responseCode == HttpsURLConnection.HTTP_INTERNAL_ERROR) response = null;
 
-            Log.e(TAG, "RESPONSE CODE: " + conn.getResponseCode());
-            Log.e(TAG, "RESPONSE_MESSAGE: " + conn.getResponseMessage());
+            // Log.e(TAG, "RESPONSE CODE: " + conn.getResponseCode());
+            // Log.e(TAG, "RESPONSE_MESSAGE: " + conn.getResponseMessage());
 
             conn.disconnect();
 

@@ -135,5 +135,11 @@
     <string name="probe">Probar</string>
     <string name="test_connection">¿Deseas probar la conexión?</string>
     <string name="click_to_probe">Da click para probar la conexión</string>
+    <string name="link">Ligar</string>
+    <string name="link_device">¿Deseas ligar este dispositivo a tu usuario?</string>
+    <string name="link_device_title">Ligar dispositivo</string>
+    <string name="link_device_error">No ha sido posible ligar el dispositivo</string>
+    <string name="link_device_ok">Dispositivo ligado correctamente, actualiza el escaneo.</string>
+    <string name="not_enough_permissions">No cuentas con los permisos necesarios</string>
 
 </resources>

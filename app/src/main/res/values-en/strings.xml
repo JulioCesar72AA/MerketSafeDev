@@ -135,5 +135,11 @@
     <string name="probe">Test</string>
     <string name="test_connection">Do you want to test the connection?</string>
     <string name="click_to_probe">Press to continue</string>
+    <string name="link">Bind</string>
+    <string name="link_device">Do you want to bind this device to your user?</string>
+    <string name="link_device_title">Bind device</string>
+    <string name="link_device_error">Failed to bind device</string>
+    <string name="link_device_ok">Device linked successfully, please update the scan.</string>
+    <string name="not_enough_permissions">You do not have the necessary permissions</string>
 
 </resources>

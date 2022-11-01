@@ -35,7 +35,7 @@ class SolkosServerResponse (val response: JSONObject) {
         this.name               = response.get("name") as String
         this.permissions        = response.get("permissions") as JSONArray
         this.permissionsStr     = permissionsToStr()
-        Log.e(TAG, "permissionsStr: $permissionsStr")
+        //Log.e(TAG, "permissionsStr: $permissionsStr")
     }
 
     private fun permissionsToStr () : String {

@@ -15,6 +15,7 @@ import mx.softel.cirwireless.R
 import mx.softel.cirwireless.activities.RootActivity
 import mx.softel.cirwireless.extensions.toast
 import mx.softel.cirwireless.interfaces.FragmentNavigation
+import mx.softel.cirwireless.utils.Utils
 import mx.softel.cirwirelesslib.enums.StateMachine
 import mx.softel.cirwirelesslib.utils.CirCommands
 
@@ -149,91 +150,103 @@ import mx.softel.cirwirelesslib.utils.CirCommands
 
 
     private fun sendReloadCommand () {
-        if (root.cirService.getQuickCommandsCharacteristic() == null)
-            sendReloadCommand()
-        else {
-            root.apply {
-                CirCommands.reloadFridge(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
-                cirService.setCurrentState(StateMachine.RELOADING_FRIDGE)
+        if (root.userPermissions!!.isCommander || root.userPermissions!!.isAdmin) {
+            if (root.cirService.getQuickCommandsCharacteristic() == null)
+                sendReloadCommand()
+            else {
+                root.apply {
+                    CirCommands.reloadFridge(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
+                    cirService.setCurrentState(StateMachine.RELOADING_FRIDGE)
+                }
             }
-        }
+        } else
+            Utils.showToastShort(activity, getString(R.string.not_enough_permissions))
     }
 
     private fun sendCloseLockCommand () {
-        if (root.cirService.getQuickCommandsCharacteristic() == null)
-            sendCloseLockCommand()
-        else {
-            toast(getString(R.string.locking))
-            root.apply {
-                CirCommands.closeLock(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
-                cirService.setCurrentState(StateMachine.CLOSING_LOCK)
+        if (root.userPermissions!!.isCommander || root.userPermissions!!.isAdmin) {
+            if (root.cirService.getQuickCommandsCharacteristic() == null)
+                sendCloseLockCommand()
+            else {
+                toast(getString(R.string.locking))
+                root.apply {
+                    CirCommands.closeLock(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
+                    cirService.setCurrentState(StateMachine.CLOSING_LOCK)
+                }
             }
-        }
+        } else
+            Utils.showToastShort(activity, getString(R.string.not_enough_permissions))
     }
 
     private fun sendOpenLockCommand () {
-        if (root.cirService.getQuickCommandsCharacteristic() == null)
-            sendOpenLockCommand()
-        else {
-            toast(getString(R.string.unlocking))
-            root.apply {
-                CirCommands.openLock(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
-                cirService.setCurrentState(StateMachine.OPENNING_LOCK)
+        if (root.userPermissions!!.isCommander || root.userPermissions!!.isAdmin) {
+            if (root.cirService.getQuickCommandsCharacteristic() == null)
+                sendOpenLockCommand()
+            else {
+                toast(getString(R.string.unlocking))
+                root.apply {
+                    CirCommands.openLock(service!!, cirService.getQuickCommandsCharacteristic()!!, root.bleMacBytes)
+                    cirService.setCurrentState(StateMachine.OPENNING_LOCK)
+                }
             }
-        }
+        } else
+            Utils.showToastShort(activity, getString(R.string.not_enough_permissions))
     }
 
     private fun showConfigOrLockBtns () {
-        val animationForLockBtns : Int
-        val animationForConfigBtns : Int
-        val visibilityForLockBtns : Int
-        val visibilityForConfigBtns : Int
-        val image : Int
+        if (root.userPermissions!!.isCommander || root.userPermissions!!.isAdmin) {
+            val animationForLockBtns : Int
+            val animationForConfigBtns : Int
+            val visibilityForLockBtns : Int
+            val visibilityForConfigBtns : Int
+            val image : Int
 
-        if (RootActivity.enableWifiConfig) {
-            if (lockOptionsEnabled) {
-                animationForLockBtns = R.anim.slide_right_to_left
-                animationForConfigBtns = R.anim.slide_left_to_right
+            if (RootActivity.enableWifiConfig) {
+                if (lockOptionsEnabled) {
+                    animationForLockBtns = R.anim.slide_right_to_left
+                    animationForConfigBtns = R.anim.slide_left_to_right
 
-                visibilityForLockBtns = View.GONE
-                visibilityForConfigBtns = View.VISIBLE
+                    visibilityForLockBtns = View.GONE
+                    visibilityForConfigBtns = View.VISIBLE
 
-                image = R.drawable.ic_abrir_chapa
+                    image = R.drawable.ic_abrir_chapa
 
-                lockOptionsEnabled = false
+                    lockOptionsEnabled = false
 
-            } else {
-                animationForLockBtns = R.anim.slide_left_to_right
-                animationForConfigBtns = R.anim.slide_right_to_left
+                } else {
+                    animationForLockBtns = R.anim.slide_left_to_right
+                    animationForConfigBtns = R.anim.slide_right_to_left
 
-                visibilityForLockBtns = View.VISIBLE
-                visibilityForConfigBtns = View.GONE
+                    visibilityForLockBtns = View.VISIBLE
+                    visibilityForConfigBtns = View.GONE
 
-                image = R.drawable.ic_config
+                    image = R.drawable.ic_config
 
-                lockOptionsEnabled = true
-            }
+                    lockOptionsEnabled = true
+                }
 
-            // Se colocan las animaciones a los botones de la seccion de chapa
-            tlLockBtns.startAnimation(AnimationUtils.loadAnimation(root, animationForLockBtns))
+                // Se colocan las animaciones a los botones de la seccion de chapa
+                tlLockBtns.startAnimation(AnimationUtils.loadAnimation(root, animationForLockBtns))
 
-            // Se colocan las animaciones a los botones de la seccion de configuración
-            cvConfigure.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
-            cvTest.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
-            cvUpdate.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
+                // Se colocan las animaciones a los botones de la seccion de configuración
+                cvConfigure.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
+                cvTest.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
+                cvUpdate.startAnimation(AnimationUtils.loadAnimation(root, animationForConfigBtns))
 
-            // Se colocan la visibilidad de los botones de la seccion de chapa
-            tlLockBtns.visibility = visibilityForLockBtns
+                // Se colocan la visibilidad de los botones de la seccion de chapa
+                tlLockBtns.visibility = visibilityForLockBtns
 
-            // Se colocan la visibilidad de los botones de la seccion de configuracion
-            // cvConfigure.visibility = visibilityForConfigBtns
-            // cvTest.visibility = visibilityForConfigBtns
-            tlConfigBtns.visibility = visibilityForConfigBtns
+                // Se colocan la visibilidad de los botones de la seccion de configuracion
+                // cvConfigure.visibility = visibilityForConfigBtns
+                // cvTest.visibility = visibilityForConfigBtns
+                tlConfigBtns.visibility = visibilityForConfigBtns
 
-            ivLockOrConfig.setImageResource(image)
+                ivLockOrConfig.setImageResource(image)
 
+            } else
+                toast(getString(R.string.unsupported_config_action))
         } else
-            toast(getString(R.string.unsupported_config_action))
+            Utils.showToastShort(activity, getString(R.string.not_enough_permissions))
     }
 
     /**
