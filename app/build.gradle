@@ -9,9 +9,15 @@ android {
         applicationId "mx.softel.cirwireless"
         minSdkVersion 23
         targetSdkVersion 31
-        versionCode 32
-        versionName "1.6.0.2"
+        versionCode 33
+        versionName "1.6.0.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
     }
     buildTypes {
         release {

@@ -5,8 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="#005EF4"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".">
+    android:layout_height="match_parent" >
 
 
     <TextView
@@ -39,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/_20dp"
-        android:text="Ingresa tu correo electrónico"
+        android:text="@string/insert_email"
         android:textAlignment="center"
         android:textColor="#F3F3F3"
         app:layout_constraintBottom_toTopOf="@+id/et_email"

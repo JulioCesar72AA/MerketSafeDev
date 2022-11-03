@@ -141,5 +141,6 @@
     <string name="link_device_error">Failed to bind device</string>
     <string name="link_device_ok">Device linked successfully, please update the scan.</string>
     <string name="not_enough_permissions">You do not have the necessary permissions</string>
-
+    <string name="email">E-mail</string>
+    <string name="login">Log in</string>
 </resources>
