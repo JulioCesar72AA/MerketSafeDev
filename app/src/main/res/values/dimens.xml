@@ -14,7 +14,7 @@
     <dimen name="cv_corner_radius">8dp</dimen>
     <dimen name="cv_content_margin">24dp</dimen>
     <dimen name="cv_close_open_lock">5dp</dimen>
-    <dimen name="cv_margin_access_point">22dp</dimen>
+    <dimen name="cv_margin_access_point">20dp</dimen>
     <dimen name="cv_margin_access_point_top">50dp</dimen>
     <dimen name="cv_card_access">20dp</dimen>
     <dimen name="cv_access_margin_start">19dp</dimen>

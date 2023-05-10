@@ -22,7 +22,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:layout_weight="1"
-            android:background="@color/colortextwhite" />
+            android:background="@color/gray70" />
 
     </LinearLayout>
 

@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">CIR Wireless</string>
+    <string name="app_name">Market Safe</string>
 
     <!-- MENU's -->
     <string name="action_update">Actualizar módulo Wifi</string>
@@ -37,8 +37,10 @@
     <string name="tv_scan">Escaneando</string>
     <string name="tv_cir_wireless">CIR Wireless</string>
     <string name="tv_title_access">Access Points</string>
+    <string name="wifi">Wi-Fi</string>
     <string name="tv_title_dispositivos">Dispositivo</string>
     <string name="tv_test_mac">00:1B:C5:00:08:11</string>
+    <string name="tv_wifi_message">Configura tu conexión wifi.</string>
     <string name="tv_password">Contraseña</string>
     <string name="tv_aceptar">Aceptar</string>
     <string name="tv_cancelar">Cancelar</string>
