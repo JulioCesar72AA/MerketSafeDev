@@ -4,7 +4,7 @@
     <dimen name="scan_corner_radius">12dp</dimen>
     <dimen name="height_ic_bluetooth_">12dp</dimen>
     <dimen name="no_dimen">0dp</dimen>
-    <dimen name="heigh_icon_ble_dimen">24dp</dimen>
+    <dimen name="heigh_icon_ble_dimen">40dp</dimen>
 
     <!-- CARD VIEW's -->
     <dimen name="cv_fixed_size">150dp</dimen>

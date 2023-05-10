@@ -56,6 +56,7 @@
     <string name="tv_wifi_nok">No se pudo configurar el Wifi, intente nuevamente</string>
     <string name="tv_wifi_ok">El Wifi se configuró correctamente</string>
     <string name="tv_version">Versión: %s</string>
+    <string name="tv_scan_msg">Seleccione el enfriador que desea configurar, asegúrese de estar cerca del dispositivo.</string>
 
     <!-- CONTENT DESCRIPTION's -->
     <string name="cd_bluetooth_icon">Bluetooth</string>
@@ -141,5 +142,4 @@
     <string name="link_device_error">No ha sido posible ligar el dispositivo</string>
     <string name="link_device_ok">Dispositivo ligado correctamente, actualiza el escaneo.</string>
     <string name="not_enough_permissions">No cuentas con los permisos necesarios</string>
-
 </resources>

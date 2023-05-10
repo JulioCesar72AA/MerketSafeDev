@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="@dimen/padding_splash"
-        android:background="@drawable/gradient_bg_azul"
-        android:src="@drawable/logo_splashscreen"/>
+        android:scaleType="fitCenter"
+        android:background="@color/gray70"
+        android:src="@drawable/market_safe_logotipo"/>
 
 </RelativeLayout>

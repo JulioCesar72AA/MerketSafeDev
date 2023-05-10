@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <color name="colorPrimaryDark">#0045C2</color>
     <color name="colorPrimary">#005EF4</color>
     <color name="colorAccent">#36c1d8</color>
@@ -15,4 +15,9 @@
 
     <color name="lightMask">#25000000</color>
     <color name="hardMask">#A5000000</color>
+
+    <color name="azul40">#0C2240</color>
+    <color name="gray70">#ECECEC</color>
+    <color name="azure60">#BCD1F6</color>
+    <color name="azure70">#F1F5FC</color>
 </resources>

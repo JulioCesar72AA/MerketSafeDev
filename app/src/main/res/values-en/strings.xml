@@ -55,6 +55,8 @@
     <string name="tv_wifi_nok">Configuration failed, try again</string>
     <string name="tv_wifi_ok">Wifi successfully configured</string>
     <string name="tv_version">Version: %s</string>
+    <string name="tv_scan_msg">Select the cooler you want to set up, make sure you are close to the device.</string>
+
 
     <!-- CONTENT DESCRIPTION's -->
     <string name="cd_bluetooth_icon">Bluetooth</string>

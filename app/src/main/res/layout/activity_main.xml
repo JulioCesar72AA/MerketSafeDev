@@ -33,33 +33,43 @@
             android:layout_height="match_parent"
             android:layout_weight=".7"
             android:gravity="center"
-            android:orientation="horizontal"
+            android:orientation="vertical"
+            android:weightSum="1"
             android:layout_marginStart="@dimen/cv_margin_access_point"
             android:layout_marginEnd="@dimen/cv_margin_access_point"
             android:layout_marginTop="@dimen/cv_margin_access_point_top">
 
 
             <ImageView
-                android:layout_width="180dp"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:contentDescription="@string/cd_icon_router"
-                android:paddingStart="@dimen/cv_access_margin_start"
-                android:paddingEnd="@dimen/cv_access_margin_end"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_img_scaneo_refri"
-                android:tint="@android:color/white" />
+                android:scaleType="fitStart"
+                android:layout_weight=".3"
+                android:src="@drawable/radar" />
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:fontFamily="@font/rubik_bold"
                 android:gravity="start|center_vertical"
                 android:lineHeight="@dimen/tv_lineheight_30"
                 android:text="@string/tv_scan"
-                android:textColor="@color/colortextwhite"
+                android:textColor="@color/azul40"
                 android:textSize="22dp"
+                android:layout_weight=".4"
                 tools:ignore="UnusedAttribute" />
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/rubik_regular"
+                android:gravity="start|center_vertical"
+                android:text="@string/tv_scan_msg"
+                android:textColor="@color/azul40"
+                android:textSize="@dimen/_15dp"
+                android:layout_weight=".3"
+                tools:ignore="UnusedAttribute" />
         </LinearLayout>
 
         <!-- List -->
@@ -89,6 +99,7 @@
                 <!-- Lista actualizable de dispositivos -->
                 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
                     android:id="@+id/srlScan"
+                    android:background="@color/gray70"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -97,7 +108,6 @@
                         android:id="@+id/rvBleList"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:padding="12dp"
                         tools:listitem="@layout/scan_devices_prototype"/>
 
                 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
@@ -116,7 +126,7 @@
         <include
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="0.9"
+            android:layout_weight="1"
             layout="@layout/branding_white" />
     </TableLayout>
 

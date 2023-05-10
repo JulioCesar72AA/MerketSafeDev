@@ -46,6 +46,7 @@ class ScanRecyclerAdapter (private val context: Context, private val devicesList
             tvDeviceModel.text  = device.bleDevice.getDeviceModelName()
 
             if (device.getScanPostResponse() != null) {
+                tvDeviceModel.text          = "${device.getScanPostResponse()?.assetType} ${device.getScanPostResponse()?.assetModel}"
                 tvDeviceSerial.text         = "${context.getText(R.string.serial_number_solkos)} ${device.getScanPostResponse()?.serialNumber}"
                 tvDeviceSolkosModel.text    = "${context.getText(R.string.model_solkos)} ${device.getScanPostResponse()?.assetModel}"
                 tvDeviceType.text           = "${context.getText(R.string.type_solkos)} ${device.getScanPostResponse()?.assetType}"
