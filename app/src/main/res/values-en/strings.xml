@@ -147,4 +147,17 @@
     <string name="not_enough_permissions">You do not have the necessary permissions</string>
     <string name="email">E-mail</string>
     <string name="login">Log in</string>
+
+    <!-- Fragment wi-fi passcode -->
+    <string name="next">Next</string>
+    <string name="empty_passcode">Contraseña invalida</string>
+    <string name="cooler">Cooler</string>
+    <string name="router">Router</string>
+    <string name="cloud">Cloud</string>
+
+    <string name="signal_strength">Signal strength</string>
+    <string name="access_points">Access points</string>
+    <string name="ip_address">IP address</string>
+    <string name="brand">Brand:</string>
+    <string name="model_short">Model:</string>
 </resources>

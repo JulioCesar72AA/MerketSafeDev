@@ -1,5 +1,6 @@
 package mx.softel.marketsafe.fragments
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -7,23 +8,33 @@ import android.content.IntentFilter
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import kotlinx.android.synthetic.main.activity_main.*
 import mx.softel.marketsafe.R
 import mx.softel.marketsafe.activities.RootActivity
 import mx.softel.marketsafe.dialogs.PasswordDialog
 import mx.softel.marketsafe.extensions.toast
 import mx.softel.cirwirelesslib.enums.StateMachine
 import mx.softel.cirwirelesslib.utils.CirCommands
+import mx.softel.marketsafe.adapters.ScanRecyclerAdapter
+import mx.softel.marketsafe.adapters.ScanWiFiAdapter
+
 class AccessPointsFragment: Fragment(),
                             AdapterView.OnItemClickListener,
                             SwipeRefreshLayout.OnRefreshListener,
                             View.OnClickListener,
-                            RootActivity.RootEvents {
+                            RootActivity.RootEvents,
+                            ScanWiFiAdapter.OnScanClickListener {
 
     // ROOT MANAGERS
     private lateinit var root           : RootActivity
@@ -35,7 +46,7 @@ class AccessPointsFragment: Fragment(),
     private lateinit var arrayAdapter   : ArrayAdapter<String>
 
     // VIEWS
-    private lateinit var lvAccessPoints : ListView
+    private lateinit var lvAccessPoints : RecyclerView
     private lateinit var tvMacSelected  : TextView
     private lateinit var backBtn        : ImageView
     private lateinit var srlScanAp      : SwipeRefreshLayout
@@ -71,15 +82,19 @@ class AccessPointsFragment: Fragment(),
                 resources.getColor(R.color.colorPrimary, null))
         }
 
+
         setOnClickListeners()
         root.setScanningUI()
         setWifiList()
         scanWifi()
-
         return view
     }
 
     override fun onRefresh() {
+        this.scanAccessPoints()
+    }
+
+    private fun scanAccessPoints () {
         root.apply {
             setScanningUI()
             CirCommands.getMacListCmd(service!!, cirService.getCharacteristicWrite()!!)
@@ -107,14 +122,16 @@ class AccessPointsFragment: Fragment(),
 
         override fun onReceive(context: Context?, intent: Intent?) {
             wifiResults = wifiManager.scanResults
-            // Log.e(TAG, "WIFI_RESULTS: $wifiResults")
+            Log.e(TAG, "WIFI_RESULTS: $wifiResults")
             root.unregisterReceiver(this)
-
             // Rellena la lista para mostrar en la pantalla estándar
             for (data in wifiResults) {
-                // Log.e(TAG, "wifi: $data")
+                Log.e(TAG, "wifi: $data")
+                Log.e(TAG, "condition: ${root.deviceMacList == null}")
+
                 // Establecemos una nueva lista de macs validadas por el dispositivo
                 if (root.deviceMacList == null) return
+
                 for (mac in root.deviceMacList!!) {
                     if (data.BSSID == mac) {
                         if (!data.SSID.isNullOrEmpty()) apMacList.add(data.SSID)
@@ -147,12 +164,15 @@ class AccessPointsFragment: Fragment(),
      * Inicializa la lista de AccessPoints visibles para el teléfono,
      * asocia el adaptador y los datos a la [ListView]
      */
+    @SuppressLint("UseRequireInsteadOfGet")
     private fun setWifiList() {
-        //arrayAdapter = ArrayAdapter(root, android.R.layout.simple_list_item_1, apList)
+
         arrayAdapter = ArrayAdapter(root, android.R.layout.simple_list_item_1, apMacList)
+        // arrayAdapter = ArrayAdapter(root, R.id.tvWiFiName, apMacList)
         lvAccessPoints.apply {
-            adapter             = arrayAdapter
-            onItemClickListener = this@AccessPointsFragment
+            val manager     = LinearLayoutManager(root, LinearLayoutManager.VERTICAL, false)
+            layoutManager   = manager
+            adapter         = ScanWiFiAdapter(this@AccessPointsFragment.context!!, apMacList, this@AccessPointsFragment)
         }
     }
 
@@ -184,12 +204,8 @@ class AccessPointsFragment: Fragment(),
      * @param id Id asociado a la vista seleccionada
      */
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        val dialog = PasswordDialog.getInstance()
-        dialog.apply {
-            apSelected = apMacList[position]
-            root.ssidSelected = apSelected
-            show(root.supportFragmentManager, null)
-        }
+        root.ssidSelected = apMacList[position]
+        root.goToWiFiPasscode()
         toast(apMacList[position])
     }
 
@@ -259,4 +275,9 @@ class AccessPointsFragment: Fragment(),
         clickTest()
     }
 
+    override fun onScanClickListener(position: Int) {
+        root.ssidSelected = apMacList[position]
+        root.goToWiFiPasscode()
+        toast(apMacList[position])
+    }
 }

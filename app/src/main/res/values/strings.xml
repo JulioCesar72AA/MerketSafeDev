@@ -144,4 +144,9 @@
     <string name="link_device_error">No ha sido posible ligar el dispositivo</string>
     <string name="link_device_ok">Dispositivo ligado correctamente, actualiza el escaneo.</string>
     <string name="not_enough_permissions">No cuentas con los permisos necesarios</string>
+    <string name="signal_strength">Intensidad de señal</string>
+    <string name="access_points">Modem</string>
+    <string name="ip_address">Dirección IP</string>
+    <string name="brand">Marca:</string>
+    <string name="model_short">Modelo:</string>
 </resources>

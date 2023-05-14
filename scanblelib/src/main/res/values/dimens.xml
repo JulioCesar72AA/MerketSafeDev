@@ -36,4 +36,7 @@
     <dimen name="_25dp">25dp</dimen>
     <dimen name="_30dp">30dp</dimen>
     <dimen name="_35dp">35dp</dimen>
+    <dimen name="_50dp">50dp</dimen>
+    <dimen name="_80dp">80dp</dimen>
+    <dimen name="_100dp">100dp</dimen>
 </resources>

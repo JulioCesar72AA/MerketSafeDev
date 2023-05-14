@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -10,13 +11,30 @@
         android:id="@+id/scanMask"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/lightMask"/>
+        android:background="@color/gray70"/>
 
     <!-- Progress Bar -->
     <ProgressBar
         android:id="@+id/pbScanning"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:visibility="invisible"
+        />
 
-</RelativeLayout>
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lavLoaderPositive"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/loader_positive" />
+</androidx.constraintlayout.widget.ConstraintLayout>

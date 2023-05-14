@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/gray70"
+    tools:context=".fragments.ConfigTestCooler">
+
+    <TextView
+        android:id="@+id/tvCoolerModelLong"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/azul40"
+        android:textSize="@dimen/_25dp"
+        android:fontFamily="@font/rubik_bold"
+        android:layout_marginTop="@dimen/_20dp"
+        android:layout_marginStart="@dimen/_20dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="COOLER G36" />
+
+    <TextView
+        android:id="@+id/tvCoolerSerial"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/azul40"
+        android:fontFamily="@font/rubik_regular"
+        android:layout_marginTop="@dimen/_20dp"
+        android:layout_marginEnd="@dimen/_20dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="Serial: 123091192" />
+
+    <TextView
+        android:id="@+id/tvCoolerBrand"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/azul40"
+        android:fontFamily="@font/rubik_regular"
+        android:layout_marginTop="@dimen/_10dp"
+        android:layout_marginEnd="@dimen/_20dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvCoolerSerial"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="Brand: Imbera" />
+
+    <TextView
+        android:id="@+id/tvCoolerModelShort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/azul40"
+        android:fontFamily="@font/rubik_regular"
+        android:layout_marginTop="@dimen/_10dp"
+        android:layout_marginEnd="@dimen/_20dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvCoolerBrand"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="Model: G36" />
+
+    <ImageView
+        android:id="@+id/ivCooler"
+        android:layout_width="@dimen/_50dp"
+        android:layout_height="@dimen/_50dp"
+        android:layout_marginStart="@dimen/_20dp"
+        android:layout_marginTop="@dimen/_50dp"
+        android:src="@drawable/fridge"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvCoolerModelShort" />
+
+    <TextView
+        android:id="@+id/tvCoolerMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/rubik_regular"
+        android:textColor="@color/azul40"
+        android:text="@string/cooler"
+        android:layout_marginTop="@dimen/_5dp"
+        app:layout_constraintTop_toBottomOf="@+id/ivCooler"
+        app:layout_constraintStart_toStartOf="@+id/ivCooler" />
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lavLoaderTest"
+        android:layout_width="@dimen/_50dp"
+        android:layout_height="55dp"
+        android:layout_marginHorizontal="@dimen/_5dp"
+        app:layout_constraintStart_toEndOf="@+id/ivCooler"
+        app:layout_constraintTop_toTopOf="@+id/ivCooler"
+        app:layout_constraintBottom_toBottomOf="@+id/ivCooler"
+        app:layout_constraintEnd_toStartOf="@+id/ivRouter"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/loader_test" />
+
+    <ImageView
+        android:id="@+id/ivGreenCheck1"
+        android:layout_width="@dimen/_20dp"
+        android:layout_height="@dimen/_20dp"
+        android:src="@drawable/green_check"
+        android:visibility="invisible"
+        app:layout_constraintStart_toEndOf="@+id/ivCooler"
+        app:layout_constraintTop_toTopOf="@+id/ivCooler"
+        app:layout_constraintBottom_toBottomOf="@+id/ivCooler"
+        app:layout_constraintEnd_toStartOf="@+id/ivRouter"
+        />
+
+    <ImageView
+        android:id="@+id/ivRouter"
+        android:layout_width="@dimen/_50dp"
+        android:layout_height="@dimen/_50dp"
+        android:layout_marginStart="@dimen/_20dp"
+        android:src="@drawable/router"
+        app:layout_constraintStart_toEndOf="@+id/lavLoaderTest"
+        app:layout_constraintTop_toTopOf="@+id/ivCooler"
+        app:layout_constraintBottom_toBottomOf="@+id/ivCooler"
+        app:layout_constraintEnd_toStartOf="@+id/lavLoaderTest1"/>
+
+    <TextView
+        android:id="@+id/tvRouterMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/rubik_regular"
+        android:text="@string/router"
+        android:textColor="@color/azul40"
+        android:layout_marginTop="@dimen/_5dp"
+        app:layout_constraintTop_toBottomOf="@+id/ivRouter"
+        app:layout_constraintStart_toStartOf="@+id/ivRouter"
+        app:layout_constraintEnd_toEndOf="@+id/ivRouter"/>
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lavLoaderTest1"
+        android:layout_width="@dimen/_50dp"
+        android:layout_height="55dp"
+        android:layout_marginHorizontal="@dimen/_5dp"
+        app:layout_constraintStart_toEndOf="@+id/ivRouter"
+        app:layout_constraintTop_toTopOf="@+id/ivRouter"
+        app:layout_constraintBottom_toBottomOf="@+id/ivRouter"
+        app:layout_constraintEnd_toStartOf="@+id/ivCLoud"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/loader_test" />
+
+    <ImageView
+        android:id="@+id/ivGreenCheck2"
+        android:layout_width="@dimen/_20dp"
+        android:layout_height="@dimen/_20dp"
+        android:src="@drawable/green_check"
+        android:visibility="invisible"
+        app:layout_constraintStart_toEndOf="@+id/ivRouter"
+        app:layout_constraintTop_toTopOf="@+id/ivRouter"
+        app:layout_constraintBottom_toBottomOf="@+id/ivRouter"
+        app:layout_constraintEnd_toStartOf="@+id/ivCLoud"
+        />
+
+    <ImageView
+        android:id="@+id/ivCLoud"
+        android:layout_width="@dimen/_50dp"
+        android:layout_height="@dimen/_50dp"
+        android:layout_marginStart="@dimen/_20dp"
+        android:src="@drawable/cloud"
+        android:layout_marginEnd="@dimen/_20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ivCooler"
+        app:layout_constraintBottom_toBottomOf="@+id/ivCooler"/>
+
+    <TextView
+        android:id="@+id/tvCloudMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/rubik_regular"
+        android:text="@string/cloud"
+        android:textColor="@color/azul40"
+        android:layout_marginTop="@dimen/_5dp"
+        app:layout_constraintTop_toBottomOf="@+id/ivCLoud"
+        app:layout_constraintStart_toStartOf="@+id/ivCLoud"
+        app:layout_constraintEnd_toEndOf="@+id/ivCLoud"/>
+
+    <TextView
+        android:id="@+id/tvCurrentStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_30dp"
+        android:layout_marginHorizontal="@dimen/_20dp"
+        android:textColor="@color/azul40"
+        android:textAlignment="center"
+        app:layout_constraintTop_toBottomOf="@+id/tvCoolerMsg"
+        tools:text="Testing ..." />
+
+    <TextView
+        android:id="@+id/tvBlueBar"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="@dimen/_25dp"
+        android:background="@color/azul40"
+        android:textColor="@color/azul40"
+        android:textAlignment="center"
+        app:layout_constraintTop_toBottomOf="@+id/tvCurrentStatus" />
+
+    <LinearLayout
+        android:id="@+id/llSsidValues"
+        android:layout_width="@dimen/_150dp"
+        android:layout_height="@dimen/_100dp"
+        android:orientation="vertical"
+        android:layout_marginStart="@dimen/_35dp"
+        android:layout_marginTop="@dimen/_30dp"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvBlueBar">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_30dp"
+            android:src="@drawable/ic_info"
+            android:scaleType="fitStart"
+            android:layout_marginBottom="@dimen/_10dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rubik_bold"
+            android:textColor="@color/azul40"
+            android:layout_marginBottom="@dimen/_10dp"
+            android:text="@string/tv_dispositivos_ssid"/>
+
+        <TextView
+            android:id="@+id/tvSsidValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rubik_regular"
+            android:textColor="@color/azul40"
+
+            android:text="..."/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llSignalValues"
+        android:layout_width="@dimen/_150dp"
+        android:layout_height="@dimen/_100dp"
+        android:orientation="vertical"
+        android:layout_marginEnd="@dimen/_35dp"
+        android:layout_marginTop="@dimen/_30dp"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvBlueBar">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_30dp"
+            android:src="@drawable/ic_signal"
+            android:scaleType="fitStart"
+            android:layout_marginBottom="@dimen/_10dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rubik_bold"
+            android:textColor="@color/azul40"
+            android:layout_marginBottom="@dimen/_10dp"
+            android:text="@string/signal_strength"/>
+
+        <TextView
+            android:id="@+id/tvSignalValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rubik_regular"
+            android:textColor="@color/azul40"
+            android:text="..."/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llAccessPointValues"
+        android:layout_width="@dimen/_150dp"
+        android:layout_height="@dimen/_100dp"
+        android:orientation="vertical"
+        android:layout_marginStart="@dimen/_35dp"
+        android:layout_marginTop="@dimen/_30dp"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/llSsidValues">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_30dp"
+            android:src="@drawable/router"
+            android:scaleType="fitStart"
+            android:layout_marginBottom="@dimen/_10dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rubik_bold"
+            android:textColor="@color/azul40"
+            android:layout_marginBottom="@dimen/_10dp"
+            android:text="@string/access_points"/>
+
+        <TextView
+            android:id="@+id/tvAccessPointValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rubik_regular"
+            android:textColor="@color/azul40"
+            android:text="..."/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llIPAddressValues"
+        android:layout_width="@dimen/_150dp"
+        android:layout_height="@dimen/_100dp"
+        android:orientation="vertical"
+        android:layout_marginEnd="@dimen/_35dp"
+        android:layout_marginTop="@dimen/_30dp"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/llSsidValues">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_30dp"
+            android:src="@drawable/ip_address"
+            android:scaleType="fitStart"
+            android:layout_marginBottom="@dimen/_10dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rubik_bold"
+            android:textColor="@color/azul40"
+            android:layout_marginBottom="@dimen/_10dp"
+            android:text="@string/ip_address"/>
+
+        <TextView
+            android:id="@+id/tvIPAddressValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rubik_regular"
+            android:textColor="@color/azul40"
+            android:text="..."/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnConfigTextNext"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_50dp"
+        android:text="@string/next"
+        android:layout_marginHorizontal="@dimen/_20dp"
+        android:layout_marginBottom="@dimen/_20dp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/rounded_corners_blue_40"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>

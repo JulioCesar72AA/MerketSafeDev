@@ -22,7 +22,7 @@ import mx.softel.cirwirelesslib.utils.CirCommands
 /**
  * A simple [Fragment] subclass.
  */
-    class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClickListener, RootActivity.RootEvents {
+class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClickListener, RootActivity.RootEvents {
 
     private var lockOptionsEnabled       : Boolean = true
 

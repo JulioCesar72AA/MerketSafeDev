@@ -25,9 +25,6 @@ import mx.softel.marketsafe.dialog_module.dialog_interfaces.DialogInteractor
 import mx.softel.marketsafe.dialog_module.dialog_models.BaseDialogModel
 import mx.softel.marketsafe.dialogs.*
 import mx.softel.marketsafe.extensions.toast
-import mx.softel.marketsafe.fragments.AccessPointsFragment
-import mx.softel.marketsafe.fragments.MainFragment
-import mx.softel.marketsafe.fragments.TesterFragment
 import mx.softel.marketsafe.interfaces.FragmentNavigation
 import mx.softel.marketsafe.web_services_module.ui_login.log_in_dialog.DialogButtonsModel
 import mx.softel.marketsafe.web_services_module.web_service.ApiClient
@@ -36,10 +33,12 @@ import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.hexStringToByteArray
 import mx.softel.cirwirelesslib.extensions.toCharString
+import mx.softel.cirwirelesslib.extensions.toHex
 import mx.softel.cirwirelesslib.utils.BleCirWireless
 import mx.softel.cirwirelesslib.utils.CirCommands
 import mx.softel.cirwirelesslib.utils.CirWirelessParser
 import mx.softel.cirwirelesslib.utils.CommandUtils
+import mx.softel.marketsafe.fragments.*
 import mx.softel.scanblelib.extensions.toHexValue
 import retrofit2.Call
 import retrofit2.Response
@@ -53,7 +52,8 @@ class RootActivity : AppCompatActivity(),
                      ConfigSelectorDialog.OnDialogClickListener,
                      IpConfigValuesDialog.OnDialogClickListener {
 
-    private var maxTimes = 0
+    private var maxTimes        = 0
+    private var triesConnect    = 0
 
     private var firstTime                       = true
     private var commandSent                     = false
@@ -67,7 +67,7 @@ class RootActivity : AppCompatActivity(),
 
     // COMMANDS DATA
     internal lateinit var ssidSelected  : String
-    private  lateinit var passwordTyped : String
+    internal lateinit var passwordTyped : String
     internal lateinit var bleMacBytes   : ByteArray
 
     internal var isTransmiting          : Boolean = false
@@ -101,7 +101,10 @@ class RootActivity : AppCompatActivity(),
     internal var actualFragment     : Fragment?             = null
     private  val mainFragment       : MainFragment          = MainFragment.getInstance()
     internal val testerFragment     : TesterFragment        = TesterFragment.getInstance()
-    private  val wifiFragment       : AccessPointsFragment  = AccessPointsFragment.getInstance()
+    private val wifiFragment        : AccessPointsFragment  = AccessPointsFragment.getInstance()
+    private val wiFiPasscodeFragment: WiFiPasscodeFragment  = WiFiPasscodeFragment.getInstance()
+    private val configTestCooler    : ConfigTestCooler      = ConfigTestCooler.getInstance()
+
 
     // HANDLERS / RUNNABLES
     private val handler               = Handler(Looper.getMainLooper())
@@ -163,10 +166,11 @@ class RootActivity : AppCompatActivity(),
     internal fun setScanningUI() {
         scanMask.apply {
             visibility = View.VISIBLE
-            background = getDrawable(R.color.hardMask)
+            background = getDrawable(R.color.gray70)
             setOnClickListener { toast(getString(R.string.wait_moment)) }
         }
-        pbScanning.visibility = View.VISIBLE
+        pbScanning.visibility = View.INVISIBLE
+        lavLoaderPositive.visibility = View.VISIBLE
         isScanning = true
     }
 
@@ -177,6 +181,7 @@ class RootActivity : AppCompatActivity(),
     internal fun setStandardUI() {
         scanMask.visibility = View.GONE
         pbScanning.visibility = View.GONE
+        lavLoaderPositive.visibility = View.GONE
         serviceStep = 0
         isScanning = false
     }
@@ -223,7 +228,7 @@ class RootActivity : AppCompatActivity(),
      */
     private fun initFragment() {
         // Iniciamos el fragmento deseado
-        val fragment = mainFragment
+        val fragment = wifiFragment // mainFragment
         actualFragment = fragment
         supportFragmentManager
             .beginTransaction()
@@ -243,6 +248,7 @@ class RootActivity : AppCompatActivity(),
         }
         if (actualFragment == testerFragment) actualFragment = mainFragment
         if (actualFragment == wifiFragment) actualFragment = mainFragment
+        if (actualFragment == wiFiPasscodeFragment) actualFragment = wifiFragment
         supportFragmentManager.popBackStackImmediate()
     }
 
@@ -344,12 +350,16 @@ class RootActivity : AppCompatActivity(),
     }
 
 
+    internal fun goToWiFiPasscode () {
+        actualFragment = wiFiPasscodeFragment
+        setScanningUI()
+    }
 
 
-
-
-
-
+    internal fun goToConfigAndTest (){
+        actualFragment = configTestCooler
+        setScanningUI()
+    }
 
 
     /************************************************************************************************/
@@ -1183,8 +1193,24 @@ class RootActivity : AppCompatActivity(),
 
         // newState solo puede ser CONNECTED o DISCONNECTED
         when (newState) {
-            ConnState.CONNECTED -> connectedDevice()
-            else                -> errorConnection(status)
+            ConnState.CONNECTED -> {
+                connectedDevice()
+                triesConnect = 0
+            }
+            else                -> errorConnection(status) /*{
+                Log.e(TAG, "triesConnect: $triesConnect")
+                if (triesConnect > 15) {
+                    triesConnect = 0
+                    errorConnection(status)
+                } else {
+                    Log.e(TAG, "Trying to connect")
+                    triesConnect++
+                    Handler(mainLooper).postDelayed({
+                        service!!.connectBleDevice(bleDevice)
+                    }, 1000)
+
+                }
+            }*/
         }
     }
 
@@ -1225,7 +1251,7 @@ class RootActivity : AppCompatActivity(),
                              response: ByteArray,
                              command: ReceivedCmd) {
 //        Log.e(TAG, "macBytes: ${bleMacBytes.toHex()}")
-//        Log.e(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toHex()}")
+        Log.e(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toHex()}")
 
         when (state) {
 
@@ -1242,10 +1268,12 @@ class RootActivity : AppCompatActivity(),
                 if (command == ReceivedCmd.POLEO) {
                     isRefreshed = true
                     runOnUiThread { setStandardUI() }
-                    if (firstTime && actualFragment == mainFragment) {
-                        (actualFragment as MainFragment).deviceConnected()
+                    if (firstTime && actualFragment == wifiFragment) {
                         firstTime = false
+                    }
 
+                    if (actualFragment == mainFragment) {
+                        (actualFragment as MainFragment).deviceConnected()
                     }
                 }
                 cipStatusMode = -1
@@ -1318,6 +1346,15 @@ class RootActivity : AppCompatActivity(),
                 if (command == ReceivedCmd.POLEO && !getApLaunched) {
 //                    Log.e(TAG, "GETTING_AP: COMMAND: ${CommandUtils.getAccessPointsCmd().toHex()}")
                     CirCommands.getMacListCmd(service!!, cirService.getCharacteristicWrite()!!)
+                }
+
+                if (actualFragment == wiFiPasscodeFragment) {
+
+                    navigateTo(wiFiPasscodeFragment, true, null)
+
+                } else if (actualFragment == configTestCooler) {
+
+                    navigateTo(configTestCooler, true, null)
                 }
             }
 
@@ -1610,7 +1647,7 @@ class RootActivity : AppCompatActivity(),
     private fun errorConnection(reason: DisconnectionReason) {
         disconnectionReason = reason
 
-        // Log.e(TAG, "errorConnection: $reason")
+        Log.e(TAG, "errorConnection: $reason")
 
         when (reason) {
             DisconnectionReason.NOT_AVAILABLE, DisconnectionReason.FAILURE -> {

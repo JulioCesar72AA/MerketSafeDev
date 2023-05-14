@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.airbnb.lottie.LottieAnimationView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.activity_main.*
@@ -61,6 +62,7 @@ class MainActivity: AppCompatActivity(),
     private var isScanning                  = false
     private var checkingCloudPermissions    = false
 
+
     private var db: WifiDatabase? = null
 
 
@@ -80,7 +82,6 @@ class MainActivity: AppCompatActivity(),
         db = WifiDatabase(this)
         bleDevices.clear()
         cirDevice.clear()
-
         checkLocation()
         setScanningUI()
         setOnClick()
@@ -123,6 +124,7 @@ class MainActivity: AppCompatActivity(),
 
     override fun onRefresh() {
         scanMask.visibility = View.VISIBLE
+        lavLoaderPositive.visibility = View.VISIBLE
         scanDevices()
 
         // Detenemos el escaneo en pantalla
@@ -285,18 +287,21 @@ class MainActivity: AppCompatActivity(),
         pbScanning.visibility   = View.GONE
         scanMask.visibility     = View.GONE
         tvNoDevices.visibility  = View.GONE
+        lavLoaderPositive.visibility = View.GONE
     }
 
 
     private fun setPermissionScanUI () {
-        pbScanning.visibility   = View.VISIBLE
-        scanMask.visibility     = View.VISIBLE
+        pbScanning.visibility   = View.INVISIBLE
+        scanMask.visibility     = View.INVISIBLE
         tvNoDevices.visibility  = View.GONE
+        lavLoaderPositive.visibility = View.VISIBLE
     }
 
 
     private fun setScanningUI() {
-        pbScanning.visibility   = View.VISIBLE
+        pbScanning.visibility           = View.INVISIBLE
+        lavLoaderPositive.visibility    = View.VISIBLE
         scanMask.visibility     = View.VISIBLE
         tvNoDevices.visibility  = View.GONE
     }
@@ -312,7 +317,8 @@ class MainActivity: AppCompatActivity(),
     }
 
     private fun setNoDataUI() {
-        pbScanning.visibility   = View.GONE
+        pbScanning.visibility           = View.GONE
+        lavLoaderPositive.visibility    = View.GONE
         scanMask.visibility     = View.GONE
         tvNoDevices.visibility  = View.VISIBLE
     }

@@ -108,11 +108,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <ListView
+                    <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/lvAccessPoints"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        tools:listitem="@layout/support_simple_spinner_dropdown_item"
+                        tools:listitem="@layout/scan_wifi_prototype"
                         android:padding="@dimen/cv_margin_access_point" />
 
                 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

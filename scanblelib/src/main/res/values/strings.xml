@@ -73,4 +73,12 @@
     <string name="wrong_file_title">Archivo Incompatible</string>
     <string name="wrong_file_message">El archivo que has seleccionado no es compatible con este chip, por favor cambia el archivo e intenta de nuevo</string>
     <string name="insert_email">Ingresa tu correo electrónico</string>
+
+
+    <!-- Fragment wi-fi passcode -->
+    <string name="next">Siguiente</string>
+    <string name="empty_passcode">Contraseña no valida</string>
+    <string name="cooler">Enfriador</string>
+    <string name="router">Router</string>
+    <string name="cloud">Internet</string>
 </resources>
