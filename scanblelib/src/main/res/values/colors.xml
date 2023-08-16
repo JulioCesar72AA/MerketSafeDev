@@ -5,4 +5,8 @@
     <color name="colorRed">#FF0000</color>
     <color name="azul40">#0C2240</color>
     <color name="gray70">#ECECEC</color>
+    <color name="azure60">#BCD1F6</color>
+    <color name="azure70">#F1F5FC</color>
+    <color name="green20">#00803F</color>
+    <color name="green30">#00BB5E</color>
 </resources>

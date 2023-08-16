@@ -120,9 +120,9 @@ public class LoginActivity extends AppCompatActivity {
                         // Log.e(TAG, "elapsedDate:SECONDS: " + elapsedDate.getElapsedSeconds());
                         // Log.e(TAG, "SAVED DATE: " + user.getAccessDate());
                         if (elapsedDate.getElapsedDays() < MAX_EXPIRATION_DAYS) {
-                            // TODO: Colocar a donde ir
-                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                            finish();
+                            etUserEmail.setText(user.getEmail());
+                            // startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            // finish();
 
                         } else if (Utils.isNetworkAvailable(LoginActivity.this)) {
 

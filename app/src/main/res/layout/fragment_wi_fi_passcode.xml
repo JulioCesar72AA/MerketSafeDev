@@ -12,7 +12,7 @@
         android:id="@+id/ivWiFiPasscodeIcon"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:src="@drawable/wifi"
+        android:src="@drawable/ic_wifi"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -42,7 +42,7 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="@dimen/heigh_icon_ble_dimen"
-            android:src="@drawable/wifi"
+            android:src="@drawable/ic_wifi"
             android:layout_weight=".5"/>
         <TextView
             android:id="@+id/tvWiFiPasscodeWiFiName"

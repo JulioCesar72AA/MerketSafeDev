@@ -30,7 +30,7 @@
         android:layout_marginStart="@dimen/_20dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:src="@drawable/wifi" />
+        android:src="@drawable/ic_wifi" />
 
     <TextView
         android:id="@+id/tvWiFiName"

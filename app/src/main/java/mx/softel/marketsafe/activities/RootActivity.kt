@@ -13,6 +13,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.fragment_config_test_cooler.*
 import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.bleservicelib.BleService
 import mx.softel.bleservicelib.enums.ConnState
@@ -57,6 +58,7 @@ class RootActivity : AppCompatActivity(),
 
     private var firstTime                       = true
     private var commandSent                     = false
+    internal var configAndTesting               = false
 
     private lateinit var token              : String
     internal var userPermissions            : UserPermissions? = null
@@ -79,6 +81,7 @@ class RootActivity : AppCompatActivity(),
 
     // VALORES PARA FRAGMENT DE TESTER
     internal var ipAssigned         : String        = ""
+    internal var ipRouterAssigned   : String        = ""
     internal var apAssigned         : Boolean       = false
     internal var ssidAssigned       : String        = ""
     internal var rssiAssigned       : String        = ""
@@ -94,6 +97,7 @@ class RootActivity : AppCompatActivity(),
     private  var isScanning         : Boolean        = false
     private  var isWifiConnected    : Boolean        = false
     private  var getApLaunched      : Boolean        = false
+    private  var beaconBytes        : ByteArray?     = null
 
     // VARIABLES DE FLUJO
     private  var disconnectionReason: DisconnectionReason   = DisconnectionReason.UNKNOWN
@@ -206,8 +210,8 @@ class RootActivity : AppCompatActivity(),
         userPermissions = data.getSerializable(USER_PERMISSIONS) as UserPermissions
         // Log.e(TAG, "TOKEN: ${token}")
 
-        val beaconBytes = data[EXTRA_BEACON_BYTES] as ByteArray
-        val beaconId    = "0x${byteArrayOf(beaconBytes[5], beaconBytes[6]).toHexValue().toUpperCase(Locale.ROOT)}"
+        beaconBytes = data[EXTRA_BEACON_BYTES] as ByteArray
+        val beaconId    = "0x${byteArrayOf(this.beaconBytes!![5], this.beaconBytes!![6]).toHexValue().toUpperCase(Locale.ROOT)}"
         enableWifiConfig = isACirWifiBeacon(beaconId)
     }
 
@@ -349,16 +353,50 @@ class RootActivity : AppCompatActivity(),
         backFragment()
     }
 
-
     internal fun goToWiFiPasscode () {
         actualFragment = wiFiPasscodeFragment
         setScanningUI()
     }
 
-
-    internal fun goToConfigAndTest (){
+    internal fun goToConfigAndTest () {
         actualFragment = configTestCooler
         setScanningUI()
+    }
+
+    internal fun goToTabMainActivity () {
+        val intent = Intent(this, TabMainActivity::class.java)
+        intent.apply {
+            putExtra(EXTRA_DEVICE,              bleDevice)
+            putExtra(EXTRA_MAC,                 bleMac)
+            putExtra(EXTRA_BEACON_BYTES,        bleMacBytes)
+            putExtra(SSID, ssidSelected)
+            putExtra(SSID_PASSCODE, passwordTyped)
+            putExtra(EXTRA_BEACON_BYTES, beaconBytes)
+
+            // Solkos' flags
+            putExtra(TOKEN, token)
+            putExtra(USER_PERMISSIONS, userPermissions)
+            putExtra(TRANSMITION, isTransmiting)
+            putExtra(SERIAL_NUMBER, serialNumber)
+            putExtra(ASSET_TYPE, assetType)
+            putExtra(ASSET_MODEL, assetMode)
+            startActivity(this)
+        }
+        finish()
+    }
+
+    internal fun initWiFiConfig () {
+        configAndTesting = true
+        CirCommands.setDeviceModeCmd(service!!,
+            cirService.getCharacteristicWrite()!!,
+            AT_MODE_MASTER_SLAVE,
+            bleMacBytes)
+
+        cirService.setCurrentState(StateMachine.WIFI_CONFIG)
+    }
+
+    internal fun initWiFiTest () {
+        cirService.setCurrentState(StateMachine.UNKNOWN)
     }
 
 
@@ -388,9 +426,10 @@ class RootActivity : AppCompatActivity(),
                 }
             }
             else -> {
-                // Log.e("Reading AT", "Writing command AT")
-                CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
-
+                if (command == ReceivedCmd.POLEO) {
+                    // Log.e("Reading AT", "Writing command AT")
+                    CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+                }
             }
         }
     }
@@ -799,30 +838,37 @@ class RootActivity : AppCompatActivity(),
                     runOnUiThread {
                         setStandardUI()
 
-                        if (isWifiConnected)
-                            showWifiOkDialog()
-                        else
+                        if (isWifiConnected) {
+                            // WiFi exitosamente configurado
+                            // showWifiOkDialog()
+                            (actualFragment as ConfigTestCooler).successfullyConfigured()
+                            (actualFragment as ConfigTestCooler).currentState(getString(R.string.ok_wifi))
+                        }
+                        else {
                             showWifiBadDialog()
+                        }
                     }
 
 
                 }
 
                 100 -> {
+                    (actualFragment as ConfigTestCooler).currentState(getString(R.string.reset_wifi))
                     CirCommands.resetWifiCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
                 }
 
                 1   -> {
+                    (actualFragment as ConfigTestCooler).currentState(getString(R.string.internal_config))
                     CirCommands.setInternalWifiCmd(service!!, cirService.getCharacteristicWrite()!!, ssidSelected, passwordTyped, AT_NO_SEND_SSID, bleMacBytes)
-
                 }
 
                 101 -> {
+                    (actualFragment as ConfigTestCooler).currentState(getString(R.string.autconnect))
                     CirCommands.setAutoConnCmd(service!!, cirService.getCharacteristicWrite()!!, 1, bleMacBytes)
-
                 }
 
                 2   -> {
+                    (actualFragment as ConfigTestCooler).currentState(getString(R.string.autconnect))
                     CirCommands.sendConfigureWifiCmd(service!!, cirService.getCharacteristicWrite()!!, ssidSelected, passwordTyped, bleMacBytes)
                 }
             }
@@ -878,7 +924,7 @@ class RootActivity : AppCompatActivity(),
             ssidAssigned = response
                 .substringAfter(SSID_SUBSTRING_AFTER)
                 .substringBefore("\",")
-            runOnUiThread { testerFragment.fragmentUiUpdate(1) }
+            runOnUiThread { configTestCooler.fragmentUiUpdate(1) }
             cirService.setCurrentState(StateMachine.GET_STATUS_AP)
             CirCommands.sendApConnectionCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
 
@@ -913,14 +959,14 @@ class RootActivity : AppCompatActivity(),
                 .replace("\r", "")
                 .replace("\n", "")
             rssiAssigned = "-$rssiAssigned"
-            runOnUiThread { testerFragment.fragmentUiUpdate(2) }
+            runOnUiThread { configTestCooler.fragmentUiUpdate(2) }
             cirService.setCurrentState(StateMachine.GET_IP)
         } else {
             if (retryAtResponse >= 2) {
                 retryAtResponse = 0
                 rssiAssigned = "No conectado"
                 runOnUiThread {
-                    testerFragment.fragmentUiUpdate(2)
+                    configTestCooler.fragmentUiUpdate(2)
                     setStandardUI()
                 }
                 val dialog = ConfigInfoDialog(1)
@@ -953,7 +999,7 @@ class RootActivity : AppCompatActivity(),
                 ipAssigned = "IP No asignada"
                 apAssigned = false
                 runOnUiThread {
-                    testerFragment.fragmentUiUpdate(3)
+                    configTestCooler.fragmentUiUpdate(3)
                     setStandardUI()
                 }
                 val dialog = ConfigInfoDialog(2)
@@ -966,16 +1012,24 @@ class RootActivity : AppCompatActivity(),
             return
         } else {
             retryAtResponse = 0
+            Log.e(TAG, "response IP: ${response}")
             var ipRead = response.substringAfter(WIFI_SUBSTRING_IP_AFTER)
+            var ipRouter = response.substringAfter(WIFI_SUBSTRING_ROUTER_IP_AFTER)
             ipRead = ipRead
                 .substringBefore(WIFI_SUBSTRING_IP_BEFORE)
                 .replace("\"", "")
                 .replace("\n", "")
                 .replace("\r", "")
-            ipAssigned = ipRead
-            apAssigned = true
+            ipRouter = ipRouter
+                .substringBefore(WIFI_SUBSTRING_ROUTER_IP_BEFORE)
+                .replace("\"", "")
+                .replace("\n", "")
+                .replace("\r", "")
+            ipAssigned          = ipRead
+            ipRouterAssigned    = ipRouter
+            apAssigned          = true
             cirService.setCurrentState(StateMachine.PING)
-            runOnUiThread { testerFragment.fragmentUiUpdate(3) }
+            runOnUiThread { configTestCooler.fragmentUiUpdate(3) }
         }
     }
 
@@ -993,7 +1047,7 @@ class RootActivity : AppCompatActivity(),
         // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         pingAssigned = (stringResponse.contains(PING_OK) && !stringResponse.contains(AT_CMD_ERROR))
-        runOnUiThread { testerFragment.fragmentUiUpdate(4) }
+        runOnUiThread { configTestCooler.fragmentUiUpdate(4) }
         if (pingAssigned)
             cirService.setCurrentState(StateMachine.DATA_CONNECTION)
         else {
@@ -1036,7 +1090,7 @@ class RootActivity : AppCompatActivity(),
                     cirService.setCurrentState(StateMachine.POLING)
                     CirCommands.setDeviceModeCmd(service!!, cirService.getCharacteristicWrite()!!, AT_MODE_SLAVE, bleMacBytes)
                     runOnUiThread {
-                        testerFragment.fragmentUiUpdate(5)
+                        configTestCooler.fragmentUiUpdate(5)
                         setStandardUI()
                     }
                     val dialog = ConfigInfoDialog(4)
@@ -1044,7 +1098,7 @@ class RootActivity : AppCompatActivity(),
                     return
                 }
                 serviceStep = 2
-                runOnUiThread { testerFragment.fragmentUiUpdate(5) }
+                runOnUiThread { configTestCooler.fragmentUiUpdate(5) }
             }
             2 -> {
                 if (restring.contains(AT_CMD_CLOSED) || restring.contains(AT_CMD_ERROR)) {
@@ -1056,6 +1110,9 @@ class RootActivity : AppCompatActivity(),
                     }
                     val dialog = ConfigInfoDialog(100)
                     dialog.show(supportFragmentManager, null)
+                    (actualFragment as ConfigTestCooler).testFinished()
+                    configAndTesting = false
+
                 } else {
                     CirCommands.closeAtSocketCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
                 }
@@ -1462,6 +1519,39 @@ class RootActivity : AppCompatActivity(),
         dialog.show()
     }
 
+    internal fun showCancelProcessDialog () {
+        val baseDialogModel: BaseDialogModel = DialogButtonsModel(
+            R.layout.generic_dialog_two_btns, R.drawable.router,
+            getString(R.string.cancel_process),
+            getString(R.string.cancel_process_ask),
+            getString(R.string.yes),
+            getString(R.string.no),
+            View.VISIBLE,
+            View.VISIBLE
+        )
+
+        val dialog = GenericDialogButtons(
+            this@RootActivity,
+            baseDialogModel,
+            object : DialogInteractor {
+                override fun positiveClick(dialog: GenericDialogButtons) {
+                    cirService.setCurrentState(StateMachine.POLING)
+                    configAndTesting = false
+                    configTestCooler.btnNext.text = getString(R.string.next)
+                    configTestCooler.stopAnimRouter()
+                    configTestCooler.stopAnimCloud()
+                    configTestCooler.currentState(getString(R.string.process_stopped))
+                    dialog.dismiss()
+                }
+
+                override fun negativeClick(dialog: GenericDialogButtons) {
+                    dialog.dismiss()
+                }
+            })
+
+        dialog.show()
+    }
+
 
     private fun showWifiProbeConfig () {
         val baseDialogModel: BaseDialogModel = DialogButtonsModel(
@@ -1735,6 +1825,21 @@ class RootActivity : AppCompatActivity(),
         fun updateHotspot ()
 
         fun testConnection ()
+    }
+
+
+    interface RootBleEvents {
+        fun deviceConnected ()
+
+        fun updateHotspot ()
+
+        fun testConnection ()
+
+        fun successfullyConfigured ()
+
+        fun currentState (state: String)
+
+        fun testFinished ()
     }
 
 

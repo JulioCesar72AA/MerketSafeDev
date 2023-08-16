@@ -329,21 +329,22 @@ class MainActivity: AppCompatActivity(),
     /************************************************************************************************/
     private fun scanDevices() {
         isScanning = true
-
-        val bleManager = BleManager(this, TIMEOUT)
         bleDevices.clear()
         cirDevice.clear()
 
+        val bleManager = BleManager(this, TIMEOUT)
+
         bleManager.scanBleDevices { devices ->
             bleDevices = devices
+            isScanning = false
 
             if (bleDevices.isEmpty()) {
 
-                isScanning = false
+
                 setNoDataUI()
+
             } else {
 
-                isScanning                  = false
                 checkingCloudPermissions    = true
                 setPermissionScanUI()
                 db!!.getUserPermissionsAndToken {
@@ -353,14 +354,7 @@ class MainActivity: AppCompatActivity(),
                     userPermissions = UserPermissions(tokenAndPermission[1])
                     val macsArray   = JSONArray()
 
-                    // Log.e(TAG, "PERMISSION: ${userPermissions.permissions}")
-
-//                    if (BuildConfig.DEBUG) {
-//                        macsArray.put("B4:A2:EB:4F:00:49")
-//                        macsArray.put("B4:A2:EB:4F:06:FC")
-//                    }
                     for (device in devices) {
-                        // Log.e(TAG, "MAC: ${device.getMac()}")
                         macsArray.put(device.getMac())
                     }
 
@@ -370,14 +364,7 @@ class MainActivity: AppCompatActivity(),
                     val requestBody = body.toString().toRequestBody(mediaType)
                     // Log.e(TAG, body.toString())
                     fetchMacs(token, requestBody)
-
-//                    db!!.getUserToken {
-//                        token = it as String
-//
-//                    }
                 }
-
-
             }
         }
     }

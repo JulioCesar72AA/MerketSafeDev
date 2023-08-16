@@ -18,6 +18,16 @@
 
     <color name="azul40">#0C2240</color>
     <color name="gray70">#ECECEC</color>
+    <color name="azure40">#3E83FF</color>
     <color name="azure60">#BCD1F6</color>
     <color name="azure70">#F1F5FC</color>
+    <color name="green20">#00803F</color>
+    <color name="green30">#00BB5E</color>
+    <color name="green50">#53F1A4</color>
+    <color name="green70">#CCFFE4</color>
+    <color name="darkgray50">#4A4A4A</color>
+    <color name="coral30">#BF0219</color>
+    <color name="coral40">#F93448</color>
+    <color name="coral50">#FF5A6D</color>
+
 </resources>

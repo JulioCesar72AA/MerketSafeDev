@@ -65,8 +65,8 @@ class ConfigInfoDialog(private var code: Int): DialogFragment(), View.OnClickLis
             4 -> tvInfo.text = getString(R.string.error_no_data)
             100 -> {
                 tvInfo.text = getString(R.string.error_no_error)
-                ivIcon.setColorFilter(ContextCompat.getColor(context!!, R.color.colorOk))
-                btnOk.setTextColor(resources.getColor(R.color.colorOk, null))
+                ivIcon.setColorFilter(ContextCompat.getColor(context!!, R.color.azul40))
+                btnOk.setTextColor(resources.getColor(R.color.green20, null))
             }
         }
     }

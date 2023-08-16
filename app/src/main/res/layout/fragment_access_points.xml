@@ -46,7 +46,7 @@
                 android:scaleType="fitStart"
                 android:paddingStart="@dimen/cv_access_margin_start"
                 android:paddingEnd="@dimen/cv_access_margin_end"
-                android:src="@drawable/wifi" />
+                android:src="@drawable/ic_wifi" />
 
             <TextView
                 android:layout_width="match_parent"

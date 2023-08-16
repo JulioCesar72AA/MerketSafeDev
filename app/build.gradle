@@ -6,11 +6,11 @@ android {
     compileSdkVersion 31
     buildToolsVersion "29.0.2"
     defaultConfig {
-        applicationId "mx.softel.cirwireless"
+        applicationId "mx.softel.marketsafe"
         minSdkVersion 23
         targetSdkVersion 31
-        versionCode 33
-        versionName "1.6.0.3"
+        versionCode 1
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     lintOptions {
@@ -30,6 +30,9 @@ android {
         targetCompatibility = 1.8
     }
     ndkVersion '25.2.9519653'
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
@@ -45,6 +48,8 @@ dependencies {
     // Testing Android
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.android.gms:play-services-location:19.0.1'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
