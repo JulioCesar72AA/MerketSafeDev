@@ -828,7 +828,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(dataResponse, bleMacBytes)
         val response = decResponse.toCharString()
-        // Log.e(TAG, "parseOkWifiConfigured: ${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        Log.e(TAG, "parseOkWifiConfigured: ${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         if (response.contains(AT_CMD_OK)) {
             when (nextStep) {
