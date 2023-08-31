@@ -53,7 +53,8 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
 
     override fun onResume() {
         super.onResume()
-        root.initWiFiConfig()
+        //root.initWiFiConfig()
+        root.initGetFwModule()
         root.setStandardUI()
         startAnimRouter()
         setCurrenStatus(getString(R.string.init_config))
