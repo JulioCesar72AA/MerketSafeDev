@@ -399,6 +399,9 @@ class RootActivity : AppCompatActivity(),
         cirService.setCurrentState(StateMachine.UNKNOWN)
     }
 
+    internal fun initGetFwModule () {
+        cirService.setCurrentState(StateMachine.GET_FIRMWARE_WIFI_MODULE)
+    }
 
     /************************************************************************************************/
     /**     CONTROL TESTER STATE MACHINE                                                            */
@@ -493,6 +496,39 @@ class RootActivity : AppCompatActivity(),
             }
         }
     }
+
+    private fun getFirmwareModule (response: ByteArray, command: ReceivedCmd) {
+        Log.e(TAG, "getFirmwareModule AAAAA")
+        if (command == ReceivedCmd.POLEO && !commandSent) {
+            CirCommands.getFirmwareWiFiModule(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+            commandSent = true
+
+        } else if (command == ReceivedCmd.AT_OK || command == ReceivedCmd.POLEO) {
+
+            CirCommands.readAtResponseCmd(service!!, cirService.getCharacteristicWrite()!!)
+
+        } else if (command == ReceivedCmd.AT_READY) {
+            val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
+            val response    = decResponse.toCharString()
+
+            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
+            if (response.contains(AT_CMD_OK)) {
+                commandSent = false
+
+                val respondModule: String = decResponse.toCharString()
+
+                // De respondModule falta sacar el dato referente a la version del fw del esp32
+
+                initWiFiConfig()
+
+            } else if (response.contains(AT_CMD_ERROR)) {
+
+                runOnUiThread { toast(getString(R.string.error_ocurred)) }
+            }
+        }
+    }
+
 
     private fun isFirmwarePathUpdated (response: ByteArray, command: ReceivedCmd) {
         if (command == ReceivedCmd.POLEO && !commandSent) {
@@ -849,26 +885,29 @@ class RootActivity : AppCompatActivity(),
                         }
                     }
 
-
                 }
 
                 100 -> {
-                    (actualFragment as ConfigTestCooler).currentState(getString(R.string.reset_wifi))
+                    // Se ejecutan en otro hilo
+                    runOnUiThread {(actualFragment as ConfigTestCooler).currentState(getString(R.string.reset_wifi))}
                     CirCommands.resetWifiCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
                 }
 
                 1   -> {
-                    (actualFragment as ConfigTestCooler).currentState(getString(R.string.internal_config))
+                    // Se ejecutan en otro hilo
+                    runOnUiThread {(actualFragment as ConfigTestCooler).currentState(getString(R.string.internal_config))}
                     CirCommands.setInternalWifiCmd(service!!, cirService.getCharacteristicWrite()!!, ssidSelected, passwordTyped, AT_NO_SEND_SSID, bleMacBytes)
                 }
 
                 101 -> {
-                    (actualFragment as ConfigTestCooler).currentState(getString(R.string.autconnect))
+                    // Se ejecutan en otro hilo
+                    runOnUiThread {(actualFragment as ConfigTestCooler).currentState(getString(R.string.autconnect))}
                     CirCommands.setAutoConnCmd(service!!, cirService.getCharacteristicWrite()!!, 1, bleMacBytes)
                 }
 
                 2   -> {
-                    (actualFragment as ConfigTestCooler).currentState(getString(R.string.autconnect))
+                    // Se ejecutan en otro hilo
+                    runOnUiThread {(actualFragment as ConfigTestCooler).currentState(getString(R.string.autconnect))}
                     CirCommands.sendConfigureWifiCmd(service!!, cirService.getCharacteristicWrite()!!, ssidSelected, passwordTyped, bleMacBytes)
                 }
             }
@@ -1073,7 +1112,7 @@ class RootActivity : AppCompatActivity(),
 
         val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
         val restring = decResponse.toCharString()
-        // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+        Log.e(TAG, "DataResponse: ${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
         when (step) {
             0 -> {
@@ -1110,7 +1149,8 @@ class RootActivity : AppCompatActivity(),
                     }
                     val dialog = ConfigInfoDialog(100)
                     dialog.show(supportFragmentManager, null)
-                    (actualFragment as ConfigTestCooler).testFinished()
+                    // Se ejecuta en otro hilo
+		            runOnUiThread {(actualFragment as ConfigTestCooler).testFinished()}
                     configAndTesting = false
 
                 } else {
@@ -1342,6 +1382,30 @@ class RootActivity : AppCompatActivity(),
                 repositoryModel = RepositoryModel(1) // Esto se debe de cambiar por el cliente que nos de la tarjeta
                 // TODO("IMPLEMENTAR OBTENER CLIENTE MEDIANTE EL PROTOCOLO DE POLEO")
             }
+
+
+//            StateMachine.SETTING_START_CMD -> {
+//                    sendStartCmd()
+//                    Handler(Looper.getMainLooper()).postDelayed({
+//                        cirService.setCurrentState(StateMachine.SETTING_RST_CMD)
+//                    }, 1_000)
+//
+//            }
+//
+//            StateMachine.SETTING_RST_CMD -> {
+//
+//                    sendRstCmd()
+//                    Handler(Looper.getMainLooper()).postDelayed({
+//                        isRstCmdSent = false
+//                        cirService.setCurrentState(StateMachine.GET_FIRMWARE_WIFI_MODULE)
+//                    }, 4_500)
+//
+//            }
+
+            StateMachine.GET_FIRMWARE_WIFI_MODULE -> {
+                getFirmwareModule(response, command)
+            }
+
 
             StateMachine.SETTING_REPOSITORY_URL -> {
                 isRepositoryUrlUpdated(response, command)
