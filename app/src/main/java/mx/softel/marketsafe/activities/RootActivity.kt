@@ -1,18 +1,23 @@
 package mx.softel.marketsafe.activities
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.*
-import android.os.Bundle
-import android.os.Handler
-import android.os.IBinder
-import android.os.Looper
+import android.icu.util.TimeZone
+import android.location.Location
+import android.location.LocationManager
+import android.os.*
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.fragment_config_test_cooler.*
 import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.bleservicelib.BleService
@@ -40,9 +45,16 @@ import mx.softel.cirwirelesslib.utils.CirCommands
 import mx.softel.cirwirelesslib.utils.CirWirelessParser
 import mx.softel.cirwirelesslib.utils.CommandUtils
 import mx.softel.marketsafe.fragments.*
+import mx.softel.marketsafe.utils.Utils
+import mx.softel.marketsafe.web_services_module.web_service.LinkPostResponse
 import mx.softel.scanblelib.extensions.toHexValue
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
+import java.time.ZoneId
 import java.util.*
 
 class RootActivity : AppCompatActivity(),
@@ -57,6 +69,7 @@ class RootActivity : AppCompatActivity(),
     private var triesConnect    = 0
 
     private var firstTime                       = true
+    internal var goingToTabActivity             = false
     private var commandSent                     = false
     internal var configAndTesting               = false
 
@@ -124,6 +137,9 @@ class RootActivity : AppCompatActivity(),
     // REPOSITORY URL
     private lateinit var repositoryModel: RepositoryModel
 
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
     /************************************************************************************************/
@@ -133,6 +149,7 @@ class RootActivity : AppCompatActivity(),
         setScanningUI()
         getAndSetIntentData()
         initFragment()
+        checkLocation()
     }
 
     override fun onResume() {
@@ -364,6 +381,8 @@ class RootActivity : AppCompatActivity(),
     }
 
     internal fun goToTabMainActivity () {
+        goingToTabActivity = true
+
         val intent = Intent(this, TabMainActivity::class.java)
         intent.apply {
             putExtra(EXTRA_DEVICE,              bleDevice)
@@ -882,6 +901,8 @@ class RootActivity : AppCompatActivity(),
                         }
                         else {
                             showWifiBadDialog()
+                            (actualFragment as ConfigTestCooler).stopAnimRouter()
+                            (actualFragment as ConfigTestCooler).stopAnimCloud()
                         }
                     }
 
@@ -1213,7 +1234,7 @@ class RootActivity : AppCompatActivity(),
     }
 
     override fun characteristicRead(characteristic: BluetoothGattCharacteristic) {
-        // Log.e(TAG, "characteristicRead: ${characteristic.value.toHex()}")
+         Log.e(TAG, "characteristicRead: ${characteristic.value.toHex()}")
 
         val uuidCharacteristic : String = characteristic.uuid.toString()
         val value : ByteArray = characteristic.value
@@ -1285,6 +1306,7 @@ class RootActivity : AppCompatActivity(),
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun connectionStatus(status: DisconnectionReason, newState: ConnState) {
         // Log.e(TAG, "connectionStatus: $newState")
 
@@ -1317,6 +1339,9 @@ class RootActivity : AppCompatActivity(),
 
     override fun mtuChanged() {
         cirService.getFirmwareData(service!!)
+        CirCommands.updateDate(service!!, cirService.getQuickCommandsCharacteristic()!!, bleMacBytes)
+        CirCommands.readDate(service!!, cirService.getQuickCommandsCharacteristic()!!, bleMacBytes)
+        cirService.setCurrentState(StateMachine.UPDATING_DATE)
     }
 
     override fun servicesDiscovered(gatt: BluetoothGatt) {
@@ -1541,7 +1566,7 @@ class RootActivity : AppCompatActivity(),
                 }
 
                 override fun onResponse(call: Call<TransmitPostResponse>, response: Response<TransmitPostResponse>) {
-//                    Log.e(TAG, "onResponse: ${response.body()}")
+                    Log.e(TAG, "onResponse: ${response.body()}")
                     val body = response.body()
                     if (body != null) {
 //                        Log.e(TAG, "onResponse: ${response.body()!!.status}")
@@ -1774,17 +1799,20 @@ class RootActivity : AppCompatActivity(),
     }
 
 
+    @SuppressLint("MissingPermission")
     private fun readLockResponse () {
         // Log.e(TAG, "readLockResponse: ")
         service!!.bleGatt!!.readCharacteristic(cirService.getQuickCommandsCharacteristic())
     }
 
 
+    @SuppressLint("MissingPermission")
     private fun readReloadResponse () {
         service!!.bleGatt!!.readCharacteristic(cirService.getQuickCommandsCharacteristic())
     }
 
 
+    @SuppressLint("MissingPermission")
     private fun readUpdatedDate () {
         service!!.bleGatt!!.readCharacteristic(cirService.getQuickCommandsCharacteristic())
     }
@@ -1817,7 +1845,7 @@ class RootActivity : AppCompatActivity(),
                 handler.apply { postDelayed(disconnectionRunnable, UI_TIMEOUT) }
             }
             else -> {
-                runOnUiThread { toast(getString(R.string.device_disconnecting)) }
+                runOnUiThread { if (!goingToTabActivity) { toast(getString(R.string.device_disconnecting)) } }
                 handler.apply {
                     postDelayed(disconnectionRunnable, UI_TIMEOUT)
                 }
@@ -1839,11 +1867,91 @@ class RootActivity : AppCompatActivity(),
      * Manda a escanear los servicios que el dispositivo contiene, e inicializa
      * algunas características necesarias para la comunicación
      */
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun connectedDevice() {
         runOnUiThread { toast(getString(R.string.device_connected)) }
         service!!.discoverDeviceServices()
+        sendLocation()
     }
 
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    @SuppressLint("MissingPermission", "NewApi")
+    private fun sendLocation () {
+        val tz: TimeZone = TimeZone.getDefault()
+        System.out.println(
+            "TimeZone   " + tz.getDisplayName(false, TimeZone.SHORT)
+                .toString() + " Timezone id :: " + tz.getID()
+        )
+        val zone: ZoneId = ZoneId.systemDefault()
+
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                val latitude =  location?.latitude
+                val longitude = location?.longitude
+                val body = JSONObject()
+
+                body.put("mac", bleDevice.address)
+                body.put("latitude", latitude)
+                body.put("longitude", longitude)
+                body.put("timezone_id", zone.toString())
+
+                val mediaType = "application/json; charset=utf-8".toMediaType()
+                val requestBody = body.toString().toRequestBody(mediaType)
+                Log.e(TAG, body.toString())
+                fetchLink(token, requestBody)
+            }
+
+
+    }
+
+
+    private fun fetchLink (token: String, infoMac: RequestBody) {
+        val apiClient = ApiClient()
+        // Log.e(TAG, "token ${token}")
+        apiClient.getApiService(this).fetchLinkPost(token = "Bearer $token", infoMac)
+            .enqueue(object : retrofit2.Callback<LinkPostResponse> {
+                override fun onFailure(call: Call <LinkPostResponse>, t: Throwable) {
+                    // Error fetching posts
+                    Log.e(TAG, "onFailure: ${t.message}")
+                    runOnUiThread { Utils.showToastShort(applicationContext, getString(R.string.link_device_error)) }
+                }
+
+                override fun onResponse(call: Call<LinkPostResponse>, response: Response <LinkPostResponse>) {
+                    // Handle function to display posts
+                    Log.e(TAG, "onResponse: ${response.body()}")
+                    val body = response.body()
+
+                    if (body != null) {
+//                        runOnUiThread { Utils.showToastShort(applicationContext, getString(R.string.link_device_ok)) }
+                        Log.e(TAG, "Device linked and location updated")
+                    } else {
+                        Log.e(TAG, "Error ocurred: Location was not sent correctly")
+//                        runOnUiThread { Utils.showToastShort(applicationContext, getString(R.string.link_device_error)) }
+                    }
+                }
+            })
+    }
+
+    private fun checkLocation(){
+        val manager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) showAlertLocation()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    }
+
+    private fun showAlertLocation() {
+        val dialog = AlertDialog.Builder(this)
+        dialog.setMessage("Your location settings is set to Off, Please enable location to use this application")
+        dialog.setPositiveButton("Settings") { _, _ ->
+            val myIntent = Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            startActivity(myIntent)
+        }
+        dialog.setNegativeButton("Cancel") { _, _ ->
+            finish()
+        }
+        dialog.setCancelable(false)
+        dialog.show()
+    }
 
     /************************************************************************************************/
     /**     BLE SERVICE CONNECTION                                                                  */

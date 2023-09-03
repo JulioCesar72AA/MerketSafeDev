@@ -80,14 +80,15 @@
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/lavLoaderTest"
         android:layout_width="@dimen/_70dp"
-        android:layout_height="@dimen/_55dp"
+        android:layout_height="@dimen/_100dp"
         android:layout_marginHorizontal="@dimen/_5dp"
         app:layout_constraintStart_toEndOf="@+id/ivCooler"
         app:layout_constraintTop_toTopOf="@+id/ivCooler"
         app:layout_constraintBottom_toBottomOf="@+id/ivCooler"
         app:layout_constraintEnd_toStartOf="@+id/ivRouter"
         app:lottie_loop="true"
-        app:lottie_rawRes="@raw/loader_test" />
+        app:lottie_rawRes="@raw/loader_test"
+        tools:lottie_rawRes="@null" />
 
     <ImageView
         android:id="@+id/ivGreenCheck1"
@@ -135,7 +136,8 @@
         app:layout_constraintBottom_toBottomOf="@+id/ivRouter"
         app:layout_constraintEnd_toStartOf="@+id/ivCLoud"
         app:lottie_loop="true"
-        app:lottie_rawRes="@raw/loader_test" />
+        app:lottie_rawRes="@raw/loader_test"
+        tools:lottie_rawRes="@null" />
 
     <ImageView
         android:id="@+id/ivGreenCheck2"

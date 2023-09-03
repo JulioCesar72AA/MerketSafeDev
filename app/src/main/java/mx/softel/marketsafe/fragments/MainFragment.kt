@@ -1,5 +1,6 @@
 package mx.softel.marketsafe.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.*
 import android.view.animation.AnimationUtils
@@ -49,6 +50,7 @@ class MainFragment : Fragment(), View.OnClickListener, PopupMenu.OnMenuItemClick
     /************************************************************************************************/
     /**     CICLO DE VIDA                                                                           */
     /************************************************************************************************/
+    @SuppressLint("UseRequireInsteadOfGet")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         navigation  = (activity!! as FragmentNavigation)

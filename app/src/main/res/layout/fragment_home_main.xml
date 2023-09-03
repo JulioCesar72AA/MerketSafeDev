@@ -59,14 +59,15 @@
     <ImageView
         android:id="@+id/ivMainImage"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:minHeight="200dp"
-        android:maxHeight="250dp"
+        android:layout_height="0dp"
+        android:maxHeight="200dp"
         android:src="@drawable/filled_cooler"
         android:scaleType="fitCenter"
         android:layout_marginTop="@dimen/_35dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvCoolerModelShort" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvCoolerModelShort"
+        app:layout_constraintBottom_toTopOf="@+id/tvStatus"/>
 
     <TextView
         android:id="@+id/tvStatus"
@@ -146,9 +147,11 @@
         android:textAllCaps="false"
         android:gravity="center"
         android:layout_marginTop="@dimen/_20dp"
+        android:layout_marginBottom="@dimen/_35dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvActions" />
+        app:layout_constraintTop_toBottomOf="@+id/tvActions"
+        app:layout_constraintBottom_toTopOf="@+id/btnLockCooler"/>
 
     <Button
         android:id="@+id/btnLockCooler"
@@ -161,6 +164,7 @@
         android:textAllCaps="false"
         android:drawableStart="@drawable/ic_lock_2"
         android:padding="@dimen/_10dp"
+        android:layout_marginBottom="@dimen/_35dp"
         app:layout_constraintStart_toEndOf="@+id/btnUnlockCooler"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnTestCooler"
@@ -176,10 +180,11 @@
         android:textColor="@android:color/white"
         android:textAllCaps="false"
         android:padding="@dimen/_10dp"
+        android:layout_marginBottom="@dimen/_35dp"
         android:drawableStart="@drawable/ic_lock_open"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnLockCooler"
-        app:layout_constraintTop_toBottomOf="@+id/btnTestCooler"
+        app:layout_constraintTop_toTopOf="@+id/btnLockCooler"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

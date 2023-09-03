@@ -15,11 +15,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.airbnb.lottie.LottieAnimationView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.scanning_mask.*
+import mx.softel.cirwirelesslib.constants.*
 import mx.softel.marketsafe.CirDevice
 import mx.softel.marketsafe.R
 import mx.softel.marketsafe.UserPermissions
@@ -34,7 +34,6 @@ import mx.softel.marketsafe.web_services_module.web_service.ApiClient
 import mx.softel.marketsafe.web_services_module.web_service.LinkPostResponse
 import mx.softel.marketsafe.web_services_module.web_service.ScanPostResponse
 import mx.softel.marketsafe.wifi_db.WifiDatabase
-import mx.softel.cirwirelesslib.constants.*
 import mx.softel.scanblelib.ble.BleDevice
 import mx.softel.scanblelib.ble.BleManager
 import okhttp3.MediaType.Companion.toMediaType
@@ -119,8 +118,10 @@ class MainActivity: AppCompatActivity(),
          * [onResume] -> [onPause] -> [onResume], es en el segundo instante
          * donde se ejecuta el escaneo al solicitar los permisos necesarios
          */
+        clearRecyclerView()
         scanDevices()
     }
+
 
     override fun onRefresh() {
         scanMask.visibility = View.VISIBLE
@@ -240,12 +241,24 @@ class MainActivity: AppCompatActivity(),
     }
 
 
+    fun clearRecyclerView() {
+        val cirDeviceSize = cirDevice.size
+        cirDevice.clear()
+        ScanRecyclerAdapter(applicationContext, cirDevice, this@MainActivity)
+    }
+
+
     /************************************************************************************************/
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
     override fun onScanClickListener(position: Int, isAllowed: Boolean) {
         val dev = bleDevices[position]
-        val cir = cirDevice[position]
+        var cir : CirDevice? = null
+
+        for (cirs in cirDevice) {
+            if (cirs.bleDevice.getMac() == dev.getMac())
+                cir = cirDevice[position]
+        }
 
         if (!isAllowed) {
             if (userPermissions.isLinker || userPermissions.isAdmin) {
@@ -269,10 +282,10 @@ class MainActivity: AppCompatActivity(),
                 // Solkos' flags
                 putExtra(TOKEN, token)
                 putExtra(USER_PERMISSIONS, userPermissions)
-                putExtra(TRANSMITION, cir.getScanPostResponse()!!.isTransmitting)
-                putExtra(SERIAL_NUMBER, cir.getScanPostResponse()!!.serialNumber)
-                putExtra(ASSET_TYPE, cir.getScanPostResponse()!!.assetType)
-                putExtra(ASSET_MODEL, cir.getScanPostResponse()!!.assetModel)
+                putExtra(TRANSMITION, cir?.getScanPostResponse()!!.isTransmitting)
+                putExtra(SERIAL_NUMBER, cir?.getScanPostResponse()!!.serialNumber)
+                putExtra(ASSET_TYPE, cir?.getScanPostResponse()!!.assetType)
+                putExtra(ASSET_MODEL, cir?.getScanPostResponse()!!.assetModel)
 
                 startActivity(this)
             }
@@ -328,42 +341,44 @@ class MainActivity: AppCompatActivity(),
     /**     AUXILIARES                                                                              */
     /************************************************************************************************/
     private fun scanDevices() {
-        isScanning = true
-        bleDevices.clear()
-        cirDevice.clear()
+        if (!isScanning) {
+            isScanning = true
+            bleDevices.clear()
+            cirDevice.clear()
 
-        val bleManager = BleManager(this, TIMEOUT)
+            val bleManager = BleManager(this, TIMEOUT)
 
-        bleManager.scanBleDevices { devices ->
-            bleDevices = devices
-            isScanning = false
+            bleManager.scanBleDevices { devices ->
+                bleDevices = devices
+                isScanning = false
 
-            if (bleDevices.isEmpty()) {
+                if (bleDevices.isEmpty()) {
 
 
-                setNoDataUI()
+                    setNoDataUI()
 
-            } else {
+                } else {
 
-                checkingCloudPermissions    = true
-                setPermissionScanUI()
-                db!!.getUserPermissionsAndToken {
-                    val tokenAndPermission = it as Array <String>
+                    checkingCloudPermissions    = true
+                    setPermissionScanUI()
+                    db!!.getUserPermissionsAndToken {
+                        val tokenAndPermission = it as Array <String>
 
-                    token           = tokenAndPermission[0]
-                    userPermissions = UserPermissions(tokenAndPermission[1])
-                    val macsArray   = JSONArray()
+                        token           = tokenAndPermission[0]
+                        userPermissions = UserPermissions(tokenAndPermission[1])
+                        val macsArray   = JSONArray()
 
-                    for (device in devices) {
-                        macsArray.put(device.getMac())
+                        for (device in devices) {
+                            macsArray.put(device.getMac())
+                        }
+
+                        val body = JSONObject()
+                        body.put("macs", macsArray)
+                        val mediaType = "application/json; charset=utf-8".toMediaType()
+                        val requestBody = body.toString().toRequestBody(mediaType)
+                        // Log.e(TAG, body.toString())
+                        fetchMacs(token, requestBody)
                     }
-
-                    val body = JSONObject()
-                    body.put("macs", macsArray)
-                    val mediaType = "application/json; charset=utf-8".toMediaType()
-                    val requestBody = body.toString().toRequestBody(mediaType)
-                    // Log.e(TAG, body.toString())
-                    fetchMacs(token, requestBody)
                 }
             }
         }
@@ -437,7 +452,9 @@ class MainActivity: AppCompatActivity(),
                             cirDevice.add(cir)
                         }
 
-                        for (dev in bleDevices) {
+                        Log.e(TAG, "CIR device: ${cirDevice}")
+                        Log.e(TAG, "CIR device size: ${cirDevice.size}")
+                        for (dev in cirDevice) {
                             setRecyclerUI()
                         }
                     }

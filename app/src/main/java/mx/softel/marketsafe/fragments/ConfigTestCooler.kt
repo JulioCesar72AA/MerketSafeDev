@@ -81,6 +81,7 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
                 root.showCancelProcessDialog()
 
             } else {
+
                 root.goToTabMainActivity()
                 // cancel process and go to Main view
             }
