@@ -23,18 +23,6 @@ import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.bleservicelib.BleService
 import mx.softel.bleservicelib.enums.ConnState
 import mx.softel.bleservicelib.enums.DisconnectionReason
-import mx.softel.marketsafe.R
-import mx.softel.marketsafe.RepositoryModel
-import mx.softel.marketsafe.UserPermissions
-import mx.softel.marketsafe.dialog_module.GenericDialogButtons
-import mx.softel.marketsafe.dialog_module.dialog_interfaces.DialogInteractor
-import mx.softel.marketsafe.dialog_module.dialog_models.BaseDialogModel
-import mx.softel.marketsafe.dialogs.*
-import mx.softel.marketsafe.extensions.toast
-import mx.softel.marketsafe.interfaces.FragmentNavigation
-import mx.softel.marketsafe.web_services_module.ui_login.log_in_dialog.DialogButtonsModel
-import mx.softel.marketsafe.web_services_module.web_service.ApiClient
-import mx.softel.marketsafe.web_services_module.web_service.TransmitPostResponse
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.hexStringToByteArray
@@ -44,7 +32,19 @@ import mx.softel.cirwirelesslib.utils.BleCirWireless
 import mx.softel.cirwirelesslib.utils.CirCommands
 import mx.softel.cirwirelesslib.utils.CirWirelessParser
 import mx.softel.cirwirelesslib.utils.CommandUtils
+import mx.softel.marketsafe.R
+import mx.softel.marketsafe.RepositoryModel
+import mx.softel.marketsafe.UserPermissions
+import mx.softel.marketsafe.dialog_module.GenericDialogButtons
+import mx.softel.marketsafe.dialog_module.dialog_interfaces.DialogInteractor
+import mx.softel.marketsafe.dialog_module.dialog_models.BaseDialogModel
+import mx.softel.marketsafe.dialogs.*
+import mx.softel.marketsafe.extensions.toast
 import mx.softel.marketsafe.fragments.*
+import mx.softel.marketsafe.interfaces.FragmentNavigation
+import mx.softel.marketsafe.web_services_module.ui_login.log_in_dialog.DialogButtonsModel
+import mx.softel.marketsafe.web_services_module.web_service.ApiClient
+import mx.softel.marketsafe.web_services_module.web_service.TransmitPostResponse
 import mx.softel.marketsafe.utils.Utils
 import mx.softel.marketsafe.web_services_module.web_service.LinkPostResponse
 import mx.softel.scanblelib.extensions.toHexValue
@@ -75,6 +75,10 @@ class RootActivity : AppCompatActivity(),
 
     private lateinit var token              : String
     internal var userPermissions            : UserPermissions? = null
+
+    private var fwModuleEsp                 : String = ""
+    private var fwModule                    : String = ""
+
 
     // BLUETOOTH DEVICE
     internal lateinit var bleDevice     : BluetoothDevice
@@ -422,6 +426,18 @@ class RootActivity : AppCompatActivity(),
         cirService.setCurrentState(StateMachine.GET_FIRMWARE_WIFI_MODULE)
     }
 
+    internal fun setFwModule (saveFwModule: String) {
+        fwModuleEsp = saveFwModule
+    }
+
+    internal fun getFwModule (): String {
+        return fwModuleEsp
+    }
+
+    internal fun initUpdateUrl () {
+        cirService.setCurrentState(StateMachine.GET_CLIENT)
+    }
+
     /************************************************************************************************/
     /**     CONTROL TESTER STATE MACHINE                                                            */
     /************************************************************************************************/
@@ -502,7 +518,8 @@ class RootActivity : AppCompatActivity(),
         } else if (command == ReceivedCmd.AT_READY) {
             val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
             val response    = decResponse.toCharString()
-            // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
+            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
                 commandSent = false
@@ -516,10 +533,14 @@ class RootActivity : AppCompatActivity(),
         }
     }
 
-    private fun getFirmwareModule (response: ByteArray, command: ReceivedCmd) {
-        Log.e(TAG, "getFirmwareModule AAAAA")
+    private fun getFirmwareModule(response: ByteArray, command: ReceivedCmd) {
+        Log.e(TAG, "getFirmwareModule")
         if (command == ReceivedCmd.POLEO && !commandSent) {
-            CirCommands.getFirmwareWiFiModule(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
+            CirCommands.getFirmwareWiFiModule(
+                service!!,
+                cirService.getCharacteristicWrite()!!,
+                bleMacBytes
+            )
             commandSent = true
 
         } else if (command == ReceivedCmd.AT_OK || command == ReceivedCmd.POLEO) {
@@ -528,7 +549,7 @@ class RootActivity : AppCompatActivity(),
 
         } else if (command == ReceivedCmd.AT_READY) {
             val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
-            val response    = decResponse.toCharString()
+            val response = decResponse.toCharString()
 
             Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
@@ -537,8 +558,18 @@ class RootActivity : AppCompatActivity(),
 
                 val respondModule: String = decResponse.toCharString()
 
-                // De respondModule falta sacar el dato referente a la version del fw del esp32
+                // Recupera la version del modulo ESPxx
+                fwModule = respondModule.substringAfter("Ver: \"")
+                fwModule = fwModule.substringBefore("Compile Date:")
+                    .replace("\"", "")
+                    .replace("\n", "")
+                    .replace("\r", "")
+                    .replace(" ", "")
 
+                Log.e("FW MODULE", fwModule)
+                setFwModule(fwModule)
+
+                // Se sigue a configurar el moduo wifi
                 initWiFiConfig()
 
             } else if (response.contains(AT_CMD_ERROR)) {
@@ -562,7 +593,8 @@ class RootActivity : AppCompatActivity(),
         } else if (command == ReceivedCmd.AT_READY) {
             val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
             val response    = decResponse.toCharString()
-            // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
+            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
                 commandSent = false
@@ -589,7 +621,8 @@ class RootActivity : AppCompatActivity(),
         } else if (command == ReceivedCmd.AT_READY) {
             val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
             val response    = decResponse.toCharString()
-            // Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+
+            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
                 commandSent = false
@@ -896,6 +929,7 @@ class RootActivity : AppCompatActivity(),
                         if (isWifiConnected) {
                             // WiFi exitosamente configurado
                             // showWifiOkDialog()
+                            Log.e(TAG, "se termina la configuracion entre el enfriador y el rauter")
                             (actualFragment as ConfigTestCooler).successfullyConfigured()
                             (actualFragment as ConfigTestCooler).currentState(getString(R.string.ok_wifi))
                         }
@@ -1070,26 +1104,39 @@ class RootActivity : AppCompatActivity(),
                 CirCommands.sendIpAtCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
             }
             return
-        } else {
+        } else if ( response.contains( WIFI_SUBSTRING_ROUTER_IP_AFTER )) {
             retryAtResponse = 0
             Log.e(TAG, "response IP: ${response}")
-            var ipRead = response.substringAfter(WIFI_SUBSTRING_IP_AFTER)
+
             var ipRouter = response.substringAfter(WIFI_SUBSTRING_ROUTER_IP_AFTER)
-            ipRead = ipRead
-                .substringBefore(WIFI_SUBSTRING_IP_BEFORE)
-                .replace("\"", "")
-                .replace("\n", "")
-                .replace("\r", "")
+            Log.e(TAG, "response ipRouter: ${ipRouter}")
+
+            var ipRead = response.substringAfter(WIFI_SUBSTRING_IP_AFTER)
+            Log.e(TAG, "response ipRead: ${ipRead}")
+
             ipRouter = ipRouter
                 .substringBefore(WIFI_SUBSTRING_ROUTER_IP_BEFORE)
                 .replace("\"", "")
                 .replace("\n", "")
                 .replace("\r", "")
+
+            ipRead = ipRead
+                .substringBefore(WIFI_SUBSTRING_IP_BEFORE)
+                .replace("\"", "")
+                .replace("\n", "")
+                .replace("\r", "")
+
+            Log.e(TAG, "response ipRouter next: ${ipRouter}")
+
+            Log.e(TAG, "response ipRead next: ${ipRead}")
+
             ipAssigned          = ipRead
             ipRouterAssigned    = ipRouter
             apAssigned          = true
             cirService.setCurrentState(StateMachine.PING)
             runOnUiThread { configTestCooler.fragmentUiUpdate(3) }
+        } else {
+            cirService.setCurrentState(StateMachine.GET_IP)
         }
     }
 
@@ -1373,7 +1420,7 @@ class RootActivity : AppCompatActivity(),
                              response: ByteArray,
                              command: ReceivedCmd) {
 //        Log.e(TAG, "macBytes: ${bleMacBytes.toHex()}")
-        Log.e(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toHex()}")
+        Log.e(TAG, "commandState: $state -> $command -> ${response.toHex()} -> ${response.toString()}")
 
         when (state) {
 
@@ -1403,39 +1450,22 @@ class RootActivity : AppCompatActivity(),
 
             StateMachine.GET_CLIENT -> {
                 showWaitDialog()
+
+                Log.e(TAG, "commandState: GET_CLIENT")
+
                 cirService.setCurrentState(StateMachine.SETTING_REPOSITORY_URL)
                 repositoryModel = RepositoryModel(1) // Esto se debe de cambiar por el cliente que nos de la tarjeta
                 // TODO("IMPLEMENTAR OBTENER CLIENTE MEDIANTE EL PROTOCOLO DE POLEO")
             }
 
-
-//            StateMachine.SETTING_START_CMD -> {
-//                    sendStartCmd()
-//                    Handler(Looper.getMainLooper()).postDelayed({
-//                        cirService.setCurrentState(StateMachine.SETTING_RST_CMD)
-//                    }, 1_000)
-//
-//            }
-//
-//            StateMachine.SETTING_RST_CMD -> {
-//
-//                    sendRstCmd()
-//                    Handler(Looper.getMainLooper()).postDelayed({
-//                        isRstCmdSent = false
-//                        cirService.setCurrentState(StateMachine.GET_FIRMWARE_WIFI_MODULE)
-//                    }, 4_500)
-//
-//            }
-
             StateMachine.GET_FIRMWARE_WIFI_MODULE -> {
                 getFirmwareModule(response, command)
             }
 
-
             StateMachine.SETTING_REPOSITORY_URL -> {
+                Log.e(TAG, "commandState: SETTING_REPOSITORY_URL")
                 isRepositoryUrlUpdated(response, command)
             }
-
 
             StateMachine.SETTING_FIRMWARE_PATH -> {
                 isFirmwarePathUpdated(response, command)
