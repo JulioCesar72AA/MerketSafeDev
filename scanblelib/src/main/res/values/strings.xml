@@ -77,6 +77,7 @@
 
     <!-- Fragment wi-fi passcode -->
     <string name="next">Siguiente</string>
+    <string name="update_url">Act. url</string>
     <string name="empty_passcode">Contraseña no valida</string>
     <string name="cooler">Enfriador</string>
     <string name="router">Router</string>
