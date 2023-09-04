@@ -186,5 +186,5 @@
     <string name="connected">Conectado</string>
     <string name="disconnected">Desconectado</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="update_url">Actualizar firmware</string>
 </resources>

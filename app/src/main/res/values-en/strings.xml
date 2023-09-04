@@ -196,4 +196,5 @@
     <string name="open">Open</string>
     <string name="connected">Connected</string>
     <string name="disconnected">Disonnected</string>
+    <string name="update_url">Update firmware</string>
 </resources>
