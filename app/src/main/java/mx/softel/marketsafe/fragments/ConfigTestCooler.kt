@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,10 +38,12 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
     private lateinit var tvCoolerBrand         : TextView
     private lateinit var tvCoolerModelShort    : TextView
     internal lateinit var btnNext              : Button
+    internal lateinit var buttonUpdateUrl      : Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        root = (activity!! as RootActivity)
+        root = ( activity!! as RootActivity )
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -76,6 +79,16 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
         ivGreenCheck2       = view.findViewById(R.id.ivGreenCheck2)
         tvCurrentStatus     = view.findViewById(R.id.tvCurrentStatus)
 
+        buttonUpdateUrl     = view.findViewById<Button>( R.id.button_update_url )
+
+        buttonUpdateUrl.visibility = View.INVISIBLE
+
+        buttonUpdateUrl.setOnClickListener {
+
+            Log.e(TAG, "Boton presionado ir a ->StateMachine.GET_CLIENT<- ")
+            root.initUpdateUrl()
+        }
+
         btnNext.setOnClickListener {
             if (root.configAndTesting) {
                 root.showCancelProcessDialog()
@@ -97,6 +110,7 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
     }
 
     internal fun startAnimRouter () {
+
         lavLoaderTest.playAnimation()
     }
 
@@ -121,7 +135,27 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
     internal fun appearGreenCheckCloud () {
         root.runOnUiThread {
             ivGreenCheck2.visibility = View.VISIBLE
+
+            val fwModuleAux: String = root.getFwModule()
+
+            Log.e(TAG, "fw aux espxx: $fwModuleAux")
+
+            if( validateFw(fwModuleAux) ) {
+                Log.e(TAG, "fw aux espxx valido: ${validateFw(fwModuleAux)}")
+                buttonUpdateUrl.visibility = View.VISIBLE
+            }
         }
+    }
+
+    fun validateFw (versionFw: String): Boolean
+    {
+        var firmwareValido: Boolean = when(versionFw)
+        {
+            "0.2.0-1" -> true
+            else -> false
+        }
+
+        return firmwareValido
     }
 
     @SuppressLint("SetTextI18n")
@@ -167,6 +201,8 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
         setCurrentStatusColor(R.color.green20)
         stopAnimCloud()
         appearGreenCheckCloud()
+
+        Log.e(TAG, "Termina la configuracion entre el rautes e internet")
         tvCurrentStatus.text = getString(R.string.ok_wifi)
     }
 
