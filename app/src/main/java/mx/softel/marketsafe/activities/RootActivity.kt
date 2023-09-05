@@ -622,19 +622,25 @@ class RootActivity : AppCompatActivity(),
             val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
             val response    = decResponse.toCharString()
 
-            Log.e(TAG, "${decResponse.toHex()} -> ${decResponse.toCharString()}")
+            Log.e(TAG, "isFirmwareVersionUpdated: ${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
                 commandSent = false
                 dismissWaitDialog()
                 cirService.setCurrentState(StateMachine.POLING)
-                runOnUiThread { toast(getString(R.string.success)) }
+                runOnUiThread { toast(getString(R.string.device_successfully_configured)) }
 
             } else if (response.contains(AT_CMD_ERROR)) {
 
+                if (response.contains("is equal or older than")) {
+                    runOnUiThread { toast(getString(R.string.device_successfully_configured)) }
+                } else {
+                    runOnUiThread { toast(getString(R.string.card_updated_or_error)) }
+                }
+
                 dismissWaitDialog()
                 cirService.setCurrentState(StateMachine.POLING)
-                runOnUiThread { toast(getString(R.string.card_updated_or_error)) }
+
             }
         }
     }

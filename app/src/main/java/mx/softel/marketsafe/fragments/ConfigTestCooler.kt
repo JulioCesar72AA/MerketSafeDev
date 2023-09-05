@@ -85,7 +85,7 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
 
         buttonUpdateUrl.setOnClickListener {
 
-            Log.e(TAG, "Boton presionado ir a ->StateMachine.GET_CLIENT<- ")
+            //Log.e(TAG, "Boton presionado ir a ->StateMachine.GET_CLIENT<- ")
             root.initUpdateUrl()
         }
 
@@ -152,6 +152,7 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
         var firmwareValido: Boolean = when(versionFw)
         {
             "0.2.0-1" -> true
+            "0.3.0-0" -> true
             else -> false
         }
 
