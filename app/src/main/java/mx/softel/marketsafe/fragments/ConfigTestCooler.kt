@@ -152,7 +152,6 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
         var firmwareValido: Boolean = when(versionFw)
         {
             "0.2.0-1" -> true
-            "0.3.0-0" -> true
             else -> false
         }
 
