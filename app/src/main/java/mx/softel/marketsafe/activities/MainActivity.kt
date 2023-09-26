@@ -354,7 +354,6 @@ class MainActivity: AppCompatActivity(),
 
                 if (bleDevices.isEmpty()) {
 
-
                     setNoDataUI()
 
                 } else {
@@ -441,15 +440,14 @@ class MainActivity: AppCompatActivity(),
                             val cir = CirDevice(device)
 
                             for (scanPostRes in respList) {
+
                                 if (scanPostRes.mac == device.getMac()) {
                                     cir.setScanPostResponse(scanPostRes)
+                                    cirDevice.add(cir)
                                     break
                                 }
-                                cir.setScanPostResponse(scanPostRes)
-
+//                                cir.setScanPostResponse(scanPostRes)
                             }
-
-                            cirDevice.add(cir)
                         }
 
                         Log.e(TAG, "CIR device: ${cirDevice}")

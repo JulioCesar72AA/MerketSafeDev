@@ -28,7 +28,8 @@ class RepositoryModel (val idClient: Int) {
 
     private fun decidePort () : String {
         return when (idClient) {
-            1 -> "443"
+//            1 -> "443"
+            1 -> "80"
             else -> NA
         }
     }
@@ -50,7 +51,7 @@ class RepositoryModel (val idClient: Int) {
     private fun decideImageVersion () : String {
         return when (idClient) {
             // 1 -> "1,\"0.2.0-3\""
-            1 -> "1,\"0.2.0-4\""
+            1 -> "0,\"0.3.0-0\""
             else -> NA
         }
     }
