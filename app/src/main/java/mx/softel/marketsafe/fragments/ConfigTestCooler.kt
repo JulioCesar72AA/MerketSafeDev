@@ -147,16 +147,7 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
         }
     }
 
-    fun validateFw (versionFw: String): Boolean
-    {
-        var firmwareValido: Boolean = when(versionFw)
-        {
-            "0.2.0-1" -> true
-            else -> false
-        }
-
-        return firmwareValido
-    }
+    private fun validateFw (versionFw: String): Boolean = (versionFw == "0.2.0-1")
 
     @SuppressLint("SetTextI18n")
     private fun initViews () {

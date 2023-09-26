@@ -91,12 +91,16 @@ class AccessPointsFragment: Fragment(),
     }
 
     override fun onRefresh() {
+        root.setScanningUI()
         this.scanAccessPoints()
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
     }
 
     private fun scanAccessPoints () {
         root.apply {
-            setScanningUI()
             CirCommands.getMacListCmd(service!!, cirService.getCharacteristicWrite()!!)
             cirService.setCurrentState(StateMachine.GET_AP)
         }
@@ -120,39 +124,44 @@ class AccessPointsFragment: Fragment(),
      */
     private val wifiReceiver = object: BroadcastReceiver() {
 
+        @SuppressLint("MissingPermission")
         override fun onReceive(context: Context?, intent: Intent?) {
             wifiResults = wifiManager.scanResults
+
             Log.e(TAG, "WIFI_RESULTS: $wifiResults")
             root.unregisterReceiver(this)
-            // Rellena la lista para mostrar en la pantalla estándar
-            for (data in wifiResults) {
-                Log.e(TAG, "wifi: $data")
-                Log.e(TAG, "condition: ${root.deviceMacList == null}")
 
-                // Establecemos una nueva lista de macs validadas por el dispositivo
-                if (root.deviceMacList == null) return
+            Handler(Looper.getMainLooper()).postDelayed({
 
-                for (mac in root.deviceMacList!!) {
-                    if (data.BSSID == mac) {
-                        if (!data.SSID.isNullOrEmpty()) apMacList.add(data.SSID)
+                // Rellena la lista para mostrar en la pantalla estándar
+                for (data in wifiResults) {
+                    Log.e(TAG, "wifi: $data")
+                    Log.e(TAG, "Device Mac List is: ${root.deviceMacList == null}")
+
+                    // Establecemos una nueva lista de macs validadas por el dispositivo
+                    if (root.deviceMacList == null) break
+
+                    for (mac in root.deviceMacList!!) {
+                        if (data.BSSID == mac) {
+                            if (!data.SSID.isNullOrEmpty()) apMacList.add(data.SSID)
+                        }
                     }
                 }
-            }
 
-            for (data in wifiResults) {
-                // Completamos la lista con los dispositivos escaneados por el teléfono
-                // El dispositivo solo puede conectarse a 2.4 de frecuencia, así que filtramos...
-                if (data.frequency < 3000 && data.SSID.length > 2)
-                    if (!apMacList.contains(data.SSID) && !data.SSID.isNullOrEmpty())
-                        apMacList.add(data.SSID)
-            }
+                for (data in wifiResults) {
+                    // Completamos la lista con los dispositivos escaneados por el teléfono
+                    // El dispositivo solo puede conectarse a 2.4 de frecuencia, así que filtramos...
+                    if (data.frequency < 3000 && data.SSID.length > 2)
+                        if (!apMacList.contains(data.SSID) && !data.SSID.isNullOrEmpty())
+                            apMacList.add(data.SSID)
+                }
 
-            // Actualizamos la vista con los access points encontrados
-            arrayAdapter.notifyDataSetChanged()
-            root.setStandardUI()
-            srlScanAp.isRefreshing = false
+                // Actualizamos la vista con los access points encontrados
+                arrayAdapter.notifyDataSetChanged()
+                root.setStandardUI()
+                srlScanAp.isRefreshing = false
+            }, 1_000)
         }
-
     }
 
     /************************************************************************************************/

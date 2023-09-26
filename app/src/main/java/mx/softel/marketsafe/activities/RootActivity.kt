@@ -1218,14 +1218,24 @@ class RootActivity : AppCompatActivity(),
                     cirService.setCurrentState(StateMachine.POLING)
                     CirCommands.setDeviceModeCmd(service!!, cirService.getCharacteristicWrite()!!, AT_MODE_SLAVE, bleMacBytes)
                     serviceStep = 0
+
                     runOnUiThread {
                         setStandardUI()
+                        Utils.showToastLong(this, getString(R.string.wait_45_secs))
                     }
-                    val dialog = ConfigInfoDialog(100)
-                    dialog.show(supportFragmentManager, null)
-                    // Se ejecuta en otro hilo
-		            runOnUiThread {(actualFragment as ConfigTestCooler).testFinished()}
-                    configAndTesting = false
+
+                    Handler(mainLooper).postDelayed({
+                        Utils.showToastLong(this, getString(R.string.wait_20_secs))
+                    }, 20_000)
+
+                    Handler(mainLooper).postDelayed({
+                        val dialog = ConfigInfoDialog(100)
+                        dialog.show(supportFragmentManager, null)
+                        // Se ejecuta en otro hilo
+                        runOnUiThread {(actualFragment as ConfigTestCooler).testFinished()}
+                        configAndTesting = false
+                    }, 45_000)
+
 
                 } else {
                     CirCommands.closeAtSocketCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
@@ -1776,7 +1786,9 @@ class RootActivity : AppCompatActivity(),
             this@RootActivity,
             baseDialogModel,
             object : DialogInteractor {
+
                 override fun positiveClick(dialog: GenericDialogButtons) { }
+
                 override fun negativeClick(dialog: GenericDialogButtons) {
                     (actualFragment as MainFragment).updateHotspot()
                     dialog.dismiss()

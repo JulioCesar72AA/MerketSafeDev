@@ -17,6 +17,8 @@
     <string name="user_not_found">Usuario no encontrado</string>
     <string name="already_session">Ya hay una sesión iniciada</string>
     <string name="internal_server_error">Error interno en el servidor</string>
+    <string name="wait_45_secs">We are finishing setting up, almost ready</string>
+    <string name="wait_20_secs">We are in the final steps</string>
 
     <!-- HINT's -->
     <string name="hint_password">Contraseña</string>
