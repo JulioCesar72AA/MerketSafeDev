@@ -633,7 +633,10 @@ class RootActivity : AppCompatActivity(),
             } else if (response.contains(AT_CMD_ERROR)) {
 
                 if (response.contains("is equal or older than")) {
-                    runOnUiThread { toast(getString(R.string.device_successfully_configured)) }
+                    runOnUiThread {
+                        (actualFragment as ConfigTestCooler).buttonUpdateUrl.visibility = View.GONE
+                        toast(getString(R.string.device_successfully_configured))
+                    }
                 } else {
                     runOnUiThread { toast(getString(R.string.card_updated_or_error)) }
                 }

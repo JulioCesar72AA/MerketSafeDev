@@ -78,7 +78,6 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
         ivGreenCheck1       = view.findViewById(R.id.ivGreenCheck1)
         ivGreenCheck2       = view.findViewById(R.id.ivGreenCheck2)
         tvCurrentStatus     = view.findViewById(R.id.tvCurrentStatus)
-
         buttonUpdateUrl     = view.findViewById<Button>( R.id.button_update_url )
 
         buttonUpdateUrl.visibility = View.INVISIBLE

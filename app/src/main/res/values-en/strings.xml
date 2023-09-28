@@ -15,9 +15,8 @@
     <string name="user_not_found">User not found</string>
     <string name="already_session">User already logged on another device!, contact support for assistance</string>
     <string name="internal_server_error">Internal server error</string>
-    <string name="wait_45_secs">Estamos terminando de configurar, ya casi listo</string>
-    <string name="wait_20_secs">Estamos en los pasos finales</string>
-
+    <string name="wait_45_secs">We are finishing setting up, almost ready</string>
+    <string name="wait_20_secs">We are in the final steps</string>
 
     <!-- HINT's -->
     <string name="hint_password">Passcode</string>
