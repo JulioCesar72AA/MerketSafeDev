@@ -6,6 +6,9 @@ enum class StateMachine {
     GET_FIRMWARE_WIFI_MODULE, // Se obtiene el firmware del modulo WiFi
     WIFI_CONFIG,    // Configurando el WIFI en el CIR WIRELESS
     GET_CLIENT,     // Obtiene el cliente del dispositivo
+    SET_WIFI_PASSCODE,     // Se envía la contraseña al dispositivo CIR Wireless
+    GOING_BACK, // Indica que vamos atras en un fragmento, solo para asegurar que hay un estado controlado
+    GO_TO_CONFIG_AND_TEST, // Se envía a la UI a la sección de configuración y prueba
     SETTING_REPOSITORY_URL, // Se actualiza la url del repositorio
     SETTING_FIRMWARE_PATH, // Se actualiza la ruta del archivo que esta en el servidor
     SETTING_FIRMWARE_VERSION, // Se actualiza la version de firmware a descargar

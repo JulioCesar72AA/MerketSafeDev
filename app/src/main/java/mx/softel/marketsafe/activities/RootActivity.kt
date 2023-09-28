@@ -42,11 +42,11 @@ import mx.softel.marketsafe.dialogs.*
 import mx.softel.marketsafe.extensions.toast
 import mx.softel.marketsafe.fragments.*
 import mx.softel.marketsafe.interfaces.FragmentNavigation
+import mx.softel.marketsafe.utils.Utils
 import mx.softel.marketsafe.web_services_module.ui_login.log_in_dialog.DialogButtonsModel
 import mx.softel.marketsafe.web_services_module.web_service.ApiClient
-import mx.softel.marketsafe.web_services_module.web_service.TransmitPostResponse
-import mx.softel.marketsafe.utils.Utils
 import mx.softel.marketsafe.web_services_module.web_service.LinkPostResponse
+import mx.softel.marketsafe.web_services_module.web_service.TransmitPostResponse
 import mx.softel.scanblelib.extensions.toHexValue
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
@@ -251,10 +251,12 @@ class RootActivity : AppCompatActivity(),
      * Inicializa el fragmento [MainFragment] para el manejo de
      * la instancia principal de conexión
      */
+    @SuppressLint("CommitTransaction")
     private fun initFragment() {
         // Iniciamos el fragmento deseado
-        val fragment = wifiFragment // mainFragment
-        actualFragment = fragment
+        val fragment    = wifiFragment // mainFragment
+        actualFragment  = fragment
+
         supportFragmentManager
             .beginTransaction()
             .add(R.id.fragmentContainer, fragment)
@@ -267,14 +269,35 @@ class RootActivity : AppCompatActivity(),
      * expulsar, desconecta el dispositivo y termina la actividad
      */
     internal fun backFragment() {
-        if (actualFragment == mainFragment) {
+        Log.e(TAG, "backFragment: ")
+
+        if (actualFragment == wifiFragment) {
             finishAndDisconnectActivity(DisconnectionReason.UNKNOWN.status)
             return
         }
-        if (actualFragment == testerFragment) actualFragment = mainFragment
-        if (actualFragment == wifiFragment) actualFragment = mainFragment
-        if (actualFragment == wiFiPasscodeFragment) actualFragment = wifiFragment
-        supportFragmentManager.popBackStackImmediate()
+
+        if (actualFragment == wiFiPasscodeFragment) {
+            actualFragment  = wifiFragment
+            cirService.setCurrentState(StateMachine.GET_AP)
+        }
+
+        if (actualFragment == configTestCooler) {
+            if (!configAndTesting) {
+                actualFragment = wiFiPasscodeFragment
+                cirService.setCurrentState(StateMachine.GOING_BACK)
+            }
+
+        }
+
+        removeCurrentFragment()
+//        supportFragmentManager.popBackStackImmediate()
+        navigateTo(actualFragment!!, true, null)
+    }
+
+    internal fun removeCurrentFragment () {
+        val oldFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
+
+        if (oldFragment != null) { supportFragmentManager.beginTransaction().remove(oldFragment).commit() }
     }
 
     /**
@@ -1466,6 +1489,12 @@ class RootActivity : AppCompatActivity(),
                 }
                 cipStatusMode = -1
             }
+
+            StateMachine.SET_WIFI_PASSCODE -> { navigateTo(wiFiPasscodeFragment, true, null) }
+
+            StateMachine.GO_TO_CONFIG_AND_TEST -> { navigateTo(configTestCooler, true, null) }
+
+            StateMachine.GOING_BACK -> { /* NOTHING TO DO HERE */ }
 
             StateMachine.GET_CLIENT -> {
                 showWaitDialog()

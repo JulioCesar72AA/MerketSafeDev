@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import mx.softel.cirwirelesslib.enums.StateMachine
 import mx.softel.marketsafe.R
 import mx.softel.marketsafe.activities.RootActivity
 import mx.softel.marketsafe.extensions.toast
@@ -39,18 +40,15 @@ class WiFiPasscodeFragment : Fragment() {
     }
 
     private fun loadViews (view: View) {
-        view.findViewById <Button> (R.id.btnWiFiPasscodeNext).setOnClickListener {
-            checkPasscode()
-        }
-
+        view.findViewById <Button> (R.id.btnWiFiPasscodeNext).setOnClickListener { checkPasscode() }
         view.findViewById <TextView> (R.id.tvWiFiPasscodeWiFiName).text = root.ssidSelected
-
         etRouterPasscode = view.findViewById(R.id.etWiFiPasscodePasscode)
     }
 
     private fun checkPasscode () {
         if (etRouterPasscode.text.isNotEmpty()) {
             root.passwordTyped = etRouterPasscode.text.toString()
+            root.cirService.setCurrentState(StateMachine.GO_TO_CONFIG_AND_TEST)
             root.goToConfigAndTest()
 
         } else {

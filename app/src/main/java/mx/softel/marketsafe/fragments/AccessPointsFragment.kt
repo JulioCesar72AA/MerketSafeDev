@@ -175,9 +175,7 @@ class AccessPointsFragment: Fragment(),
      */
     @SuppressLint("UseRequireInsteadOfGet")
     private fun setWifiList() {
-
         arrayAdapter = ArrayAdapter(root, android.R.layout.simple_list_item_1, apMacList)
-        // arrayAdapter = ArrayAdapter(root, R.id.tvWiFiName, apMacList)
         lvAccessPoints.apply {
             val manager     = LinearLayoutManager(root, LinearLayoutManager.VERTICAL, false)
             layoutManager   = manager
@@ -287,6 +285,7 @@ class AccessPointsFragment: Fragment(),
     override fun onScanClickListener(position: Int) {
         root.ssidSelected = apMacList[position]
         root.goToWiFiPasscode()
+        root.cirService.setCurrentState(StateMachine.SET_WIFI_PASSCODE)
         toast(apMacList[position])
     }
 }
