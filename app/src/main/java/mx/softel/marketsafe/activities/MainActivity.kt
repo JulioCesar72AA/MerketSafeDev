@@ -82,7 +82,7 @@ class MainActivity: AppCompatActivity(),
         bleDevices.clear()
         cirDevice.clear()
         checkLocation()
-        setScanningUI()
+        // setScanningUI()
         setOnClick()
     }
 
@@ -96,12 +96,13 @@ class MainActivity: AppCompatActivity(),
 
     private fun showAlertLocation() {
         val dialog = AlertDialog.Builder(this)
-        dialog.setMessage("Your location settings is set to Off, Please enable location to use this application")
-        dialog.setPositiveButton("Settings") { _, _ ->
+        val adMessage = getString(R.string.no_location_services)
+        dialog.setMessage(adMessage)
+        dialog.setPositiveButton(getString(R.string.settings)) { _, _ ->
             val myIntent = Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
             startActivity(myIntent)
         }
-        dialog.setNegativeButton("Cancel") { _, _ ->
+        dialog.setNegativeButton(getString(R.string.tv_cancelar)) { _, _ ->
             finish()
         }
         dialog.setCancelable(false)
@@ -315,8 +316,8 @@ class MainActivity: AppCompatActivity(),
     private fun setScanningUI() {
         pbScanning.visibility           = View.INVISIBLE
         lavLoaderPositive.visibility    = View.VISIBLE
-        scanMask.visibility     = View.VISIBLE
-        tvNoDevices.visibility  = View.GONE
+        scanMask.visibility             = View.VISIBLE
+        tvNoDevices.visibility          = View.GONE
     }
 
     private fun setRecyclerUI() {
@@ -332,8 +333,8 @@ class MainActivity: AppCompatActivity(),
     private fun setNoDataUI() {
         pbScanning.visibility           = View.GONE
         lavLoaderPositive.visibility    = View.GONE
-        scanMask.visibility     = View.GONE
-        tvNoDevices.visibility  = View.VISIBLE
+        scanMask.visibility             = View.GONE
+        tvNoDevices.visibility          = View.VISIBLE
     }
 
 
@@ -351,7 +352,7 @@ class MainActivity: AppCompatActivity(),
             bleManager.scanBleDevices { devices ->
                 bleDevices = devices
                 isScanning = false
-
+                Log.e(TAG, "BLE Devices: ${bleDevices}")
                 if (bleDevices.isEmpty()) {
 
                     setNoDataUI()
@@ -455,6 +456,8 @@ class MainActivity: AppCompatActivity(),
                         for (dev in cirDevice) {
                             setRecyclerUI()
                         }
+                    } else {
+                        setNoDataUI()
                     }
                 }
             })

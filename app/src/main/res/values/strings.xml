@@ -188,6 +188,6 @@
     <string name="open">Abrir</string>
     <string name="connected">Conectado</string>
     <string name="disconnected">Desconectado</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="update_url">Actualizar firmware</string>
+    <string name="no_location_services">La configuración de su ubicación está desactivada. Habilite la ubicación para usar esta aplicación.</string>
 </resources>
