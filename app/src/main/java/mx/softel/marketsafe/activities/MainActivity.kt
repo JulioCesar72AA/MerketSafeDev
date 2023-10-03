@@ -443,26 +443,21 @@ class MainActivity: AppCompatActivity(),
                     if (respList != null && respList.isNotEmpty()) {
                         for (device in bleDevices) {
                             val cir = CirDevice(device)
-
                             for (scanPostRes in respList) {
-
                                 if (scanPostRes.mac == device.getMac()) {
                                     cir.setScanPostResponse(scanPostRes)
                                     cirDevice.add(cir)
                                     break
                                 }
-//                                cir.setScanPostResponse(scanPostRes)
                             }
                         }
 
                         Log.e(TAG, "CIR device: ${cirDevice}")
                         Log.e(TAG, "CIR device size: ${cirDevice.size}")
-                        for (dev in cirDevice) {
-                            setRecyclerUI()
-                        }
-                    } else {
-                        setNoDataUI()
-                    }
+
+                        for (dev in cirDevice) { setRecyclerUI() }
+
+                    } else { setNoDataUI() }
                 }
             })
     }
