@@ -19,6 +19,7 @@
     <string name="internal_server_error">Error interno en el servidor</string>
     <string name="wait_45_secs">Estamos terminando de configurar, ya casi listo</string>
     <string name="wait_20_secs">Estamos en los pasos finales</string>
+    <string name="wifi_configuration_running">Hay proceso de configuración en proceso, espera por favor</string>
 
     <!-- HINT's -->
     <string name="hint_password">Contraseña</string>

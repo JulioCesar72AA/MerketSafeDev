@@ -17,9 +17,11 @@
         android:theme="@style/AppTheme.NoActionBar"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <activity
-            android:name=".ScanBleDevices"
+            android:name=".WiFiConfigurationActivity"
             android:exported="false" />
-        <!-- Activities -->
+        <activity
+            android:name=".ScanBleDevices"
+            android:exported="false" /> <!-- Activities -->
         <activity
             android:name=".activities.SplashActivity"
             android:exported="true"

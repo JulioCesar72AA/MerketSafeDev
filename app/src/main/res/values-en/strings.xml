@@ -18,6 +18,7 @@
     <string name="wait_45_secs">We are finishing setting up, almost ready</string>
     <string name="wait_20_secs">We are in the final steps</string>
     <string name="device_successfully_configured">The device has been successfully configured</string>
+    <string name="wifi_configuration_running">There is a configuration process in progress, please wait</string>
 
     <!-- HINT's -->
     <string name="hint_password">Passcode</string>
