@@ -82,7 +82,7 @@ class MainActivity: AppCompatActivity(),
         bleDevices.clear()
         cirDevice.clear()
         checkLocation()
-        // setScanningUI()
+        setScanningUI()
         setOnClick()
     }
 
@@ -125,8 +125,9 @@ class MainActivity: AppCompatActivity(),
 
 
     override fun onRefresh() {
-        scanMask.visibility = View.VISIBLE
-        lavLoaderPositive.visibility = View.VISIBLE
+        scanMask.visibility             = View.VISIBLE
+        lavLoaderPositive.visibility    = View.VISIBLE
+        scanningMask.visibility         = View.VISIBLE
         scanDevices()
 
         // Detenemos el escaneo en pantalla
@@ -302,6 +303,7 @@ class MainActivity: AppCompatActivity(),
         scanMask.visibility     = View.GONE
         tvNoDevices.visibility  = View.GONE
         lavLoaderPositive.visibility = View.GONE
+        scanningMask.visibility      = View.GONE
     }
 
 
@@ -318,6 +320,7 @@ class MainActivity: AppCompatActivity(),
         lavLoaderPositive.visibility    = View.VISIBLE
         scanMask.visibility             = View.VISIBLE
         tvNoDevices.visibility          = View.GONE
+        scanningMask.visibility         = View.VISIBLE
     }
 
     private fun setRecyclerUI() {
@@ -335,6 +338,7 @@ class MainActivity: AppCompatActivity(),
         lavLoaderPositive.visibility    = View.GONE
         scanMask.visibility             = View.GONE
         tvNoDevices.visibility          = View.VISIBLE
+        scanningMask.visibility         = View.GONE
     }
 
 
@@ -376,7 +380,7 @@ class MainActivity: AppCompatActivity(),
                         body.put("macs", macsArray)
                         val mediaType = "application/json; charset=utf-8".toMediaType()
                         val requestBody = body.toString().toRequestBody(mediaType)
-                        // Log.e(TAG, body.toString())
+                        Log.e(TAG, "BODY TO REQUEST: ${body.toString()}")
                         fetchMacs(token, requestBody)
                     }
                 }
@@ -436,7 +440,7 @@ class MainActivity: AppCompatActivity(),
                     // Log.e(TAG, "onResponse: ${response.body()}")
                     val respList    = response.body()
                     val testArray   = arrayOf("")
-                    if (respList != null) {
+                    if (respList != null && respList.isNotEmpty()) {
                         for (device in bleDevices) {
                             val cir = CirDevice(device)
 
