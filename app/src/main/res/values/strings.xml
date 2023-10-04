@@ -11,7 +11,7 @@
     <string name="unlocking">Abriendo chapa</string>
     <string name="success">Configuración exitosa</string>
     <string name="device_successfully_configured">El dispositivo ha sido existosamente configurado</string>
-    <string name="card_updated_or_error">El dispositivo ya está actualizado o hay un error en la URL</string>
+    <string name="card_updated_or_error">Hay un error en la URL, intente de nuevo</string>
     <string name="scan_permissions_cloud">Verificando permisos de conexión</string>
     <string name="request_error">Error en la petición</string>
     <string name="user_not_found">Usuario no encontrado</string>

@@ -581,23 +581,29 @@ class RootActivity : AppCompatActivity(),
 
                 val respondModule: String = decResponse.toCharString()
 
-                // Recupera la version del modulo ESPxx
-                fwModule = respondModule.substringAfter("Ver: \"")
-                fwModule = fwModule.substringBefore("Compile Date:")
-                    .replace("\"", "")
-                    .replace("\n", "")
-                    .replace("\r", "")
-                    .replace(" ", "")
+                if(respondModule.contains("Ver: \"") && respondModule.contains("Compile Date:")) {
 
-                Log.e("FW MODULE", fwModule)
-                setFwModule(fwModule)
+                    // Recupera la version del modulo ESPxx
+                    fwModule = respondModule.substringAfter("Ver: \"")
+                    fwModule = fwModule.substringBefore("Compile Date:")
+                        .replace("\"", "")
+                        .replace("\n", "")
+                        .replace("\r", "")
+                        .replace(" ", "")
 
-                // Se sigue a configurar el moduo wifi
-                initWiFiConfig()
+                    Log.e("FW MODULE", fwModule)
+                    setFwModule(fwModule)
+
+                    // Se sigue a configurar el moduo wifi
+                    initWiFiConfig()
+                } else {
+                    runOnUiThread { toast("Sin comunicación con el modulo wifi") }
+                    commandSent = false
+                }
 
             } else if (response.contains(AT_CMD_ERROR)) {
-
-                runOnUiThread { toast(getString(R.string.error_ocurred)) }
+                runOnUiThread { toast("Sin comunicación con el modulo wifi") }
+                commandSent = false
             }
         }
     }
@@ -651,6 +657,7 @@ class RootActivity : AppCompatActivity(),
                 commandSent = false
                 dismissWaitDialog()
                 cirService.setCurrentState(StateMachine.POLING)
+                (actualFragment as ConfigTestCooler).buttonUpdateUrl.visibility = View.GONE
                 runOnUiThread { toast(getString(R.string.device_successfully_configured)) }
 
             } else if (response.contains(AT_CMD_ERROR)) {
@@ -960,7 +967,6 @@ class RootActivity : AppCompatActivity(),
 
                         if (isWifiConnected) {
                             // WiFi exitosamente configurado
-                            // showWifiOkDialog()
                             Log.e(TAG, "se termina la configuracion entre el enfriador y el rauter")
                             (actualFragment as ConfigTestCooler).successfullyConfigured()
                             (actualFragment as ConfigTestCooler).currentState(getString(R.string.ok_wifi))
