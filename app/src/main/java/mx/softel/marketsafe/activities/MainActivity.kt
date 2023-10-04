@@ -96,12 +96,13 @@ class MainActivity: AppCompatActivity(),
 
     private fun showAlertLocation() {
         val dialog = AlertDialog.Builder(this)
-        dialog.setMessage("Your location settings is set to Off, Please enable location to use this application")
-        dialog.setPositiveButton("Settings") { _, _ ->
+        val adMessage = getString(R.string.no_location_services)
+        dialog.setMessage(adMessage)
+        dialog.setPositiveButton(getString(R.string.settings)) { _, _ ->
             val myIntent = Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
             startActivity(myIntent)
         }
-        dialog.setNegativeButton("Cancel") { _, _ ->
+        dialog.setNegativeButton(getString(R.string.tv_cancelar)) { _, _ ->
             finish()
         }
         dialog.setCancelable(false)
@@ -124,8 +125,9 @@ class MainActivity: AppCompatActivity(),
 
 
     override fun onRefresh() {
-        scanMask.visibility = View.VISIBLE
-        lavLoaderPositive.visibility = View.VISIBLE
+        scanMask.visibility             = View.VISIBLE
+        lavLoaderPositive.visibility    = View.VISIBLE
+        scanningMask.visibility         = View.VISIBLE
         scanDevices()
 
         // Detenemos el escaneo en pantalla
@@ -301,6 +303,7 @@ class MainActivity: AppCompatActivity(),
         scanMask.visibility     = View.GONE
         tvNoDevices.visibility  = View.GONE
         lavLoaderPositive.visibility = View.GONE
+        scanningMask.visibility      = View.GONE
     }
 
 
@@ -315,8 +318,9 @@ class MainActivity: AppCompatActivity(),
     private fun setScanningUI() {
         pbScanning.visibility           = View.INVISIBLE
         lavLoaderPositive.visibility    = View.VISIBLE
-        scanMask.visibility     = View.VISIBLE
-        tvNoDevices.visibility  = View.GONE
+        scanMask.visibility             = View.VISIBLE
+        tvNoDevices.visibility          = View.GONE
+        scanningMask.visibility         = View.VISIBLE
     }
 
     private fun setRecyclerUI() {
@@ -332,8 +336,9 @@ class MainActivity: AppCompatActivity(),
     private fun setNoDataUI() {
         pbScanning.visibility           = View.GONE
         lavLoaderPositive.visibility    = View.GONE
-        scanMask.visibility     = View.GONE
-        tvNoDevices.visibility  = View.VISIBLE
+        scanMask.visibility             = View.GONE
+        tvNoDevices.visibility          = View.VISIBLE
+        scanningMask.visibility         = View.GONE
     }
 
 
@@ -351,7 +356,7 @@ class MainActivity: AppCompatActivity(),
             bleManager.scanBleDevices { devices ->
                 bleDevices = devices
                 isScanning = false
-
+                Log.e(TAG, "BLE Devices: ${bleDevices}")
                 if (bleDevices.isEmpty()) {
 
                     setNoDataUI()
@@ -375,7 +380,7 @@ class MainActivity: AppCompatActivity(),
                         body.put("macs", macsArray)
                         val mediaType = "application/json; charset=utf-8".toMediaType()
                         val requestBody = body.toString().toRequestBody(mediaType)
-                        // Log.e(TAG, body.toString())
+                        Log.e(TAG, "BODY TO REQUEST: ${body.toString()}")
                         fetchMacs(token, requestBody)
                     }
                 }
@@ -435,27 +440,24 @@ class MainActivity: AppCompatActivity(),
                     // Log.e(TAG, "onResponse: ${response.body()}")
                     val respList    = response.body()
                     val testArray   = arrayOf("")
-                    if (respList != null) {
+                    if (respList != null && respList.isNotEmpty()) {
                         for (device in bleDevices) {
                             val cir = CirDevice(device)
-
                             for (scanPostRes in respList) {
-
                                 if (scanPostRes.mac == device.getMac()) {
                                     cir.setScanPostResponse(scanPostRes)
                                     cirDevice.add(cir)
                                     break
                                 }
-//                                cir.setScanPostResponse(scanPostRes)
                             }
                         }
 
                         Log.e(TAG, "CIR device: ${cirDevice}")
                         Log.e(TAG, "CIR device size: ${cirDevice.size}")
-                        for (dev in cirDevice) {
-                            setRecyclerUI()
-                        }
-                    }
+
+                        for (dev in cirDevice) { setRecyclerUI() }
+
+                    } else { setNoDataUI() }
                 }
             })
     }

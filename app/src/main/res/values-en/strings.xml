@@ -17,6 +17,7 @@
     <string name="internal_server_error">Internal server error</string>
     <string name="wait_45_secs">We are finishing setting up, almost ready</string>
     <string name="wait_20_secs">We are in the final steps</string>
+    <string name="device_successfully_configured">The device has been successfully configured</string>
 
     <!-- HINT's -->
     <string name="hint_password">Passcode</string>
@@ -198,5 +199,6 @@
     <string name="connected">Connected</string>
     <string name="disconnected">Disonnected</string>
     <string name="update_url">Update firmware</string>
-    <string name="device_successfully_configured">The device has been successfully configured</string>
+    <string name="no_location_services">Your location settings is set to Off, Please enable location to use this application</string>
+
 </resources>
