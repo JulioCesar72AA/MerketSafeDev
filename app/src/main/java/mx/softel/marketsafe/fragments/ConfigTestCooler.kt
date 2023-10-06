@@ -63,6 +63,8 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
         setCurrenStatus(getString(R.string.init_config))
     }
 
+
+
     private fun loadViews (view: View) {
         btnNext             = view.findViewById<Button>(R.id.btnConfigTextNext)
         tvCoolerModelLong   = view.findViewById(R.id.tvCoolerModelLong)
@@ -80,7 +82,7 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
         tvCurrentStatus     = view.findViewById(R.id.tvCurrentStatus)
         buttonUpdateUrl     = view.findViewById<Button>( R.id.button_update_url )
 
-        buttonUpdateUrl.visibility = View.INVISIBLE
+        buttonUpdateUrl.visibility = View.GONE
 
         buttonUpdateUrl.setOnClickListener {
 
