@@ -1,190 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/gray70"
     tools:context=".fragments.HomeMainFragment">
-    <TextView
-        android:id="@+id/tvCoolerModelLong"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/azul40"
-        android:textSize="@dimen/_25dp"
-        android:fontFamily="@font/rubik_bold"
-        android:layout_marginTop="@dimen/_20dp"
-        android:layout_marginStart="@dimen/_20dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:text="COOLER G36" />
 
-    <TextView
-        android:id="@+id/tvCoolerSerial"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/azul40"
-        android:fontFamily="@font/rubik_regular"
-        android:layout_marginTop="@dimen/_20dp"
-        android:layout_marginEnd="@dimen/_20dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:text="Serial: 123091192" />
-
-    <TextView
-        android:id="@+id/tvCoolerBrand"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/azul40"
-        android:fontFamily="@font/rubik_regular"
-        android:layout_marginTop="@dimen/_10dp"
-        android:layout_marginEnd="@dimen/_20dp"
-        app:layout_constraintTop_toBottomOf="@+id/tvCoolerSerial"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:text="Brand: Imbera" />
-
-    <TextView
-        android:id="@+id/tvCoolerModelShort"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/azul40"
-        android:fontFamily="@font/rubik_regular"
-        android:layout_marginTop="@dimen/_10dp"
-        android:layout_marginEnd="@dimen/_20dp"
-        app:layout_constraintTop_toBottomOf="@+id/tvCoolerBrand"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:text="Model: G36" />
-
-    <ImageView
-        android:id="@+id/ivMainImage"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:maxHeight="200dp"
-        android:src="@drawable/filled_cooler"
-        android:scaleType="fitCenter"
-        android:layout_marginTop="@dimen/_35dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvCoolerModelShort"
-        app:layout_constraintBottom_toTopOf="@+id/tvStatus"/>
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tvStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/azul40"
-        android:textSize="@dimen/_25dp"
-        android:text="@string/status"
-        android:fontFamily="@font/rubik_bold"
-        android:layout_marginTop="@dimen/_20dp"
-        android:layout_marginStart="@dimen/_20dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ivMainImage" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/llBleStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/rounded_corners_green_50"
-        android:orientation="horizontal"
-        android:padding="@dimen/_10dp"
-        android:gravity="center"
-        android:layout_marginTop="@dimen/_20dp"
-        app:layout_constraintTop_toBottomOf="@+id/tvStatus"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" >
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/_10dp"
-            android:orientation="vertical" >
             <TextView
+                android:id="@+id/tvCoolerModelLong"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/bluetooth"
-                android:fontFamily="@font/rubik_regular" />
-            <TextView
-                android:id="@+id/tvBleStatusValue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/rubik_regular"
+                android:layout_marginStart="@dimen/_20dp"
+                android:layout_marginTop="@dimen/_20dp"
+                android:fontFamily="@font/rubik_bold"
+                android:textColor="@color/azul40"
                 android:textSize="@dimen/_20dp"
-                android:text="----"
-                android:layout_marginTop="@dimen/_5dp"/>
-        </LinearLayout>
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="COOLER G36" />
 
-        <ImageView
-            android:layout_width="@dimen/_35dp"
-            android:layout_height="@dimen/_35dp"
-            android:src="@drawable/ic_bluetooth"
-            android:tint="@color/azul40" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tvCoolerSerial"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_20dp"
+                android:layout_marginEnd="@dimen/_20dp"
+                android:fontFamily="@font/rubik_regular"
+                android:textColor="@color/azul40"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvCoolerModelLong"
+                tools:text="Serial: 123091192" />
 
-    <TextView
-        android:id="@+id/tvActions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/azul40"
-        android:textSize="@dimen/_25dp"
-        android:text="@string/actions"
-        android:fontFamily="@font/rubik_bold"
-        android:layout_marginTop="@dimen/_35dp"
-        android:layout_marginStart="@dimen/_20dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/llBleStatus" />
+            <TextView
+                android:id="@+id/tvCoolerBrand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10dp"
+                android:layout_marginEnd="@dimen/_20dp"
+                android:fontFamily="@font/rubik_regular"
+                android:textColor="@color/azul40"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvCoolerSerial"
+                tools:text="Brand: Imbera" />
 
-    <Button
-        android:id="@+id/btnTestCooler"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_50dp"
-        android:layout_marginHorizontal="@dimen/_20dp"
-        android:background="@drawable/rounded_corners_gray70"
-        android:text="@string/test"
-        app:layout_goneMarginTop="@dimen/_10dp"
-        android:textSize="@dimen/_20dp"
-        android:textColor="@color/azul40"
-        android:textAllCaps="false"
-        android:gravity="center"
-        android:layout_marginTop="@dimen/_20dp"
-        android:layout_marginBottom="@dimen/_35dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvActions"
-        app:layout_constraintBottom_toTopOf="@+id/btnLockCooler"/>
+            <TextView
+                android:id="@+id/tvCoolerModelShort"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10dp"
+                android:layout_marginEnd="@dimen/_20dp"
+                android:fontFamily="@font/rubik_regular"
+                android:textColor="@color/azul40"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvCoolerBrand"
+                tools:text="Model: G36" />
 
-    <Button
-        android:id="@+id/btnLockCooler"
-        android:layout_width="@dimen/_125dp"
-        android:layout_height="@dimen/_50dp"
-        android:layout_marginHorizontal="@dimen/_20dp"
-        android:background="@drawable/rounded_corners_blue_40"
-        android:text="@string/close"
-        android:textColor="@android:color/white"
-        android:textAllCaps="false"
-        android:drawableStart="@drawable/ic_lock_2"
-        android:padding="@dimen/_10dp"
-        android:layout_marginBottom="@dimen/_35dp"
-        app:layout_constraintStart_toEndOf="@+id/btnUnlockCooler"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnTestCooler"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+            <ImageView
+                android:id="@+id/ivMainImage"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/_35dp"
+                android:maxHeight="200dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/filled_cooler"
+                app:layout_constraintBottom_toTopOf="@+id/tvStatus"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvCoolerModelShort" />
 
-    <Button
-        android:id="@+id/btnUnlockCooler"
-        android:layout_width="@dimen/_125dp"
-        android:layout_height="@dimen/_50dp"
-        android:layout_marginHorizontal="@dimen/_20dp"
-        android:background="@drawable/rounded_corners_blue_40"
-        android:text="@string/open"
-        android:textColor="@android:color/white"
-        android:textAllCaps="false"
-        android:padding="@dimen/_10dp"
-        android:layout_marginBottom="@dimen/_35dp"
-        android:drawableStart="@drawable/ic_lock_open"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnLockCooler"
-        app:layout_constraintTop_toTopOf="@+id/btnLockCooler"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_20dp"
+                android:layout_marginTop="@dimen/_20dp"
+                android:fontFamily="@font/rubik_bold"
+                android:text="@string/status"
+                android:textColor="@color/azul40"
+                android:textSize="@dimen/_25dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ivMainImage" />
+
+            <LinearLayout
+                android:id="@+id/llBleStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_20dp"
+                android:background="@drawable/rounded_corners_green_50"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="@dimen/_10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvStatus">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/_10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/rubik_regular"
+                        android:text="@string/bluetooth" />
+
+                    <TextView
+                        android:id="@+id/tvBleStatusValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_5dp"
+                        android:fontFamily="@font/rubik_regular"
+                        android:text="----"
+                        android:textSize="@dimen/_20dp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="@dimen/_35dp"
+                    android:layout_height="@dimen/_35dp"
+                    android:src="@drawable/ic_bluetooth"
+                    app:tint="@color/azul40" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvActions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_20dp"
+                android:layout_marginTop="@dimen/_35dp"
+                android:fontFamily="@font/rubik_bold"
+                android:text="@string/actions"
+                android:textColor="@color/azul40"
+                android:textSize="@dimen/_25dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/llBleStatus" />
+
+            <Button
+                android:id="@+id/btnTestCooler"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_50dp"
+                android:layout_marginHorizontal="@dimen/_20dp"
+                android:layout_marginTop="@dimen/_20dp"
+                android:layout_marginBottom="@dimen/_35dp"
+                android:background="@drawable/rounded_corners_gray70"
+                android:gravity="center"
+                android:text="@string/test"
+                android:textAllCaps="false"
+                android:textColor="@color/azul40"
+                android:textSize="@dimen/_20dp"
+                app:layout_constraintBottom_toTopOf="@+id/btnLockCooler"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvActions"
+                app:layout_goneMarginTop="@dimen/_10dp" />
+
+            <Button
+                android:id="@+id/btnLockCooler"
+                android:layout_width="@dimen/_125dp"
+                android:layout_height="@dimen/_50dp"
+                android:layout_marginHorizontal="@dimen/_20dp"
+                android:layout_marginBottom="@dimen/_35dp"
+                android:background="@drawable/rounded_corners_blue_40"
+                android:drawableStart="@drawable/ic_lock_2"
+                android:padding="@dimen/_10dp"
+                android:text="@string/close"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/btnUnlockCooler"
+                app:layout_constraintTop_toBottomOf="@+id/btnTestCooler" />
+
+            <Button
+                android:id="@+id/btnUnlockCooler"
+                android:layout_width="@dimen/_125dp"
+                android:layout_height="@dimen/_50dp"
+                android:layout_marginHorizontal="@dimen/_20dp"
+                android:layout_marginBottom="@dimen/_35dp"
+                android:background="@drawable/rounded_corners_blue_40"
+                android:drawableStart="@drawable/ic_lock_open"
+                android:padding="@dimen/_10dp"
+                android:text="@string/open"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/btnLockCooler"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/btnLockCooler" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
