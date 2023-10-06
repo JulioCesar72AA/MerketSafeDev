@@ -69,6 +69,7 @@ class RootActivity : AppCompatActivity(),
     private var triesConnect    = 0
 
     private var firstTime                       = true
+    private var firstTimeBack                   = false
     internal var goingToTabActivity             = false
     private var commandSent                     = false
     internal var configAndTesting               = false
@@ -278,6 +279,7 @@ class RootActivity : AppCompatActivity(),
 
         if (actualFragment == wiFiPasscodeFragment) {
             actualFragment  = wifiFragment
+            wifiFragment.scanWifi()// Nota aun queda por definir bien este paso
             cirService.setCurrentState(StateMachine.GET_AP)
         }
 
@@ -286,7 +288,6 @@ class RootActivity : AppCompatActivity(),
                 actualFragment = wiFiPasscodeFragment
                 cirService.setCurrentState(StateMachine.GOING_BACK)
             }
-
         }
 
         removeCurrentFragment()
@@ -591,18 +592,18 @@ class RootActivity : AppCompatActivity(),
                         .replace("\r", "")
                         .replace(" ", "")
 
-                    Log.e("FW MODULE", fwModule)
+                    //Log.e(TAG, "FW MODULE -> $fwModule")
                     setFwModule(fwModule)
 
                     // Se sigue a configurar el moduo wifi
                     initWiFiConfig()
                 } else {
-                    runOnUiThread { toast("Sin comunicación con el modulo wifi") }
+                    //runOnUiThread { toast("Esperando la respuesta acorde al comando enviado") }
                     commandSent = false
                 }
 
             } else if (response.contains(AT_CMD_ERROR)) {
-                runOnUiThread { toast("Sin comunicación con el modulo wifi") }
+                //runOnUiThread { toast("Sin comunicación con el modulo wifi") }
                 commandSent = false
             }
         }
@@ -651,32 +652,44 @@ class RootActivity : AppCompatActivity(),
             val decResponse = CommandUtils.decryptResponse(response, bleMacBytes)
             val response    = decResponse.toCharString()
 
-            Log.e(TAG, "isFirmwareVersionUpdated: ${decResponse.toHex()} -> ${decResponse.toCharString()}")
+            //Log.e(TAG, "isFirmwareVersionUpdated: ${decResponse.toHex()} -> ${decResponse.toCharString()}")
 
             if (response.contains(AT_CMD_OK)) {
                 commandSent = false
-                dismissWaitDialog()
-                cirService.setCurrentState(StateMachine.POLING)
-                (actualFragment as ConfigTestCooler).buttonUpdateUrl.visibility = View.GONE
-                runOnUiThread { toast(getString(R.string.device_successfully_configured)) }
+                cirService.setCurrentState(StateMachine.SETTING_FIRMWARE_DELAY)                     // Nota:  En este siguiente estado se deshabilita la ventana emergente luego de 1 min
+
+                //Log.e(TAG, "Se termina la actualizacion del modulo wifi Ok")
+                runOnUiThread {
+                    (actualFragment as ConfigTestCooler).buttonUpdateUrl.visibility = View.GONE     // Se deshabilita el boton cuando la respuesta de la actualizacion arroja un "OK"
+                    toast(getString(R.string.device_successfully_configured)) }
 
             } else if (response.contains(AT_CMD_ERROR)) {
 
+                //Log.e(TAG, "Se termina la actualizacion del modulo wifi Er")
                 if (response.contains("is equal or older than")) {
                     runOnUiThread {
-                        (actualFragment as ConfigTestCooler).buttonUpdateUrl.visibility = View.GONE
+                        (actualFragment as ConfigTestCooler).buttonUpdateUrl.visibility = View.GONE // Se deshabilita el boton cuando la respuesta de la actualizacion arroja un "ERROR"
                         toast(getString(R.string.device_successfully_configured))
                     }
                 } else {
                     runOnUiThread { toast(getString(R.string.card_updated_or_error)) }
                 }
 
-                dismissWaitDialog()
-                cirService.setCurrentState(StateMachine.POLING)
+                cirService.setCurrentState(StateMachine.SETTING_FIRMWARE_DELAY)                     // Nota:  En este siguiente estado se deshabilita la ventana emergente luego de 1 min
 
             }
         }
     }
+
+    private fun isFirmwareVersionDelay (command: ReceivedCmd) {
+        // Este nuevo estado ejecuta un retardo que deshabilita la ventana emerjente luego de 1 min, Por solicitud de SOLKOS
+        Handler(Looper.getMainLooper()).postDelayed({
+            //Log.e(TAG, "Han pasado 60 seg desde la actualizacion")
+            dismissWaitDialog()
+            cirService.setCurrentState(StateMachine.POLING)
+        }, 60_000)
+    }
+
 
     private fun isIpModeConfigOk (response: ByteArray, command: ReceivedCmd) {
         if (command == ReceivedCmd.POLEO && !commandSent) {
@@ -1268,7 +1281,6 @@ class RootActivity : AppCompatActivity(),
                         configAndTesting = false
                     }, 45_000)
 
-
                 } else {
                     CirCommands.closeAtSocketCmd(service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
                 }
@@ -1529,6 +1541,10 @@ class RootActivity : AppCompatActivity(),
                 isFirmwareVersionUpdated(response, command)
             }
 
+            StateMachine.SETTING_FIRMWARE_DELAY -> {
+                isFirmwareVersionDelay(command)
+            }
+
             // SE MUESTRA QUE TIPO DE CONFIGURACION SE DESEA REALIZAR
             StateMachine.SHOW_CONFIG_MODES -> {
                 val dialog = ConfigSelectorDialog()
@@ -1564,9 +1580,11 @@ class RootActivity : AppCompatActivity(),
                     deviceMacList = CirCommands.fromResponseGetMacList(response)
 
                     // Log.e(TAG, "DEVICE_MAC_LIST: $deviceMacList")
-                    if (actualFragment != wifiFragment) navigateTo(wifiFragment, true, null)
-
-                    else wifiFragment.scanWifi()
+                    if (actualFragment != wifiFragment) {
+                        navigateTo(wifiFragment, true, null)
+                    } else {
+                        wifiFragment.scanWifi()
+                    }
 
                     actualFragment = wifiFragment
 
@@ -1724,7 +1742,6 @@ class RootActivity : AppCompatActivity(),
 
         dialog.show()
     }
-
 
     private fun showWifiProbeConfig () {
         val baseDialogModel: BaseDialogModel = DialogButtonsModel(
