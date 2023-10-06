@@ -11,7 +11,7 @@
     <string name="unlocking">Abriendo chapa</string>
     <string name="success">Configuración exitosa</string>
     <string name="device_successfully_configured">El dispositivo ha sido existosamente configurado</string>
-    <string name="card_updated_or_error">Hay un error en la URL, intente de nuevo</string>
+    <string name="card_updated_or_error">Hay un error en la URL, intente nuevamente</string>
     <string name="scan_permissions_cloud">Verificando permisos de conexión</string>
     <string name="request_error">Error en la petición</string>
     <string name="user_not_found">Usuario no encontrado</string>
@@ -123,7 +123,7 @@
     <string name="invalid_gateway">La dirección de la puerta de enlace no es valida</string>
     <string name="cancel">Cancelar</string>
     <string name="wait_a_moment">Espera por favor</string>
-    <string name="error_ocurred">Error en la configuración, vuelve a intentarlo</string>
+    <string name="error_ocurred">Error en la configuración, intente nuevamenete</string>
     <string name="connection_not_allowed">No tienes permisos para conectarte a este dispositivo</string>
     <string name="type_solkos">Tipo:</string>
     <string name="model_solkos">Model:</string>
@@ -147,7 +147,7 @@
     <string name="link_device_error">No ha sido posible ligar el dispositivo</string>
     <string name="link_device_ok">Dispositivo ligado correctamente, actualiza el escaneo.</string>
     <string name="not_enough_permissions">No cuentas con los permisos necesarios</string>
-    <string name="signal_strength">Intensidad de señal</string>
+    <string name="signal_strength">Señal</string>
     <string name="access_points">Modem</string>
     <string name="ip_address">Dirección IP</string>
     <string name="brand">Marca:</string>

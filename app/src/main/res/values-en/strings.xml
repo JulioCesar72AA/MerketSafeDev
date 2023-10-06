@@ -157,7 +157,7 @@
     <string name="router">Router</string>
     <string name="cloud">Cloud</string>
 
-    <string name="signal_strength">Signal strength</string>
+    <string name="signal_strength">Signal</string>
     <string name="access_points">Access points</string>
     <string name="ip_address">IP address</string>
     <string name="brand">Brand:</string>
