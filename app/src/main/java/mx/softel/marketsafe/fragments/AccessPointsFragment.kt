@@ -15,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -82,11 +83,11 @@ class AccessPointsFragment: Fragment(),
                 resources.getColor(R.color.colorPrimary, null))
         }
 
-
+        //scanWifi()
+        setWifiList()
         setOnClickListeners()
         root.setScanningUI()
-        setWifiList()
-        scanWifi()
+
         return view
     }
 
@@ -95,9 +96,11 @@ class AccessPointsFragment: Fragment(),
         this.scanAccessPoints()
     }
 
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
     }
+
 
     private fun scanAccessPoints () {
         root.apply {
@@ -175,11 +178,14 @@ class AccessPointsFragment: Fragment(),
      */
     @SuppressLint("UseRequireInsteadOfGet")
     private fun setWifiList() {
+
+        var newLayoutManager = LinearLayoutManager( root, LinearLayoutManager.VERTICAL, false )
+        var newAdapter = ScanWiFiAdapter( this@AccessPointsFragment.context!!, apMacList, this@AccessPointsFragment )
+
         arrayAdapter = ArrayAdapter(root, android.R.layout.simple_list_item_1, apMacList)
         lvAccessPoints.apply {
-            val manager     = LinearLayoutManager(root, LinearLayoutManager.VERTICAL, false)
-            layoutManager   = manager
-            adapter         = ScanWiFiAdapter(this@AccessPointsFragment.context!!, apMacList, this@AccessPointsFragment)
+            layoutManager   = newLayoutManager
+            adapter         = newAdapter
         }
     }
 
@@ -227,12 +233,14 @@ class AccessPointsFragment: Fragment(),
      */
     @Suppress("DEPRECATION")
     internal fun scanWifi() {
+
+        Log.e(TAG, "scanWifi, inicia el escaneo ")
+
         // Leemos los Access Points del celular
         apMacList.clear()
         root.registerReceiver(wifiReceiver, IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
         wifiManager.startScan()
     }
-
 
     private fun clickTest() {
         if (root.cirService.getCharacteristicWrite() == null)
