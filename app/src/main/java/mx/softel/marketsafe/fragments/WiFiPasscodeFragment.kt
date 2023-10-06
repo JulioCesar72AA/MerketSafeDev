@@ -1,5 +1,6 @@
 package mx.softel.marketsafe.fragments
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -8,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import mx.softel.cirwirelesslib.enums.StateMachine
 import mx.softel.marketsafe.R
 import mx.softel.marketsafe.activities.RootActivity
