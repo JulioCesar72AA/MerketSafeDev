@@ -12,6 +12,7 @@ enum class StateMachine {
     SETTING_REPOSITORY_URL, // Se actualiza la url del repositorio
     SETTING_FIRMWARE_PATH, // Se actualiza la ruta del archivo que esta en el servidor
     SETTING_FIRMWARE_VERSION, // Se actualiza la version de firmware a descargar
+    SETTING_FIRMWARE_DELAY,
     SHOW_CONFIG_MODES, // Muestra las formas de configurar la CIR WIRELESS
     SHOW_PARAMETERS_STATIC_IP, // Se muestra el cuando de dialogo
     SETTING_MODE_IP_CONFIG, // Se configura el tipo de IP - DHCP o estatica
