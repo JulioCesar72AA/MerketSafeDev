@@ -113,7 +113,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         tools:listitem="@layout/scan_wifi_prototype"
-                        android:padding="@dimen/cv_margin_access_point" />
+                         />
 
                 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
             </androidx.cardview.widget.CardView>
