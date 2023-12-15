@@ -4,14 +4,21 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "mx.softel.marketsafe"
+<<<<<<< HEAD
         minSdkVersion 24
         targetSdkVersion 33
         versionCode 12
         versionName "1.0.12"
+=======
+        minSdkVersion 23
+        targetSdkVersion 34
+        versionCode 13
+        versionName "1.0.13"
+>>>>>>> 54ec8ed1b82efecb62255922280bdca168b6838d
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     lintOptions {
