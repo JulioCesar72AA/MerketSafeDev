@@ -5,13 +5,21 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.viewbinding.BuildConfig
+import mx.softel.Softel_Dinamic_Fw.Common.SoftelDinamicFwAuthenticate
+import mx.softel.Softel_Dinamic_Fw.Common.SoftelDinamicFwSupportedList
 import mx.softel.marketsafe.R
+import mx.softel.marketsafe.utils.Credential
 import mx.softel.marketsafe.web_services_module.ui_login.LoginActivity
 import mx.softel.marketsafe.utils.Permissions
 import mx.softel.marketsafe.utils.Utils
+import java.util.ArrayList
 
+private lateinit var token : String
+private lateinit var fwList : ArrayList<String>
 class SplashActivity : AppCompatActivity() {
 
     private val adapter = BluetoothAdapter.getDefaultAdapter()
@@ -74,6 +82,59 @@ class SplashActivity : AppCompatActivity() {
             overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
         }, 2000)
     }
+
+    /******************* Get Token *******************/
+    private var authToken : SoftelDinamicFwAuthenticate? = null
+    private val authTokenInterface = object : SoftelDinamicFwAuthenticate.AuthenticationResult {
+        override fun onSuccessAuthentication(tokenRes : String) {
+            token = tokenRes
+//            Log.e("token", token)
+            initSupportedFwListVariables()
+        }
+
+        override fun onErrorAuthentication(error: String) {
+            Log.e(TAG, error)
+        }
+    }
+    private fun initAuthenticateVariables () {
+        var user = Credential.USUARIO
+        var pass = ""
+        Log.e("BuildConfig", BuildConfig.DEBUG.toString())
+        if (BuildConfig.DEBUG) {
+            pass = Credential.PASS_DEV
+        } else {
+            pass = Credential.PASS_PROD
+        }
+        authToken = SoftelDinamicFwAuthenticate(
+            this,
+            BuildConfig.DEBUG,
+            user,
+            pass,
+            authTokenInterface)
+    }
+    /******************* Get Fw Support List *******************/
+    private var fwSupportedList : SoftelDinamicFwSupportedList? = null
+    private val fwSupportedListInterface = object : SoftelDinamicFwSupportedList.SupportedListResult {
+        override fun onSuccessSupportedList(supportedFwList: ArrayList<String>) {
+            fwList = supportedFwList
+            Log.e("fwList", fwList.toString())
+            //saveFirmwareList()
+        }
+
+        override fun onErrorSupportedList(error: String) {
+            //           Log.e(TAG, error)
+        }
+    }
+    private fun initSupportedFwListVariables () {
+        var appId = applicationContext.packageName
+        fwSupportedList = SoftelDinamicFwSupportedList(
+            this,
+            BuildConfig.DEBUG,
+            token,
+            appId,
+            fwSupportedListInterface)
+    }
+
 
     /************************************************************************************************/
     /**     COMPANION OBJECT                                                                        */
