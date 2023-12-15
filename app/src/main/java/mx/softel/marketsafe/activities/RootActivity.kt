@@ -23,6 +23,8 @@ import kotlinx.android.synthetic.main.scanning_mask.*
 import mx.softel.bleservicelib.BleService
 import mx.softel.bleservicelib.enums.ConnState
 import mx.softel.bleservicelib.enums.DisconnectionReason
+import mx.softel.cir_wireless_mx.Entity.TagsFirmwareList
+import mx.softel.cir_wireless_mx.dataBaseRoom.UserRepository
 import mx.softel.cirwirelesslib.constants.*
 import mx.softel.cirwirelesslib.enums.*
 import mx.softel.cirwirelesslib.extensions.hexStringToByteArray
@@ -1388,13 +1390,31 @@ class RootActivity : AppCompatActivity(),
                 }
             }
         } else {
-            cirService.extractFirmwareData(
+            val deviceFirmware = cirService.extractFirmwareData(
                 service!!,
                 cirService.getCharacteristicDeviceInfo()!!,
                 cirService.getNotificationDescriptor()!!
             )
+
+            var repo = UserRepository(this)
+            var statusId = repo.getFirmwareListWithId(deviceFirmware)
+            //Log.e("statusId", "statusId: $statusId")
+            val correctFirmware = checkCorrectFirmware(statusId)
+
+
+            //Log.e("fwListBleCIRfw", correctFirmware.toString())
+            if (!correctFirmware)
+                service!!.disconnectBleDevice(DisconnectionReason.FIRMWARE_UNSUPPORTED.status)
         }
 
+    }
+
+    private fun checkCorrectFirmware(fware: TagsFirmwareList): Boolean {
+        //Log.e("fwListBleCIRfw", fware.toString())
+        if (fware.id == fware.fw) {
+            return true
+        }
+        return false
     }
 
     override fun characteristicWrite(characteristic: BluetoothGattCharacteristic) {

@@ -269,5 +269,6 @@ public class LoginActivity extends AppCompatActivity {
         llCourtain.setVisibility(View.GONE);
         btnAccept.setVisibility(View.VISIBLE);
     }
+
 }
 

@@ -11,6 +11,8 @@ import androidx.core.app.ActivityCompat
 import androidx.viewbinding.BuildConfig
 import mx.softel.Softel_Dinamic_Fw.Common.SoftelDinamicFwAuthenticate
 import mx.softel.Softel_Dinamic_Fw.Common.SoftelDinamicFwSupportedList
+import mx.softel.cir_wireless_mx.Entity.TagsFirmwareList
+import mx.softel.cir_wireless_mx.dataBaseRoom.UserRepository
 import mx.softel.marketsafe.R
 import mx.softel.marketsafe.utils.Credential
 import mx.softel.marketsafe.web_services_module.ui_login.LoginActivity
@@ -30,6 +32,7 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
+        initAuthenticateVariables()
     }
 
 
@@ -88,12 +91,12 @@ class SplashActivity : AppCompatActivity() {
     private val authTokenInterface = object : SoftelDinamicFwAuthenticate.AuthenticationResult {
         override fun onSuccessAuthentication(tokenRes : String) {
             token = tokenRes
-//            Log.e("token", token)
+            //Log.e("token", token)
             initSupportedFwListVariables()
         }
 
         override fun onErrorAuthentication(error: String) {
-            Log.e(TAG, error)
+            //Log.e(TAG, error)
         }
     }
     private fun initAuthenticateVariables () {
@@ -107,9 +110,9 @@ class SplashActivity : AppCompatActivity() {
         }
         authToken = SoftelDinamicFwAuthenticate(
             this,
-            BuildConfig.DEBUG,
+            true,//BuildConfig.DEBUG,
             user,
-            pass,
+            Credential.PASS_DEV,
             authTokenInterface)
     }
     /******************* Get Fw Support List *******************/
@@ -117,22 +120,35 @@ class SplashActivity : AppCompatActivity() {
     private val fwSupportedListInterface = object : SoftelDinamicFwSupportedList.SupportedListResult {
         override fun onSuccessSupportedList(supportedFwList: ArrayList<String>) {
             fwList = supportedFwList
-            Log.e("fwList", fwList.toString())
-            //saveFirmwareList()
+            //Log.e("fwList", fwList.toString())
+            saveFirmwareList()
         }
 
         override fun onErrorSupportedList(error: String) {
-            //           Log.e(TAG, error)
+            //Log.e(TAG, error)
         }
     }
     private fun initSupportedFwListVariables () {
         var appId = applicationContext.packageName
         fwSupportedList = SoftelDinamicFwSupportedList(
             this,
-            BuildConfig.DEBUG,
+            true,//BuildConfig.DEBUG,
             token,
             appId,
             fwSupportedListInterface)
+    }
+
+    private fun saveFirmwareList() {
+        var repo = UserRepository(this)
+        for (firmware in fwList) {
+            var statusId = repo.getFirmwareListWithId(firmware)
+            //Log.e("statusId", "statusId: $statusId")
+            val firmwareList = TagsFirmwareList(id = firmware, fw = firmware)
+
+            if (statusId != null) { repo.updateFirmwareList(firmwareList) }
+
+            else { repo.insertFirmwareList(firmwareList) }
+        }
     }
 
 

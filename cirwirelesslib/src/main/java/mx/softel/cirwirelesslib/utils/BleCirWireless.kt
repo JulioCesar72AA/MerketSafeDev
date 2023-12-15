@@ -142,35 +142,17 @@ class BleCirWireless {
 
     fun extractFirmwareData(service: BleService,
                             characteristic: BluetoothGattCharacteristic,
-                            descriptor: BluetoothGattDescriptor) {
-        // Log.d(TAG, "extractFirmwareData")
-        // Lectura de DEVICE_INFO_UUID
+                            descriptor: BluetoothGattDescriptor) : String {
         if (characteristic.uuid.toString() == BleConstants.DEVICE_INFO_UUID) {
             val one = characteristic.value[1]
             val two = characteristic.value[2]
             val three = characteristic.value[3]
             firmware = "$one.$two.$three"
             println("$TAG FIRMWARE $firmware")
-            correctFirmware = (firmware == BleConstants.FIRMWARE_350) ||
-                    (firmware == BleConstants.FIRMWARE_351) ||
-                    (firmware == BleConstants.FIRMWARE_352) ||
-                    (firmware == BleConstants.FIRMWARE_353) ||
-                    (firmware == BleConstants.FIRMWARE_354) ||
-                    (firmware == BleConstants.FIRMWARE_355) ||
-                    (firmware == BleConstants.FIRMWARE_363) ||
-                    (firmware == BleConstants.FIRMWARE_382) ||
-                    (firmware == BleConstants.FIRMWARE_387) ||
-                    (firmware == BleConstants.FIRMWARE_388) ||
-                    (firmware == BleConstants.FIRMWARE_401) ||
-                    (firmware == BleConstants.FIRMWARE_402) ||
-                    (firmware == BleConstants.FIRMWARE_410)
-
-
-            if (!correctFirmware)
-                service.disconnectBleDevice(DisconnectionReason.FIRMWARE_UNSUPPORTED.status)
-
             initPoleCmd(service, characteristicNotify!!, descriptor)
+            return firmware
         }
+        return ""
     }
 
 
