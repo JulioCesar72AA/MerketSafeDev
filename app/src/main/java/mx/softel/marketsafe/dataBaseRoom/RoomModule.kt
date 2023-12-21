@@ -6,9 +6,10 @@ import mx.softel.cir_wireless_mx.Entity.TagsFirmwareList
 import mx.softel.cir_wireless_mx.dataBaseRoom.Dao.*
 
 
-class UserRepository(context: Context) {
+class SupportedFirmwaresRepository(context: Context) {
 
-    var db_firmwareList: TagFirmwareListDao = TagFirmwareListDatabase.getInstance(context)?.firmwareListDao()!!
+    var db_firmwareList     : TagFirmwareListDao        = SupportedFirmwareDao.getInstance(context)?.firmwareListDao()!!
+    var dbSupportedFirmware : SupportedFirmwareDao      = SupportedFirmwareDao.getInstance(context)!!
 
     fun getFirmwareList(): TagsFirmwareList {
         return db_firmwareList.getFirmwareList()
@@ -34,6 +35,12 @@ class UserRepository(context: Context) {
             db_firmwareList.deleteFirmwareList(firmwareList)
         //}
     }
+
+    // Delete firmware table
+    fun dropFirmwareTableList () {
+        dbSupportedFirmware.clearAllData()
+    }
+
     private class insertAsyncTaskFirmwareList internal constructor(private val tagFirmwareListDao: TagFirmwareListDao ) :
         AsyncTask<TagsFirmwareList, Void, Void>() {
 

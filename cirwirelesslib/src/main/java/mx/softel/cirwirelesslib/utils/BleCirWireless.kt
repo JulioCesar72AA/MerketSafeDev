@@ -149,6 +149,7 @@ class BleCirWireless {
             val three = characteristic.value[3]
             firmware = "$one.$two.$three"
             println("$TAG FIRMWARE $firmware")
+
             initPoleCmd(service, characteristicNotify!!, descriptor)
             return firmware
         }
