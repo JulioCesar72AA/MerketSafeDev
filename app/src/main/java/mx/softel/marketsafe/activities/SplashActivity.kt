@@ -110,9 +110,9 @@ class SplashActivity : AppCompatActivity() {
         }
         authToken = SoftelDinamicFwAuthenticate(
             this,
-            true,//BuildConfig.DEBUG,
+            BuildConfig.DEBUG,
             user,
-            Credential.PASS_DEV,
+            pass,
             authTokenInterface)
     }
     /******************* Get Fw Support List *******************/
@@ -132,7 +132,7 @@ class SplashActivity : AppCompatActivity() {
         var appId = applicationContext.packageName
         fwSupportedList = SoftelDinamicFwSupportedList(
             this,
-            true,//BuildConfig.DEBUG,
+            BuildConfig.DEBUG,
             token,
             appId,
             fwSupportedListInterface)

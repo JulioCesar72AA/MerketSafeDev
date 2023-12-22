@@ -437,12 +437,12 @@ class MainActivity: AppCompatActivity(),
 
                 override fun onResponse(call: Call<List <ScanPostResponse>>, response: Response <List <ScanPostResponse>>) {
                     // Handle function to display posts
-                    // Log.e(TAG, "onResponse: ${response.body()}")
+                     Log.e(TAG, "onResponseMacs: ${response.body()}")
                     val respList    = response.body()
                     val testArray   = arrayOf("")
                     if (respList != null && respList.isNotEmpty()) {
                         for (device in bleDevices) {
-                            val cir = CirDevice(device)
+                            val cir = CirDevice( device)
                             for (scanPostRes in respList) {
                                 if (scanPostRes.mac == device.getMac()) {
                                     cir.setScanPostResponse(scanPostRes)

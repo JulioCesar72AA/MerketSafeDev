@@ -47,6 +47,7 @@ import mx.softel.marketsafe.interfaces.FragmentNavigation
 import mx.softel.marketsafe.utils.Utils
 import mx.softel.marketsafe.web_services_module.ui_login.log_in_dialog.DialogButtonsModel
 import mx.softel.marketsafe.web_services_module.web_service.ApiClient
+import mx.softel.marketsafe.web_services_module.web_service.LastLoginGetRequest
 import mx.softel.marketsafe.web_services_module.web_service.LinkPostResponse
 import mx.softel.marketsafe.web_services_module.web_service.TransmitPostResponse
 import mx.softel.scanblelib.extensions.toHexValue
@@ -233,7 +234,6 @@ class RootActivity : AppCompatActivity(),
         token           = data.getString(TOKEN)!!
         userPermissions = data.getSerializable(USER_PERMISSIONS) as UserPermissions
         // Log.e(TAG, "TOKEN: ${token}")
-
         beaconBytes = data[EXTRA_BEACON_BYTES] as ByteArray
         val beaconId    = "0x${byteArrayOf(this.beaconBytes!![5], this.beaconBytes!![6]).toHexValue().toUpperCase(Locale.ROOT)}"
         enableWifiConfig = isACirWifiBeacon(beaconId)
@@ -1688,7 +1688,7 @@ class RootActivity : AppCompatActivity(),
                 }
 
                 override fun onResponse(call: Call<TransmitPostResponse>, response: Response<TransmitPostResponse>) {
-                    Log.e(TAG, "onResponse: ${response.body()}")
+                    Log.e(TAG, "onResponseLink: ${response.body()}")
                     val body = response.body()
                     if (body != null) {
 //                        Log.e(TAG, "onResponse: ${response.body()!!.status}")
@@ -1704,6 +1704,26 @@ class RootActivity : AppCompatActivity(),
             })
     }
 
+
+
+    private fun fetchLastLoginPost () {
+        val apiClient = ApiClient()
+        Log.e(TAG, "Bearer $token")
+        // Pass the token as parameter
+        apiClient.getApiService(this).fetchLastLoginGet(token = "Bearer $token", "B4A2EB4F05F0")
+            .enqueue(object : retrofit2.Callback <LastLoginGetRequest> {
+                override fun onFailure(call: Call<LastLoginGetRequest>, t: Throwable) {
+                    Log.e(TAG, "onFailure")
+                }
+
+                override fun onResponse(call: Call<LastLoginGetRequest>, response: Response<LastLoginGetRequest>) {
+                    Log.e(TAG, "onResponseLast: ${call.request()}")
+                    Log.e(TAG, "onResponseLast: ${response.message()}")
+                    Log.e(TAG, "onResponseLast: ${response.code()}")
+                    Log.e(TAG, "onResponseLast: ${response.body()}")
+                }
+            })
+    }
 
     private fun showTransmitionOkDialog () {
         val baseDialogModel: BaseDialogModel = DialogButtonsModel(
@@ -2023,6 +2043,7 @@ class RootActivity : AppCompatActivity(),
                 val requestBody = body.toString().toRequestBody(mediaType)
                 Log.e(TAG, body.toString())
                 fetchLink(token, requestBody)
+                fetchLastLoginPost()
             }
 
 

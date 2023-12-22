@@ -7,4 +7,5 @@ object URLs {
     const val SCAN_URL          = "assets/scan"
     const val STATUS_URL        = "assets/status"
     const val LINK_URL          = "assets/link"
+    const val LAST_LOGIN        = "devices/{mac}/last_login"
 }

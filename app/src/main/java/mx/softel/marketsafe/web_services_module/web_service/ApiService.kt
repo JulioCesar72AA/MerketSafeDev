@@ -24,4 +24,7 @@ interface ApiService {
     @Headers("Content-Type: application/json")
     @POST(URLs.LINK_URL)
     fun fetchLinkPost(@Header("Authorization") token: String, @Body infoMac : RequestBody): Call<LinkPostResponse>
+
+    @GET(URLs.LAST_LOGIN)
+    fun fetchLastLoginGet(@Header("Authorization") token: String, @Path("mac") mac: String): Call<LastLoginGetRequest>
 }
