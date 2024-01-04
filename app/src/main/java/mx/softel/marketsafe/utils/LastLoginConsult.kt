@@ -1,0 +1,14 @@
+package mx.softel.marketsafe.utils
+
+enum class LastLoginConsult {
+
+    SEND_POST,
+    GET_RESPONSE_POST,
+    WAIT_BEFORE_POST,
+    DISPLAY_DIALOG_ALERT,
+    WAITTH_USER_INTERACTION,
+    SEND_POST_AGAIN,
+    GET_RESPONSE_NEW_POST,
+    WAIT_BEFORE_NEW_POST,
+    DISPLAY_DIALOG_ALERT_TRY_AGAIN
+}

@@ -2,7 +2,6 @@ package mx.softel.marketsafe.fragments
 
 import android.annotation.SuppressLint
 import android.content.DialogInterface
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -13,16 +12,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.airbnb.lottie.LottieAnimationView
-import mx.softel.cirwirelesslib.enums.StateMachine
 import mx.softel.marketsafe.R
 import mx.softel.marketsafe.activities.RootActivity
 import mx.softel.marketsafe.interfaces.FragmentUiUpdate
-import java.time.LocalDateTime
 
 private const val TAG = "ConfigTestCooler"
 
@@ -273,7 +269,7 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
         statusDoorA = status_
     }
 
-    fun alertAAAAAAAAAAAAAAA() {
+    fun alertDialogOpenDoor() {
 
         val builder = AlertDialog.Builder(root)
         builder.apply {
@@ -292,7 +288,7 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
         builder.show()
     }
 
-    fun alertBBBBBBBBBBBBBB() {
+    fun AlertDialogTryAgain() {
 
 
         val builder = AlertDialog.Builder(root)

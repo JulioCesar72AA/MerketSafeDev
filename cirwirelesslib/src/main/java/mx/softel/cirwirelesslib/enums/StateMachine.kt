@@ -12,7 +12,7 @@ enum class StateMachine {
     SETTING_REPOSITORY_URL, // Se actualiza la url del repositorio
     SETTING_FIRMWARE_PATH, // Se actualiza la ruta del archivo que esta en el servidor
     SETTING_FIRMWARE_VERSION, // Se actualiza la version de firmware a descargar
-    SETTING_FIRMWARE_DELAY,
+    SETTING_FIRMWARE_DELAY, // Secuencia para la implemntacion de post a api "last_login"
     SHOW_CONFIG_MODES, // Muestra las formas de configurar la CIR WIRELESS
     SHOW_PARAMETERS_STATIC_IP, // Se muestra el cuando de dialogo
     SETTING_MODE_IP_CONFIG, // Se configura el tipo de IP - DHCP o estatica
@@ -23,8 +23,8 @@ enum class StateMachine {
     GET_IP,         // Obteniendo la IP
     GET_STATUS_AP,  // Obteniendo el RSSI
     PING,           // Obteniendo status de PING
-    DATA_CONNECTION,// Obteniendo status de conexión a servidor
-    CHECK_SEND_DATA, //
+    DATA_CONNECTION, // Obteniendo status de conexión a servidor
+    CHECK_SEND_DATA, // Secuencia para la implemntacion de post a api "last_login"
     OPENNING_LOCK, // Abriendo chapa (cerradura)
     CLOSING_LOCK, // Cerrando chapa (cerradura)
     RELOADING_FRIDGE, // Cargando refrigerador
