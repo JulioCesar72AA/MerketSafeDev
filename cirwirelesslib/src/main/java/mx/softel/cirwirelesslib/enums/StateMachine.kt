@@ -24,6 +24,7 @@ enum class StateMachine {
     GET_STATUS_AP,  // Obteniendo el RSSI
     PING,           // Obteniendo status de PING
     DATA_CONNECTION,// Obteniendo status de conexión a servidor
+    CHECK_SEND_DATA, //
     OPENNING_LOCK, // Abriendo chapa (cerradura)
     CLOSING_LOCK, // Cerrando chapa (cerradura)
     RELOADING_FRIDGE, // Cargando refrigerador
