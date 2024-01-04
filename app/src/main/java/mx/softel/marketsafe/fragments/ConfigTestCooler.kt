@@ -1,6 +1,8 @@
 package mx.softel.marketsafe.fragments
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -11,12 +13,16 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.airbnb.lottie.LottieAnimationView
+import mx.softel.cirwirelesslib.enums.StateMachine
 import mx.softel.marketsafe.R
 import mx.softel.marketsafe.activities.RootActivity
 import mx.softel.marketsafe.interfaces.FragmentUiUpdate
+import java.time.LocalDateTime
 
 private const val TAG = "ConfigTestCooler"
 
@@ -63,8 +69,6 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
         setCurrenStatus(getString(R.string.init_config))
     }
 
-
-
     private fun loadViews (view: View) {
         btnNext             = view.findViewById<Button>(R.id.btnConfigTextNext)
         tvCoolerModelLong   = view.findViewById(R.id.tvCoolerModelLong)
@@ -84,9 +88,18 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
 
         buttonUpdateUrl.visibility = View.GONE
 
+        // se preciona el boton de actualizacion
         buttonUpdateUrl.setOnClickListener {
 
-            //Log.e(TAG, "Boton presionado ir a ->StateMachine.GET_CLIENT<- ")
+//            // solicitud de facha y hora del dispositivo celular
+//            datetime = LocalDateTime.now()
+//            Log.e(TAG, "Obtencion de fecha: LocalDateTime -> $datetime <- ")
+//
+//            unixTime = System.currentTimeMillis() / 1000
+//            Log.e(TAG, "Obtencion de fecha: System -> $unixTime <- ")
+//            Log.e(TAG, "* Solicita la fecha del dispositivo y comienza a actualizar el ESPxx")
+
+            Log.e(TAG, "* Boton presionado ir a ->StateMachine.GET_CLIENT<-")
             root.initUpdateUrl()
         }
 
@@ -133,6 +146,8 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
         ivGreenCheck1.visibility = View.VISIBLE
     }
 
+    private lateinit var token              : String
+
     internal fun appearGreenCheckCloud () {
         root.runOnUiThread {
             ivGreenCheck2.visibility = View.VISIBLE
@@ -141,11 +156,21 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
 
             Log.e(TAG, "fw aux espxx: $fwModuleAux")
 
-            if( validateFw(fwModuleAux) ) {
+            if( validateFw( fwModuleAux ) ) {
+                setflagvalidateFw(true)
                 Log.e(TAG, "fw aux espxx valido: ${validateFw(fwModuleAux)}")
                 buttonUpdateUrl.visibility = View.VISIBLE
             }
         }
+    }
+
+    var flagFw = false
+    fun setflagvalidateFw( _statusFlag: Boolean ){
+        flagFw = _statusFlag
+    }
+
+    fun getflagvalidateFw(): Boolean{
+        return flagFw
     }
 
     private fun validateFw (versionFw: String): Boolean = (versionFw == "0.2.0-1")
@@ -236,6 +261,55 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
             }
             5 -> { }
         }
+    }
+
+    var statusDoorA = false
+
+    fun getStatusDor(): Boolean{
+        return statusDoorA
+    }
+
+    fun setStatusDor(status_: Boolean){
+        statusDoorA = status_
+    }
+
+    fun alertAAAAAAAAAAAAAAA() {
+
+        val builder = AlertDialog.Builder(root)
+        builder.apply {
+            setPositiveButton(R.string.accept,
+                DialogInterface.OnClickListener { dialog, id ->
+                    statusDoorA = true
+                })
+
+        }
+        // Set other dialog properties
+        builder.setTitle("Revisando comunicación.")
+        builder.setMessage("Abra la puerta y mantenla por unos segundos, posteriormente cierre la puerta del refrigerador.")
+
+        // Create the AlertDialog
+        builder.create()
+        builder.show()
+    }
+
+    fun alertBBBBBBBBBBBBBB() {
+
+
+        val builder = AlertDialog.Builder(root)
+        builder.apply {
+            setPositiveButton(R.string.accept,
+                DialogInterface.OnClickListener { dialog, id ->
+
+                })
+        }
+        // Set other dialog properties
+        builder.setTitle("Revisando comunicación.")
+        builder.setMessage("Hubo un problema con la comunicación, intente más tarde.")
+
+        // Create the AlertDialog
+        builder.create()
+        builder.show()
+
     }
 
 }
