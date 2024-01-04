@@ -201,5 +201,6 @@
     <string name="disconnected">Disonnected</string>
     <string name="update_url">Update firmware</string>
     <string name="no_location_services">Your location settings is set to Off, Please enable location to use this application</string>
+    <string name="open_and_close_door">Open and close the refrigerator door to generate new data to report.</string>
 
 </resources>
