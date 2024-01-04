@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.*
+import android.icu.text.SimpleDateFormat
 import android.icu.util.TimeZone
 import android.location.Location
 import android.location.LocationManager
@@ -57,8 +58,10 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
+
 
 class RootActivity : AppCompatActivity(),
                      FragmentNavigation,
@@ -531,6 +534,7 @@ class RootActivity : AppCompatActivity(),
      * Actualiza las rutas de los firmwares almacenados en la nube
      ***********************************************************************************************/
     private fun isRepositoryUrlUpdated (response: ByteArray, command: ReceivedCmd) {
+
         if (command == ReceivedCmd.POLEO && !commandSent) {
 
             CirCommands.setRepositoryUrl(repositoryModel.repositoryUrl(), repositoryModel.port(), service!!, cirService.getCharacteristicWrite()!!, bleMacBytes)
@@ -925,12 +929,6 @@ class RootActivity : AppCompatActivity(),
     }
 
 
-
-
-
-
-
-
     /************************************************************************************************/
     /**     PARSER                                                                                  */
     /************************************************************************************************/
@@ -1281,6 +1279,12 @@ class RootActivity : AppCompatActivity(),
                         // Se ejecuta en otro hilo
                         runOnUiThread {(actualFragment as ConfigTestCooler).testFinished()}
                         configAndTesting = false
+
+                        if ( (actualFragment as ConfigTestCooler).getflagvalidateFw() == false )
+                        {
+                            cirService.setCurrentState(StateMachine.CHECK_SEND_DATA)  ///////////////////////////////////////////haber
+                        }
+
                     }, 45_000)
 
                 } else {
@@ -1483,6 +1487,7 @@ class RootActivity : AppCompatActivity(),
         service!!.setMtu(300)
     }
 
+    var flagShowWaitDialog = false
 
     /************************************************************************************************/
     /**     BLE SERVICE EXTENSIONS                                                                  */
@@ -1562,7 +1567,8 @@ class RootActivity : AppCompatActivity(),
             }
 
             StateMachine.SETTING_FIRMWARE_DELAY -> {
-                isFirmwareVersionDelay(command)
+                //isFirmwareVersionDelay(command)
+                getCheckSendReport()
             }
 
             // SE MUESTRA QUE TIPO DE CONFIGURACION SE DESEA REALIZAR
@@ -1583,11 +1589,9 @@ class RootActivity : AppCompatActivity(),
                 isIpModeConfigOk(response, command)
             }
 
-
             StateMachine.SETTING_STATIC_IP_VALUES -> {
                 areIpConfigValuesOk(response, command)
             }
-
 
             // STATUS DE MAC'S DE AP'S QUE EL DISPOSITIVO VE
             StateMachine.GET_AP -> {
@@ -1637,11 +1641,296 @@ class RootActivity : AppCompatActivity(),
             StateMachine.GET_IP             -> { getIpFromAt(response, command) }
             StateMachine.PING               -> { getPing(response, command) }
             StateMachine.DATA_CONNECTION    -> { getDataConnection(response, command, serviceStep) }
+            StateMachine.CHECK_SEND_DATA    -> { flagShowWaitDialog = true
+                                                 getCheckSendReport() }
             // ****************************************************************************************
 
             else -> { /* Ignoramos la respuesta */ }
         }
     }
+
+    var subState = 1
+    var responseCode = 0
+    var getTimestamp: String = ""
+    var getMac: String = ""
+    var getStatus: String = ""
+    var getVarName: String = ""
+    var intentos = 0
+
+    private fun fetchLastLoginPost (diviseMac: String) {
+        val apiClient = ApiClient()
+        //Log.e(TAG, "Bearer $token")
+
+        // Pass the token as parameter
+        apiClient.getApiService(this).fetchLastLoginGet(token = "Bearer $token", diviseMac) // B4A2EB4F05F0  //B4A2EB4F05DC   //B4A2EB4874D4
+            .enqueue(object : retrofit2.Callback <LastLoginGetRequest> {
+                override fun onFailure(call: Call<LastLoginGetRequest>, t: Throwable) {
+                    responseCode = 401
+                    //Log.e(TAG, "onFailure")
+                }
+
+                override fun onResponse(call: Call<LastLoginGetRequest>, response: Response<LastLoginGetRequest>) {
+                    //Log.e(TAG, "onResponseLast: ${call.request()}")
+                    //Log.e(TAG, "onResponseLast: ${response.message()}")
+                    //Log.e(TAG, "onResponseLast: ${response.code()}")
+                    //Log.e(TAG, "onResponseLast: ${response.body()}")
+
+                    if( response.body() != null && response.code() == 200 ){
+                        responseCode = response.code()
+                        intentos = 0
+                        getTimestamp = response.body()!!.timestamp
+                        getMac = response.body()!!.mac
+                        getStatus = response.body()!!.status
+                        getVarName = response.body()!!.variable_name
+
+                        //Log.e(TAG, "onResponseLastBody: ${response.body()?.mac}")
+                        //Log.e(TAG, "onResponseLastBody: ${response.body()?.status}")
+                        //Log.e(TAG, "onResponseLastBody: ${response.body()?.timestamp}")
+                        //Log.e(TAG, "onResponseLastBody: ${response.body()?.variable_name}")
+                    }
+                    else if(response.code() == 404 )
+                    {
+                        responseCode = response.code()
+                    }
+
+                }
+            })
+    }
+
+    fun remoteDateToTimestamp(dateStr: String): Long {
+        try {
+            // Definir el formato de fecha
+            val formato = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.US)
+
+            val localDateTime = formato.parse(dateStr)
+
+            // Obtener el Instant y luego el tiempo en milisegundos desde 1985
+            val tiempoDesde1985 = localDateTime?.time ?: -1
+
+            //Log.e(TAG, "tiempoDesde1985 = $tiempoDesde1985")
+
+            return tiempoDesde1985
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Manejar el caso en que la conversión falla
+            return -1
+        }
+    }
+
+    fun localDateToDateUTC(time: Long): Long {
+        try {
+            val dateFormat =
+                SimpleDateFormat("yyyy.MM.dd HH:mm:ss")
+            val date = Date(time)
+            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val strDate = dateFormat.format(date)
+            //Log.e("Local Millis * " + date.getTime() + "  ---UTC time  " + strDate);//correct
+            val dateFormatLocal =
+                SimpleDateFormat("yyyy.MM.dd HH:mm:ss")
+            val utcDate = dateFormatLocal.parse(strDate)
+            //Log.e("UTC Millis * " + utcDate.getTime() + " ------  " + dateFormatLocal.format(utcDate));
+            return utcDate.time
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+        return time
+    }
+
+    var status_post = 0
+    var statusDoor = false
+    var unixTimeLocalUTC: Long = 0
+
+    private fun getCheckSendReport() {
+
+        when( subState ){
+
+            1 -> {
+
+                responseCode = 0
+                fetchLastLoginPost ( bleMac )
+                subState = 2
+            }
+
+            2 -> {
+
+                if( responseCode == 200 )
+                {
+                    // Tiempo del equipo en milisegundos
+                    unixTimeLocalUTC = localDateToDateUTC( System.currentTimeMillis() )
+
+                    // Tiempo del servidor solkos en milisegundos
+                    var timeReport = remoteDateToTimestamp( getTimestamp )
+
+                    var difTime = unixTimeLocalUTC - timeReport
+
+                    if( difTime <= 3600000 )
+                    {
+                        Utils.showToastLong(this, "Equipo reportando.")
+
+                        if( !flagShowWaitDialog ) {
+                            flagShowWaitDialog = false
+                            dismissWaitDialog()
+                        }
+
+                        cirService.setCurrentState(StateMachine.POLING)
+
+                        subState = 1
+                        intentos = 0
+                        status_post = 0
+                    }
+                    else
+                    {
+                        subState = 3
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            status_post = 1
+                            Utils.showToastLong(this, "Verificando comunicación de la tarjeta en segundo plano, espere...")
+                            //Log.e(TAG, "Respuesta: tiempo mayor a 1 hora, intentos -> $intentos ")
+
+                        }, 5_000)
+                    }
+
+                    //Log.e(TAG, "Respuesta: 200, Equipo: "+ getMac+", Fecha recibida: "+ getTimestamp)
+
+                }
+                else if( responseCode == 404 || responseCode != 0 )
+                {
+                    subState = 3
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        status_post = 1
+                        //Log.e(TAG, "Respuesta: 404, intentos -> $intentos ")
+
+                    }, 5_000)
+                }
+            }
+
+            3 -> {
+                if( status_post == 1)
+                {
+                    status_post = 0
+                    intentos++
+                    subState = if( intentos > 4 ) {
+                        4
+                    } else {
+                        1
+                    }
+                   //Log.e(TAG, "onResponseLast: reintento -> $intentos")
+                }
+            }
+
+            4 -> {
+
+                statusDoor = false
+                (actualFragment as ConfigTestCooler).setStatusDor( statusDoor )
+
+                //Log.e(TAG, "statusDoor-4 ---- statusDoor: $statusDoor")
+                runOnUiThread { (actualFragment as ConfigTestCooler).alertAAAAAAAAAAAAAAA() }
+                subState = 5
+            }
+
+            5 -> {
+                if( (actualFragment as ConfigTestCooler).getStatusDor() )
+                {
+                    if( flagShowWaitDialog ) {
+                        flagShowWaitDialog = false
+                        showWaitDialog()
+                    }
+                    //Log.e(TAG, "statusDoor-5 al statusDoor-6 ---- statusDoor: $statusDoor")
+                    statusDoor = false
+                    (actualFragment as ConfigTestCooler).setStatusDor( statusDoor )
+                    subState = 6
+                }
+            }
+
+            6 -> {
+                //Log.e(TAG, "statusDoor-6")
+                responseCode = 0
+                fetchLastLoginPost ( bleMac )
+                subState = 7
+            }
+
+            7 -> {
+
+                if( responseCode == 200 )
+                {
+                    // Tiempo del equipo
+                    unixTimeLocalUTC = localDateToDateUTC( System.currentTimeMillis() )
+
+                    // Tiempo del servidor solkos
+                    var timeReport = remoteDateToTimestamp( getTimestamp )
+
+                    var difTime = unixTimeLocalUTC - timeReport
+
+                    if( difTime <= 3600000 )
+                    {
+                        Utils.showToastLong(this, "Equipo reportando.")
+
+                        dismissWaitDialog()
+                        cirService.setCurrentState(StateMachine.POLING)
+
+                        subState = 1
+                        intentos = 0
+                        status_post = 0
+                    }
+                    else
+                    {
+                        subState = 8
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            status_post = 1
+                            Utils.showToastLong(this, "Verificando comunicación de la tarjeta, espere...")
+                            //Log.e(TAG, "Respuesta: tiempo mayor a 1 hora, intentos -> $intentos ")
+
+                        }, 5_000)
+                    }
+
+                    //Log.e(TAG, "Respuesta: 200, Equipo: "+ getMac+", Fecha recibida: "+ getTimestamp)
+
+                }
+                else if( responseCode == 404 || responseCode != 0 )
+                {
+                    subState = 8
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        status_post = 1
+
+                        //Utils.showToastLong(this, "Respuesta: 404, intentos -> $intentos ")
+
+                    }, 5_000)
+                }
+            }
+
+            8 -> {
+                 if( status_post == 1)
+                 {
+                     status_post = 0
+                     intentos++
+
+                     // realiza 120 intentos para un tiempo poco mayor a 10min
+                     subState = if( intentos > 120 ) {
+                         9
+                     } else {
+                         6
+                     }
+                     //Log.e(TAG, "onResponseLast: reintento -> $intentos")
+                 }
+            }
+
+            9 -> {
+
+                dismissWaitDialog()
+
+                //Log.e(TAG, "statusDoor-4 ---- statusDoor: $statusDoor")
+                runOnUiThread { (actualFragment as ConfigTestCooler).alertBBBBBBBBBBBBBB() }
+                cirService.setCurrentState(StateMachine.POLING)
+                subState = 1
+                intentos = 0
+                status_post = 0
+            }
+
+            else -> { /* */  }
+        }
+    }
+
+
 
     private fun wasReloadSuccess (state: StateMachine, value: ByteArray) {
         // Log.e(TAG, "Value RELOAD: ${value.toHex()}")
@@ -1704,27 +1993,6 @@ class RootActivity : AppCompatActivity(),
             })
     }
 
-
-
-    private fun fetchLastLoginPost () {
-        val apiClient = ApiClient()
-        Log.e(TAG, "Bearer $token")
-        // Pass the token as parameter
-        apiClient.getApiService(this).fetchLastLoginGet(token = "Bearer $token", "B4A2EB4F05F0")
-            .enqueue(object : retrofit2.Callback <LastLoginGetRequest> {
-                override fun onFailure(call: Call<LastLoginGetRequest>, t: Throwable) {
-                    Log.e(TAG, "onFailure")
-                }
-
-                override fun onResponse(call: Call<LastLoginGetRequest>, response: Response<LastLoginGetRequest>) {
-                    Log.e(TAG, "onResponseLast: ${call.request()}")
-                    Log.e(TAG, "onResponseLast: ${response.message()}")
-                    Log.e(TAG, "onResponseLast: ${response.code()}")
-                    Log.e(TAG, "onResponseLast: ${response.body()}")
-                }
-            })
-    }
-
     private fun showTransmitionOkDialog () {
         val baseDialogModel: BaseDialogModel = DialogButtonsModel(
             R.layout.login_error_dialog, -1,
@@ -1751,6 +2019,7 @@ class RootActivity : AppCompatActivity(),
     }
 
     internal fun showCancelProcessDialog () {
+
         val baseDialogModel: BaseDialogModel = DialogButtonsModel(
             R.layout.generic_dialog_two_btns, R.drawable.router,
             getString(R.string.cancel_process),
@@ -2043,10 +2312,17 @@ class RootActivity : AppCompatActivity(),
                 val requestBody = body.toString().toRequestBody(mediaType)
                 Log.e(TAG, body.toString())
                 fetchLink(token, requestBody)
-                fetchLastLoginPost()
+
+                // solicitud de facha y hora del dispositivo celular
+
+                val datetime = LocalDateTime.now()
+                Log.e(TAG, "Obtencion de fecha: LocalDateTime -> $datetime <- ")
+
+                val unixTime = System.currentTimeMillis() / 1000
+                Log.e(TAG, "Obtencion de fecha: System -> $unixTime <- ")
+
+                //fetchLastLoginPost()
             }
-
-
     }
 
 
