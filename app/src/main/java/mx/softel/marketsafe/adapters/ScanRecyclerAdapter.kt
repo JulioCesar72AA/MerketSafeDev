@@ -1,6 +1,8 @@
 package mx.softel.marketsafe.adapters
 
 import android.content.Context
+import android.provider.Settings.Global.getString
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -8,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.scan_devices_prototype.view.*
 import mx.softel.marketsafe.CirDevice
 import mx.softel.marketsafe.R
+import mx.softel.marketsafe.dialogs.TAG
+import mx.softel.marketsafe.utils.Utils
 import mx.softel.scanblelib.extensions.inflate
 
 class ScanRecyclerAdapter (private val context: Context, private val devicesList: List<CirDevice>,
@@ -42,27 +46,26 @@ class ScanRecyclerAdapter (private val context: Context, private val devicesList
             tvDeviceModel.text  = device.bleDevice.getDeviceModelName()
 
             if (device.getScanPostResponse() != null) {
-                tvDeviceModel.text          = "${device.getScanPostResponse()?.assetType} ${device.getScanPostResponse()?.assetModel}"
-                tvDeviceSerial.text         = "${context.getText(R.string.serial_number_solkos)} ${device.getScanPostResponse()?.serialNumber}"
-                tvDeviceSolkosModel.text    = "${context.getText(R.string.model_solkos)} ${device.getScanPostResponse()?.assetModel}"
-                tvDeviceType.text           = "${context.getText(R.string.type_solkos)} ${device.getScanPostResponse()?.assetType}"
 
-                var transmiting = context.getString(R.string.transmitting)
+                    tvDeviceModel.text          = "${device.getScanPostResponse()?.assetType} ${device.getScanPostResponse()?.assetModel}"
+                    tvDeviceSerial.text         = "${context.getText(R.string.serial_number_solkos)} ${device.getScanPostResponse()?.serialNumber}"
+                    tvDeviceSolkosModel.text    = "${context.getText(R.string.model_solkos)} ${device.getScanPostResponse()?.assetModel}"
+                    tvDeviceType.text           = "${context.getText(R.string.type_solkos)} ${device.getScanPostResponse()?.assetType}"
 
-                if (!device.getScanPostResponse()!!.isTransmitting)
-                    transmiting = context.getString(R.string.no_transmission)
+                    var transmiting = context.getString(R.string.transmitting)
 
-                tvDeviceTransmition.text    = "${context.getText(R.string.transmition_solkos)} $transmiting"
+                    if (!device.getScanPostResponse()!!.isTransmitting)
+                        transmiting = context.getString(R.string.no_transmission)
+
+                    tvDeviceTransmition.text    = "${context.getText(R.string.transmition_solkos)} $transmiting"
 
             } else {
                 this.setBackgroundColor(resources.getColor(R.color.colorBackShadow))
-                tvDeviceSerial.visibility       = View.GONE
                 tvDeviceSerial.visibility       = View.GONE
                 tvDeviceSolkosModel.visibility  = View.GONE
                 tvDeviceType.visibility         = View.GONE
                 tvDeviceTransmition.visibility  = View.GONE
             }
-
         }
 
         override fun onClick(v: View?) {
