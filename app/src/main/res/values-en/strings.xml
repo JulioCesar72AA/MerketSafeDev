@@ -81,7 +81,7 @@
     <string name="error_no_ap">Access Point not detected</string>
     <string name="error_no_ip">IP direction wasn\'t assigned. Check your modem configuration</string>
     <string name="error_no_ping">Connected, but without internet connection</string>
-    <string name="error_no_data">There is no connection to server</string>
+    <string name="error_no_data">There is no connection to server, try to configure again</string>
     <string name="error_no_error">Correct configuration</string>
 
     <!-- TOAST's -->
