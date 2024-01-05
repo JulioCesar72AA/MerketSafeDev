@@ -43,6 +43,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
+import java.lang.Exception
 import java.time.ZoneId
 import java.util.*
 
@@ -254,43 +255,51 @@ class MainActivity: AppCompatActivity(),
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
     override fun onScanClickListener(position: Int, isAllowed: Boolean) {
-        val dev = bleDevices[position]
-        var cir : CirDevice? = null
 
-        for (cirs in cirDevice) {
-            if (cirs.bleDevice.getMac() == dev.getMac())
-                cir = cirDevice[position]
-        }
 
-        if (!isAllowed) {
-            if (userPermissions.isLinker || userPermissions.isAdmin) {
-                showLinkDeviceDialog(dev.getMac())
+        try {
 
-            } else
-                Utils.showToastLong(this, getString(R.string.connection_not_allowed))
+            val dev = bleDevices[position]
+            var cir: CirDevice? = null
 
-        } else {
-            val intent = Intent(this, RootActivity::class.java)
-            intent.apply {
-                putExtra(EXTRA_DEVICE,              dev.getBleDevice())
-                putExtra(EXTRA_NAME,                dev.getName())
-                putExtra(EXTRA_MAC,                 dev.getMac())
-                putExtra(EXTRA_BEACON,              dev.getBeaconDeviceString())
-                putExtra(EXTRA_BEACON_BYTES,        dev.getScanRecord()?.bytes)
-                putExtra(EXTRA_BEACON_ENCRYPTED,    dev.getDeviceBeaconIsEncrypted())
-                putExtra(EXTRA_BEACON_TYPE,         dev.getBeaconType())
-                putExtra(EXTRA_IS_ENCRYPTED,        dev.isEncrypted())
-
-                // Solkos' flags
-                putExtra(TOKEN, token)
-                putExtra(USER_PERMISSIONS, userPermissions)
-                putExtra(TRANSMITION, cir?.getScanPostResponse()!!.isTransmitting)
-                putExtra(SERIAL_NUMBER, cir?.getScanPostResponse()!!.serialNumber)
-                putExtra(ASSET_TYPE, cir?.getScanPostResponse()!!.assetType)
-                putExtra(ASSET_MODEL, cir?.getScanPostResponse()!!.assetModel)
-
-                startActivity(this)
+            for (cirs in cirDevice) {
+                if (cirs.bleDevice.getMac() == dev.getMac())
+                    cir = cirDevice[position]
             }
+
+            if (!isAllowed) {
+                if (userPermissions.isLinker || userPermissions.isAdmin) {
+                    showLinkDeviceDialog(dev.getMac())
+
+                } else
+                    Utils.showToastLong(this, getString(R.string.connection_not_allowed))
+
+            } else {
+                val intent = Intent(this, RootActivity::class.java)
+                intent.apply {
+                    putExtra(EXTRA_DEVICE, dev.getBleDevice())
+                    putExtra(EXTRA_NAME, dev.getName())
+                    putExtra(EXTRA_MAC, dev.getMac())
+                    putExtra(EXTRA_BEACON, dev.getBeaconDeviceString())
+                    putExtra(EXTRA_BEACON_BYTES, dev.getScanRecord()?.bytes)
+                    putExtra(EXTRA_BEACON_ENCRYPTED, dev.getDeviceBeaconIsEncrypted())
+                    putExtra(EXTRA_BEACON_TYPE, dev.getBeaconType())
+                    putExtra(EXTRA_IS_ENCRYPTED, dev.isEncrypted())
+
+                    // Solkos' flags
+                    putExtra(TOKEN, token)
+                    putExtra(USER_PERMISSIONS, userPermissions)
+                    putExtra(TRANSMITION, cir?.getScanPostResponse()!!.isTransmitting)
+                    putExtra(SERIAL_NUMBER, cir?.getScanPostResponse()!!.serialNumber)
+                    putExtra(ASSET_TYPE, cir?.getScanPostResponse()!!.assetType)
+                    putExtra(ASSET_MODEL, cir?.getScanPostResponse()!!.assetModel)
+
+                    startActivity(this)
+                }
+            }
+        } catch (ex: Exception){
+            Log.e(TAG, "ex.message: ${ex.message} -> position: $position")
+            Utils.showToastShort(this, "ex.message: ${ex.message} -> position: $position" )
         }
     }
 
