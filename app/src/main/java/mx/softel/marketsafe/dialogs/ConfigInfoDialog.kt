@@ -86,9 +86,6 @@ class ConfigInfoDialog(private var code: Int): DialogFragment(), View.OnClickLis
         }
     }
 
-
-
-
     companion object {
         private val TAG = ConfigInfoDialog::class.java.simpleName
     }

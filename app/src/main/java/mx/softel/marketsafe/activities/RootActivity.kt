@@ -1333,7 +1333,6 @@ class RootActivity : AppCompatActivity(),
     }
 
 
-
     /************************************************************************************************/
     /**     BLE SERVICE                                                                             */
     /************************************************************************************************/
@@ -1667,14 +1666,14 @@ class RootActivity : AppCompatActivity(),
             .enqueue(object : retrofit2.Callback <LastLoginGetRequest> {
                 override fun onFailure(call: Call<LastLoginGetRequest>, t: Throwable) {
                     responseCode = 401
-                    Log.e(TAG, "onFailure")
+                    //Log.e(TAG, "onFailure")
                 }
 
                 override fun onResponse(call: Call<LastLoginGetRequest>, response: Response<LastLoginGetRequest>) {
                     Log.e(TAG, "onResponseLast: ${call.request()}")
-                    Log.e(TAG, "onResponseLast: ${response.message()}")
-                    Log.e(TAG, "onResponseLast: ${response.code()}")
-                    Log.e(TAG, "onResponseLast: ${response.body()}")
+                    //Log.e(TAG, "onResponseLast: ${response.message()}")
+                    //Log.e(TAG, "onResponseLast: ${response.code()}")
+                    //Log.e(TAG, "onResponseLast: ${response.body()}")
 
                     if( response.body() != null && response.code() == 200 ){
                         responseCode = response.code()
@@ -1684,10 +1683,10 @@ class RootActivity : AppCompatActivity(),
                         getStatus = response.body()!!.status
                         getVarName = response.body()!!.variable_name
 
-                        Log.e(TAG, "onResponseLastBody: ${response.body()?.mac}")
-                        Log.e(TAG, "onResponseLastBody: ${response.body()?.status}")
-                        Log.e(TAG, "onResponseLastBody: ${response.body()?.timestamp}")
-                        Log.e(TAG, "onResponseLastBody: ${response.body()?.variable_name}")
+                        //Log.e(TAG, "onResponseLastBody: ${response.body()?.mac}")
+                        //Log.e(TAG, "onResponseLastBody: ${response.body()?.status}")
+                        //Log.e(TAG, "onResponseLastBody: ${response.body()?.timestamp}")
+                        //Log.e(TAG, "onResponseLastBody: ${response.body()?.variable_name}")
                     }
                     else if(response.code() == 404 )
                     {
@@ -1753,7 +1752,7 @@ class RootActivity : AppCompatActivity(),
 
             LastLoginConsult.SEND_POST -> {
                 responseCode = 0
-                fetchLastLoginPost ( bleMac )
+                fetchLastLoginPost(bleMac)
                 consultationSequence = LastLoginConsult.GET_RESPONSE_POST
             }
 
@@ -1763,6 +1762,7 @@ class RootActivity : AppCompatActivity(),
                 {
                     // Tiempo del equipo en milisegundos
                     unixTimeLocalUTC = localDateToDateUTC( System.currentTimeMillis() )
+                    //Log.e(TAG, "unixTimeLocalUTC = $unixTimeLocalUTC")
 
                     // Tiempo del servidor solkos en milisegundos
                     var timeReport = remoteDateToTimestamp( getTimestamp )
@@ -1771,8 +1771,8 @@ class RootActivity : AppCompatActivity(),
 
                     if( difTime <= 3600000 )
                     {
-                        Log.e(TAG, "Equipo reportando.")
-                        //Utils.showToastLong(this, "Equipo reportando.")
+                        //Log.e(TAG, "difTime = $difTime")
+                        runOnUiThread { Utils.showToastLong(this, getString( R.string.message_report_ok)) }
 
                         if( !flagShowWaitDialog ) {
                             flagShowWaitDialog = false
@@ -1790,20 +1790,21 @@ class RootActivity : AppCompatActivity(),
                         consultationSequence = LastLoginConsult.WAIT_BEFORE_POST
                         Handler(Looper.getMainLooper()).postDelayed({
                             status_post = 1
-                            Log.e(TAG, "Verificando comunicación de la tarjeta en segundo plano, espere...")
-                            Log.e(TAG, "Respuesta: tiempo mayor a 1 hora, intentos -> $intentos ")
+                            runOnUiThread { Utils.showToastLong(this, getString( R.string.comunication_chek)) }
+                            //Log.e(TAG, "Respuesta: tiempo mayor a 1 hora, intentos -> $intentos ")
 
                         }, 5_000)
                     }
 
-                    Log.e(TAG, "Respuesta: 200, Equipo: "+ getMac+", Fecha recibida: "+ getTimestamp)
+                    //Log.e(TAG, "Respuesta: 200, Equipo: "+ getMac+", Fecha recibida: "+ getTimestamp)
                 }
                 else if( responseCode == 404 || responseCode != 0 )
                 {
                     consultationSequence = LastLoginConsult.WAIT_BEFORE_POST
                     Handler(Looper.getMainLooper()).postDelayed({
                         status_post = 1
-                        Log.e(TAG, "Respuesta: 404, intentos -> $intentos ")
+                        runOnUiThread { Utils.showToastLong(this, getString( R.string.comunication_chek)) }
+                        //Log.e(TAG, "Respuesta: 404, intentos -> $intentos ")
                     }, 5_000)
                 }
             }
@@ -1818,14 +1819,14 @@ class RootActivity : AppCompatActivity(),
                     } else {
                         LastLoginConsult.SEND_POST
                     }
-                    Log.e(TAG, "onResponseLast: reintento -> $intentos")
+                    //Log.e(TAG, "onResponseLast: reintento -> $intentos")
                 }
             }
 
             LastLoginConsult.DISPLAY_DIALOG_ALERT -> {
                 statusDoor = false
                 (actualFragment as ConfigTestCooler).setStatusDor( statusDoor )
-                Log.e(TAG, "statusDoor-4 ---- statusDoor: $statusDoor")
+                //Log.e(TAG, "statusDoor-4 ---- statusDoor: $statusDoor")
                 runOnUiThread { (actualFragment as ConfigTestCooler).alertDialogOpenDoor() }
                 consultationSequence = LastLoginConsult.WAITTH_USER_INTERACTION
             }
@@ -1837,7 +1838,7 @@ class RootActivity : AppCompatActivity(),
                         flagShowWaitDialog = false
                         showWaitDialog()
                     }
-                    Log.e(TAG, "statusDoor-5 al statusDoor-6 ---- statusDoor: $statusDoor")
+                    //Log.e(TAG, "statusDoor-5 al statusDoor-6 ---- statusDoor: $statusDoor")
                     statusDoor = false
                     (actualFragment as ConfigTestCooler).setStatusDor( statusDoor )
                     consultationSequence = LastLoginConsult.SEND_POST_AGAIN
@@ -1845,7 +1846,7 @@ class RootActivity : AppCompatActivity(),
             }
 
             LastLoginConsult.SEND_POST_AGAIN -> {
-                Log.e(TAG, "statusDoor-6")
+                //Log.e(TAG, "statusDoor-6")
                 responseCode = 0
                 fetchLastLoginPost ( bleMac )
                 consultationSequence = LastLoginConsult.GET_RESPONSE_NEW_POST
@@ -1866,10 +1867,9 @@ class RootActivity : AppCompatActivity(),
                     if( difTime <= 3600000 )
                     {
                         Log.e(TAG, "Equipo reportando.")
-
+                        runOnUiThread { Utils.showToastLong(this, getString( R.string.message_report_ok)) }
                         dismissWaitDialog()
                         cirService.setCurrentState(StateMachine.POLING)
-
 
                         consultationSequence = LastLoginConsult.SEND_POST
                         intentos = 0
@@ -1880,13 +1880,13 @@ class RootActivity : AppCompatActivity(),
                         consultationSequence = LastLoginConsult.WAIT_BEFORE_NEW_POST
                         Handler(Looper.getMainLooper()).postDelayed({
                             status_post = 1
-                            Utils.showToastLong(this, "Verificando comunicación de la tarjeta, espere...")
-                            Log.e(TAG, "Respuesta: tiempo mayor a 1 hora, intentos -> $intentos ")
+                            runOnUiThread { Utils.showToastLong(this, getString( R.string.comunication_chek)) }
+                            //Log.e(TAG, "Respuesta: tiempo mayor a 1 hora, intentos -> $intentos ")
 
                         }, 5_000)
                     }
 
-                    Log.e(TAG, "Respuesta: 200, Equipo: "+ getMac+", Fecha recibida: "+ getTimestamp)
+                    //Log.e(TAG, "Respuesta: 200, Equipo: "+ getMac+", Fecha recibida: "+ getTimestamp)
 
                 }
                 else if( responseCode == 404 || responseCode != 0 )
@@ -1894,8 +1894,8 @@ class RootActivity : AppCompatActivity(),
                     consultationSequence = LastLoginConsult.WAIT_BEFORE_NEW_POST
                     Handler(Looper.getMainLooper()).postDelayed({
                         status_post = 1
-
-                        //Utils.showToastLong(this, "Respuesta: 404, intentos -> $intentos ")
+                        runOnUiThread { Utils.showToastLong(this, getString( R.string.comunication_chek)) }
+                        //Log.e(TAG, "Respuesta: 404, intentos -> $intentos ")
 
                     }, 5_000)
                 }

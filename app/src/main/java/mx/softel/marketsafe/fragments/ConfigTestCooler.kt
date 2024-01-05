@@ -280,8 +280,8 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
 
         }
         // Set other dialog properties
-        builder.setTitle("Revisando comunicación.")
-        builder.setMessage("Abra la puerta y mantenla por unos segundos, posteriormente cierre la puerta del refrigerador.")
+        builder.setTitle(R.string.message_report_ok)
+        builder.setMessage(R.string.open_and_close_door)
 
         // Create the AlertDialog
         builder.create()
@@ -299,8 +299,8 @@ class ConfigTestCooler : Fragment(), RootActivity.RootBleEvents, FragmentUiUpdat
                 })
         }
         // Set other dialog properties
-        builder.setTitle("Revisando comunicación.")
-        builder.setMessage("Hubo un problema con la comunicación, intente más tarde.")
+        builder.setTitle(R.string.message_report_ok)
+        builder.setMessage(R.string.fail_update_broker)
 
         // Create the AlertDialog
         builder.create()

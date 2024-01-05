@@ -192,4 +192,8 @@
     <string name="update_url">Actualizar firmware</string>
     <string name="no_location_services">La configuración de su ubicación está desactivada. Habilite la ubicación para usar esta aplicación.</string>
     <string name="open_and_close_door">Abra y cierre la puerta del refrigerador para generar nuevos datos a reportar.</string>
+    <string name="fail_update_broker">Hubo un problema con la actualización, intente nuevamente.</string>
+    <string name="title_reviw">Revisando comunicación.</string>
+    <string name="message_report_ok">Equipo reportando.</string>
+    <string name="comunication_chek">Verificando la comunicación de la tarjeta, espere…</string>
 </resources>
