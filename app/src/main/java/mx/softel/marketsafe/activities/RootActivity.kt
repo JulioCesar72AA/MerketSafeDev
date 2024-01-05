@@ -1254,6 +1254,7 @@ class RootActivity : AppCompatActivity(),
                     }
                     val dialog = ConfigInfoDialog(4)
                     dialog.show(supportFragmentManager, null)
+                    runOnUiThread {(actualFragment as ConfigTestCooler).stopAnimCloud()}
                     return
                 }
                 serviceStep = 2
