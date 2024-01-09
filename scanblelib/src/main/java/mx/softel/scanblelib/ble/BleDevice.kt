@@ -9,8 +9,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class BleDevice(scanResult: ScanResult,
-                private var availableBeacons: HashMap<String, String>) {
+class BleDevice(scanResult: ScanResult, private var availableBeacons: HashMap<String, String>) {
 
     // BLE ESCANEADOS (PROPIEDADES PUBLICAS AL FRONT END)
     private val rssi            : Int               = scanResult.rssi

@@ -24,6 +24,7 @@ import mx.softel.marketsafe.CirDevice
 import mx.softel.marketsafe.R
 import mx.softel.marketsafe.UserPermissions
 import mx.softel.marketsafe.adapters.ScanRecyclerAdapter
+import mx.softel.marketsafe.ble_adapters.adapter_java.CirDeviceAdapter
 import mx.softel.marketsafe.dialog_module.GenericDialogButtons
 import mx.softel.marketsafe.dialog_module.dialog_interfaces.DialogInteractor
 import mx.softel.marketsafe.dialog_module.dialog_models.BaseDialogModel
@@ -43,7 +44,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
-import java.lang.Exception
 import java.time.ZoneId
 import java.util.*
 
@@ -72,27 +72,33 @@ class MainActivity: AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        srlScan.apply {
-            setOnRefreshListener(this@MainActivity)
-            setColorSchemeColors(getColor(R.color.colorAccent),
-                                 getColor(R.color.colorIconBlue),
-                                 getColor(R.color.colorPrimary))
-        }
 
         db = WifiDatabase(this)
         bleDevices.clear()
         cirDevice.clear()
-        checkLocation()
-        setScanningUI()
-        setOnClick()
-    }
 
-
-    private fun checkLocation(){
         val manager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) showAlertLocation()
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            showAlertLocation()
+        }
+        else
+        {
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+            setScanningUI()
+            clearRecyclerView()
+            //scanDevices()
+            letsScan()
+            setOnClick()
+        }
     }
+
+
+//    private fun checkLocation(){
+//        val manager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+//        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) showAlertLocation()
+//        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+//    }
 
 
     private fun showAlertLocation() {
@@ -120,8 +126,8 @@ class MainActivity: AppCompatActivity(),
          * [onResume] -> [onPause] -> [onResume], es en el segundo instante
          * donde se ejecuta el escaneo al solicitar los permisos necesarios
          */
-        clearRecyclerView()
-        scanDevices()
+        //clearRecyclerView()
+        //scanDevices()
     }
 
 
@@ -129,7 +135,10 @@ class MainActivity: AppCompatActivity(),
         scanMask.visibility             = View.VISIBLE
         lavLoaderPositive.visibility    = View.VISIBLE
         scanningMask.visibility         = View.VISIBLE
-        scanDevices()
+
+        clearRecyclerView()
+        letsScan()
+        //scanDevices()
 
         // Detenemos el escaneo en pantalla
         Handler(mainLooper).postDelayed({
@@ -360,7 +369,7 @@ class MainActivity: AppCompatActivity(),
             bleDevices.clear()
             cirDevice.clear()
 
-            val bleManager = BleManager(this, TIMEOUT)
+            var bleManager = BleManager(this, TIMEOUT)
 
             bleManager.scanBleDevices { devices ->
                 bleDevices = devices
@@ -394,6 +403,54 @@ class MainActivity: AppCompatActivity(),
                     }
                 }
             }
+        }
+    }
+
+    private fun letsScan() {
+        Utils.showToastShort(this, getString(R.string.scanning))
+//        setUIScanningSanitizers(true)
+//        setUIRefreshMessage(true)
+
+        val  bleManager = BleManager(this, TIMEOUT, ArrayList<String>())
+
+        Log.e(TAG, "letsScan -> realiza escaneo")
+
+        bleManager.scanBleDevices { mBleDevices ->
+
+            bleDevices = mBleDevices
+            isScanning = false
+            Log.e(TAG, "BLE Devices: ${bleDevices}")
+
+            if (bleDevices.isEmpty()) {
+
+                setNoDataUI()
+
+            } else {
+
+                checkingCloudPermissions    = true
+                setPermissionScanUI()
+                db!!.getUserPermissionsAndToken {
+                    val tokenAndPermission = it as Array <String>
+
+                    token           = tokenAndPermission[0]
+                    userPermissions = UserPermissions(tokenAndPermission[1])
+                    val macsArray   = JSONArray()
+
+                    for (device in mBleDevices) {
+                        macsArray.put(device.getMac())
+                    }
+
+                    val body = JSONObject()
+                    body.put("macs", macsArray)
+                    val mediaType = "application/json; charset=utf-8".toMediaType()
+                    val requestBody = body.toString().toRequestBody(mediaType)
+                    Log.e(TAG, "BODY TO REQUEST: ${body.toString()}")
+                    fetchMacs(token, requestBody)
+                }
+            }
+            //setUIScanningSanitizers(false)
+            //setUIRefreshMessage(false)
+            //Unit
         }
     }
 
