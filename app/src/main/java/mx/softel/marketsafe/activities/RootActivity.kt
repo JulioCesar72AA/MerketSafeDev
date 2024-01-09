@@ -1281,15 +1281,23 @@ class RootActivity : AppCompatActivity(),
                     }, 20_000)
 
                     Handler(mainLooper).postDelayed({
-                        val dialog = ConfigInfoDialog(100)
-                        dialog.show(supportFragmentManager, null)
-                        // Se ejecuta en otro hilo
-                        runOnUiThread {(actualFragment as ConfigTestCooler).testFinished()}
+//                        val dialog = ConfigInfoDialog(100)
+//                        dialog.show(supportFragmentManager, null)
+//                        // Se ejecuta en otro hilo
+//                        runOnUiThread {(actualFragment as ConfigTestCooler).testFinished()}
                         configAndTesting = false
 
                         if ( (actualFragment as ConfigTestCooler).getflagvalidateFw() == false )
                         {
                             cirService.setCurrentState(StateMachine.CHECK_SEND_DATA)  ///////////////////////////////////////////haber
+                        }
+                        else {
+
+                            val dialog = ConfigInfoDialog(100)
+                            dialog.show(supportFragmentManager, null)
+                            // Se ejecuta en otro hilo
+                            runOnUiThread {(actualFragment as ConfigTestCooler).testFinished()}
+
                         }
 
                     }, 45_000)
@@ -1780,6 +1788,13 @@ class RootActivity : AppCompatActivity(),
                         //Log.e(TAG, "difTime = $difTime")
                         runOnUiThread { Utils.showToastLong(this, getString( R.string.message_report_ok)) }
 
+                        if (flagShowWaitDialog) {
+                            val dialog = ConfigInfoDialog(100)
+                            dialog.show(supportFragmentManager, null)
+                            // Se ejecuta en otro hilo
+                            runOnUiThread { (actualFragment as ConfigTestCooler).testFinished() }
+                        }
+
                         if( !flagShowWaitDialog ) {
                             flagShowWaitDialog = false
                             dismissWaitDialog()
@@ -1877,6 +1892,13 @@ class RootActivity : AppCompatActivity(),
                         dismissWaitDialog()
                         cirService.setCurrentState(StateMachine.POLING)
 
+                        if (flagShowWaitDialog) {
+                            val dialog = ConfigInfoDialog(100)
+                            dialog.show(supportFragmentManager, null)
+                            // Se ejecuta en otro hilo
+                            runOnUiThread { (actualFragment as ConfigTestCooler).testFinished() }
+                        }
+
                         consultationSequence = LastLoginConsult.SEND_POST
                         intentos = 0
                         status_post = 0
@@ -1924,6 +1946,11 @@ class RootActivity : AppCompatActivity(),
             }
 
             LastLoginConsult.DISPLAY_DIALOG_ALERT_TRY_AGAIN -> {
+
+                if (flagShowWaitDialog) {
+                    // Se ejecuta en otro hilo
+                    runOnUiThread { (actualFragment as ConfigTestCooler).stopAnimCloud() }
+                }
 
                 dismissWaitDialog()
 
