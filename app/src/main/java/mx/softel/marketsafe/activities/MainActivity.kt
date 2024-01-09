@@ -96,6 +96,19 @@ class MainActivity: AppCompatActivity(),
 //        }
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        /**
+         * Se añade el escaneo en el [onResume] porque solicita los permisos
+         * de ubicación al usuario, si no los ha proporcionado hace el flujo
+         * [onResume] -> [onPause] -> [onResume], es en el segundo instante
+         * donde se ejecuta el escaneo al solicitar los permisos necesarios
+         */
+        clearRecyclerView()
+        scanDevices()
+    }
+
 
     private fun checkLocation(){
         val manager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -117,20 +130,6 @@ class MainActivity: AppCompatActivity(),
         }
         dialog.setCancelable(false)
         dialog.show()
-    }
-
-
-    override fun onResume() {
-        super.onResume()
-
-        /**
-         * Se añade el escaneo en el [onResume] porque solicita los permisos
-         * de ubicación al usuario, si no los ha proporcionado hace el flujo
-         * [onResume] -> [onPause] -> [onResume], es en el segundo instante
-         * donde se ejecuta el escaneo al solicitar los permisos necesarios
-         */
-        clearRecyclerView()
-        scanDevices()
     }
 
 
@@ -169,6 +168,7 @@ class MainActivity: AppCompatActivity(),
     }
 
     private fun setOnClick() {
+        srlScan.setOnRefreshListener(this)
         scanMask.setOnClickListener(this)
         ivMenu  .setOnClickListener(this)
     }
