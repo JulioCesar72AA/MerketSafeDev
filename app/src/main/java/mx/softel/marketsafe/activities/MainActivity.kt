@@ -79,21 +79,7 @@ class MainActivity: AppCompatActivity(),
         checkLocation()
         setScanningUI()
         setOnClick()
-//
-//        val manager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-//
-//        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-//            showAlertLocation()
-//        }
-//        else
-//        {
-//            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-//            setScanningUI()
-//            clearRecyclerView()
-//            scanDevices()
-////            letsScan()
-//            setOnClick()
-//        }
+
     }
 
     override fun onResume() {
