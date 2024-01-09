@@ -163,7 +163,7 @@ class MainActivity: AppCompatActivity(),
                     toast(R.string.tst_scanning)
 
             }
-            R.id.ivMenu -> createMenu()
+//            R.id.ivMenu -> createMenu()
         }
     }
 

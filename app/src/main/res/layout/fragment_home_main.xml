@@ -67,9 +67,10 @@
             <ImageView
                 android:id="@+id/ivMainImage"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="200dp"
                 android:layout_marginTop="@dimen/_35dp"
                 android:maxHeight="200dp"
+                android:minHeight="200dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/filled_cooler"
                 app:layout_constraintBottom_toTopOf="@+id/tvStatus"
