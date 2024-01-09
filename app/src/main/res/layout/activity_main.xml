@@ -20,7 +20,7 @@
         android:layout_gravity="end"
         android:src="@drawable/ic_menu"
         android:contentDescription="@string/cd_back_icon"
-        app:tint="@color/azul40" />
+        android:visibility="invisible" />
 
     <!-- Contenido de la vista -->
     <TableLayout
