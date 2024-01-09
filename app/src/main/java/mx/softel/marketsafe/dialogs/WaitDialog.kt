@@ -26,6 +26,7 @@ class WaitDialog : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = Dialog(context!!)
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCanceledOnTouchOutside(false)
         return dialog
     }
 
