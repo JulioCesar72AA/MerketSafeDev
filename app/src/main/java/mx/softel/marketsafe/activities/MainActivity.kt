@@ -24,7 +24,6 @@ import mx.softel.marketsafe.CirDevice
 import mx.softel.marketsafe.R
 import mx.softel.marketsafe.UserPermissions
 import mx.softel.marketsafe.adapters.ScanRecyclerAdapter
-import mx.softel.marketsafe.ble_adapters.adapter_java.CirDeviceAdapter
 import mx.softel.marketsafe.dialog_module.GenericDialogButtons
 import mx.softel.marketsafe.dialog_module.dialog_interfaces.DialogInteractor
 import mx.softel.marketsafe.dialog_module.dialog_models.BaseDialogModel
@@ -77,28 +76,32 @@ class MainActivity: AppCompatActivity(),
         bleDevices.clear()
         cirDevice.clear()
 
-        val manager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-            showAlertLocation()
-        }
-        else
-        {
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-            setScanningUI()
-            clearRecyclerView()
-            //scanDevices()
-            letsScan()
-            setOnClick()
-        }
+        checkLocation()
+        setScanningUI()
+        setOnClick()
+//
+//        val manager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+//
+//        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+//            showAlertLocation()
+//        }
+//        else
+//        {
+//            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+//            setScanningUI()
+//            clearRecyclerView()
+//            scanDevices()
+////            letsScan()
+//            setOnClick()
+//        }
     }
 
 
-//    private fun checkLocation(){
-//        val manager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-//        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) showAlertLocation()
-//        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-//    }
+    private fun checkLocation(){
+        val manager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) showAlertLocation()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    }
 
 
     private fun showAlertLocation() {
@@ -126,19 +129,19 @@ class MainActivity: AppCompatActivity(),
          * [onResume] -> [onPause] -> [onResume], es en el segundo instante
          * donde se ejecuta el escaneo al solicitar los permisos necesarios
          */
-        //clearRecyclerView()
-        //scanDevices()
+        clearRecyclerView()
+        scanDevices()
     }
 
 
     override fun onRefresh() {
+        Log.e(TAG, "onRefresh: ")
         scanMask.visibility             = View.VISIBLE
         lavLoaderPositive.visibility    = View.VISIBLE
         scanningMask.visibility         = View.VISIBLE
 
         clearRecyclerView()
-        letsScan()
-        //scanDevices()
+        scanDevices()
 
         // Detenemos el escaneo en pantalla
         Handler(mainLooper).postDelayed({
@@ -169,8 +172,6 @@ class MainActivity: AppCompatActivity(),
         scanMask.setOnClickListener(this)
         ivMenu  .setOnClickListener(this)
     }
-
-
 
 
     /************************************************************************************************/
@@ -263,22 +264,12 @@ class MainActivity: AppCompatActivity(),
     /************************************************************************************************/
     /**     INTERFACES                                                                              */
     /************************************************************************************************/
-    override fun onScanClickListener(position: Int, isAllowed: Boolean) {
-
-
+    override fun onCirSelected(cirSelected: CirDevice?, allowedDevice: Boolean) {
         try {
 
-            val dev = bleDevices[position]
-            var cir: CirDevice? = null
-
-            for (cirs in cirDevice) {
-                if (cirs.bleDevice.getMac() == dev.getMac())
-                    cir = cirDevice[position]
-            }
-
-            if (!isAllowed) {
+            if (!allowedDevice) {
                 if (userPermissions.isLinker || userPermissions.isAdmin) {
-                    showLinkDeviceDialog(dev.getMac())
+                    showLinkDeviceDialog(cirSelected!!.bleDevice.getMac())
 
                 } else
                     Utils.showToastLong(this, getString(R.string.connection_not_allowed))
@@ -286,29 +277,30 @@ class MainActivity: AppCompatActivity(),
             } else {
                 val intent = Intent(this, RootActivity::class.java)
                 intent.apply {
-                    putExtra(EXTRA_DEVICE, dev.getBleDevice())
-                    putExtra(EXTRA_NAME, dev.getName())
-                    putExtra(EXTRA_MAC, dev.getMac())
-                    putExtra(EXTRA_BEACON, dev.getBeaconDeviceString())
-                    putExtra(EXTRA_BEACON_BYTES, dev.getScanRecord()?.bytes)
-                    putExtra(EXTRA_BEACON_ENCRYPTED, dev.getDeviceBeaconIsEncrypted())
-                    putExtra(EXTRA_BEACON_TYPE, dev.getBeaconType())
-                    putExtra(EXTRA_IS_ENCRYPTED, dev.isEncrypted())
+                    putExtra(EXTRA_DEVICE, cirSelected!!.bleDevice.getBleDevice())
+                    putExtra(EXTRA_NAME, cirSelected.bleDevice.getName())
+                    putExtra(EXTRA_MAC, cirSelected.bleDevice.getMac())
+                    putExtra(EXTRA_BEACON, cirSelected.bleDevice.getBeaconDeviceString())
+                    putExtra(EXTRA_BEACON_BYTES, cirSelected.bleDevice.getScanRecord()?.bytes)
+                    putExtra(EXTRA_BEACON_ENCRYPTED, cirSelected.bleDevice.getDeviceBeaconIsEncrypted())
+                    putExtra(EXTRA_BEACON_TYPE, cirSelected.bleDevice.getBeaconType())
+                    putExtra(EXTRA_IS_ENCRYPTED, cirSelected.bleDevice.isEncrypted())
 
                     // Solkos' flags
                     putExtra(TOKEN, token)
                     putExtra(USER_PERMISSIONS, userPermissions)
-                    putExtra(TRANSMITION, cir?.getScanPostResponse()!!.isTransmitting)
-                    putExtra(SERIAL_NUMBER, cir?.getScanPostResponse()!!.serialNumber)
-                    putExtra(ASSET_TYPE, cir?.getScanPostResponse()!!.assetType)
-                    putExtra(ASSET_MODEL, cir?.getScanPostResponse()!!.assetModel)
+                    putExtra(TRANSMITION, cirSelected.getScanPostResponse()!!.isTransmitting)
+                    putExtra(SERIAL_NUMBER, cirSelected.getScanPostResponse()!!.serialNumber)
+                    putExtra(ASSET_TYPE, cirSelected.getScanPostResponse()!!.assetType)
+                    putExtra(ASSET_MODEL, cirSelected.getScanPostResponse()!!.assetModel)
 
                     startActivity(this)
+                    finish()
                 }
             }
         } catch (ex: Exception){
-            Log.e(TAG, "ex.message: ${ex.message} -> position: $position")
-            Utils.showToastShort(this, "ex.message: ${ex.message} -> position: $position" )
+            Log.e(TAG, "ex.message: ${ex.message}")
+            Utils.showToastShort(this, "ex.message: ${ex.message}" )
         }
     }
 
@@ -405,55 +397,6 @@ class MainActivity: AppCompatActivity(),
             }
         }
     }
-
-    private fun letsScan() {
-        Utils.showToastShort(this, getString(R.string.scanning))
-//        setUIScanningSanitizers(true)
-//        setUIRefreshMessage(true)
-
-        val  bleManager = BleManager(this, TIMEOUT, ArrayList<String>())
-
-        Log.e(TAG, "letsScan -> realiza escaneo")
-
-        bleManager.scanBleDevices { mBleDevices ->
-
-            bleDevices = mBleDevices
-            isScanning = false
-            Log.e(TAG, "BLE Devices: ${bleDevices}")
-
-            if (bleDevices.isEmpty()) {
-
-                setNoDataUI()
-
-            } else {
-
-                checkingCloudPermissions    = true
-                setPermissionScanUI()
-                db!!.getUserPermissionsAndToken {
-                    val tokenAndPermission = it as Array <String>
-
-                    token           = tokenAndPermission[0]
-                    userPermissions = UserPermissions(tokenAndPermission[1])
-                    val macsArray   = JSONArray()
-
-                    for (device in mBleDevices) {
-                        macsArray.put(device.getMac())
-                    }
-
-                    val body = JSONObject()
-                    body.put("macs", macsArray)
-                    val mediaType = "application/json; charset=utf-8".toMediaType()
-                    val requestBody = body.toString().toRequestBody(mediaType)
-                    Log.e(TAG, "BODY TO REQUEST: ${body.toString()}")
-                    fetchMacs(token, requestBody)
-                }
-            }
-            //setUIScanningSanitizers(false)
-            //setUIRefreshMessage(false)
-            //Unit
-        }
-    }
-
 
     private fun fetchLink (token: String, infoMac: RequestBody) {
         val apiClient = ApiClient()

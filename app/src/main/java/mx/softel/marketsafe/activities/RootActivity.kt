@@ -276,9 +276,10 @@ class RootActivity : AppCompatActivity(),
      * expulsar, desconecta el dispositivo y termina la actividad
      */
     internal fun backFragment() {
-        Log.e(TAG, "backFragment: ")
+        Log.e(TAG, "backFragment:")
 
         if (actualFragment == wifiFragment) {
+            goToMainActivity()
             finishAndDisconnectActivity(DisconnectionReason.UNKNOWN.status)
             return
         }
@@ -412,6 +413,10 @@ class RootActivity : AppCompatActivity(),
     internal fun goToConfigAndTest () {
         actualFragment = configTestCooler
         setScanningUI()
+    }
+
+    internal fun goToMainActivity () {
+        startActivity(Intent(this, MainActivity::class.java))
     }
 
     internal fun goToTabMainActivity () {
